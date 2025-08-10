@@ -106,32 +106,10 @@ export default {
             // Add backdrop blur values
             backdropBlur: {
                 'glass': '12px'
-            },
-            
-            // Add animation delays
-            animationDelay: {
-                '500': '0.5s',
-                '1000': '1s',
-                '1500': '1.5s'
             }
         }
     },
     plugins: [
-        require("tailwindcss-animate"),
-        // Add custom plugin for animation delays
-        function({ addUtilities }) {
-            const newUtilities = {
-                '.delay-500': {
-                    'animation-delay': '0.5s',
-                },
-                '.delay-1000': {
-                    'animation-delay': '1s',
-                },
-                '.delay-1500': {
-                    'animation-delay': '1.5s',
-                }
-            }
-            addUtilities(newUtilities)
-        }
+        require("tailwindcss-animate")
     ],
 }

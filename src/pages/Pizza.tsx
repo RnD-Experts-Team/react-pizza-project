@@ -11,8 +11,6 @@ import {
 import { Input } from "../components/ui/input";
 import { useAuth } from "../hooks/useAuth";
 
-import MainLayout from "../components/layouts/MainLayout";
-
 interface Pizza {
   id: number;
   name: string;

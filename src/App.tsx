@@ -94,11 +94,11 @@ function App() {
               <Route 
                 path="/pizza" 
                 element={
-                  <PublicRoute>
+                  <ProtectedRoute>
                     <MainLayout>
                       <Pizza />
                     </MainLayout>
-                  </PublicRoute>
+                  </ProtectedRoute>
                 } 
               />
               

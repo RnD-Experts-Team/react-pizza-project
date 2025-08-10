@@ -11,7 +11,14 @@ import {
 import { useAuth } from "../hooks/useAuth.tsx";
 import { authService } from "../services/authService.ts";
 import type { User } from "../types/authTypes.ts";
-import  MainLayout  from "../components/layouts/MainLayout";
+import {InfoSection} from "../components/dashboard/T.tsx";
+import {InfoCards} from "../components/dashboard/P copy.tsx";
+import {ChannelSalesDashboard} from "../components/dashboard/O.tsx";
+import {Dsqr} from "../components/dashboard/U copy.tsx";
+import {FrameScreen} from "../components/dashboard/Y copy.tsx";
+
+
+
 
 const Dashboard: React.FC = () => {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
@@ -70,7 +77,16 @@ const Dashboard: React.FC = () => {
 
   return (
     <div>
-      <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen rounded-lg bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <InfoSection></InfoSection>
+        <InfoCards></InfoCards>
+        <ChannelSalesDashboard></ChannelSalesDashboard>
+        <Dsqr></Dsqr>
+        <FrameScreen></FrameScreen>
+
+
+
+
         <div className="max-w-4xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -78,6 +94,7 @@ const Dashboard: React.FC = () => {
               Welcome back! Here's your account information.
             </p>
           </div>
+          
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* User Profile Card */}
@@ -89,6 +106,7 @@ const Dashboard: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
+                
                 {error && (
                   <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm mb-4">
                     {error}
