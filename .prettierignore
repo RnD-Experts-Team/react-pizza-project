@@ -1,0 +1,8 @@
+# Build outputs
+dist/
+build/
+node_modules/
+
+# Generated files
+*.min.js
+*.min.css
