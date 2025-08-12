@@ -13,11 +13,12 @@ import { authService } from "../services/authService.ts";
 import type { User } from "../types/authTypes.ts";
 // import {InfoSection2} from "../components/dashboard/T.tsx";
 // import {InfoCards} from "../components/dashboard/P copy.tsx";
-import {ChannelSalesDashboard} from "../components/dashboard/O.tsx";
-import {Dsqr} from "../components/dashboard/U copy.tsx";
+// import {ChannelSalesDashboard} from "../components/dashboard/O.tsx";
+import {Dsqr} from "../components/dashboard/U.tsx";
 import {FrameScreen} from "../components/dashboard/Y copy.tsx";
 import { InfoSection } from '@/components/InfoSection';
 import {InfoCards} from "../components/InfoCards";
+import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
 
 
 
