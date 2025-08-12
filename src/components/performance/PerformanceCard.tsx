@@ -7,14 +7,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface PerformanceCardProps {
   item: PerformanceItemProps;
-  onClick?: () => void;
   isLoading?: boolean;
   isMobile?: boolean;
 }
 
 export const PerformanceCard: React.FC<PerformanceCardProps> = ({ 
   item, 
-  onClick,
   isLoading = false,
   isMobile = false
 }) => {
@@ -23,11 +21,9 @@ export const PerformanceCard: React.FC<PerformanceCardProps> = ({
   return (
     <Card 
       className={cn(
-        "w-full h-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer",
-        onClick && "hover:scale-105",
+        "w-full h-full shadow-md transition-all duration-200",
         isLoading && "opacity-50 pointer-events-none"
       )}
-      onClick={onClick}
     >
       <CardHeader 
         className={cn(

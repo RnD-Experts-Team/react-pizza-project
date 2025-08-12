@@ -1,30 +1,31 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGrid } from '@/components/performance/PerformanceGrid';
-import { usePerformanceData } from '@/hooks/usePerformanceData';
+import { InfoCardsGrid } from '@/components/infoCards/InfoCardsGrid';
+import { useInfoCardsData } from '@/hooks/useInfoCardsData';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { PerformanceItemProps } from '@/types/performance';
-
+import type { CardDataProps } from '@/types/infoCards';
 import { Button } from '@/components/ui/button';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-interface InfoSectionProps {
+interface InfoCardsProps {
   title?: string;
   subtitle?: string;
-  data?: PerformanceItemProps[];
+  data?: CardDataProps[];
   className?: string;
+  showIcons?: boolean;
   showRefresh?: boolean;
 }
 
-export const InfoSection: React.FC<InfoSectionProps> = ({
-  title = "Sales Performance Overview",
+export const InfoCards: React.FC<InfoCardsProps> = ({
+  title = "Business Overview",
   subtitle,
   data: externalData,
   className,
+  showIcons = true,
   showRefresh = true
 }) => {
-  const { data: hookData, isLoading, refreshData } = usePerformanceData();
+  const { data: hookData, isLoading, refreshData } = useInfoCardsData();
   const isMobile = useIsMobile();
   const data = externalData || hookData;
 
@@ -56,14 +57,15 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
                 isMobile ? "h-3 w-3" : "h-4 w-4",
                 isLoading && "animate-spin"
               )} />
-              {isMobile ? "Refresh" : "Refresh"}
+              Refresh
             </Button>
           ) : null
         }
       />
       
-      <PerformanceGrid
+      <InfoCardsGrid
         data={data}
+        showIcons={showIcons}
         isLoading={isLoading}
       />
     </section>

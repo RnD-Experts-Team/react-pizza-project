@@ -7,14 +7,12 @@ import { cn } from '@/lib/utils';
 
 interface PerformanceGridProps {
   data: PerformanceItemProps[];
-  onCardClick?: (item: PerformanceItemProps, index: number) => void;
   isLoading?: boolean;
   className?: string;
 }
 
 export const PerformanceGrid: React.FC<PerformanceGridProps> = ({
   data,
-  onCardClick,
   isLoading = false,
   className
 }) => {
@@ -23,7 +21,8 @@ export const PerformanceGrid: React.FC<PerformanceGridProps> = ({
   return (
     <div className={cn(
       // Always 2x2 grid
-      "grid grid-cols-2 grid-rows-2",
+      "grid grid-cols-2 lg:grid-cols-4 grid-rows-2 lg:grid-rows-1",
+
       // Responsive gap and spacing
       isMobile ? "gap-2" : "gap-4 md:gap-6",
       className
@@ -32,7 +31,6 @@ export const PerformanceGrid: React.FC<PerformanceGridProps> = ({
         <PerformanceCard
           key={`${item.title}-${index}`}
           item={item}
-          onClick={() => onCardClick?.(item, index)}
           isLoading={isLoading}
           isMobile={isMobile}
         />
