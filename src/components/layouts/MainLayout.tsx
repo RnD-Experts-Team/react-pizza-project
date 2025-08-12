@@ -3,7 +3,6 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Button } from '../ui/button';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { Input } from '../ui/input';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,6 +52,8 @@ import {
   Store,
   ChevronDown,
   Check,
+  ScrollText,
+  Shield,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -84,6 +85,11 @@ function AppSidebar() {
       title: 'Pizzas',
       url: '/pizza',
       icon: Pizza,
+    },
+    {
+      title: 'Settings',
+      url: '/settings',
+      icon: Settings,
     },
   ];
 
@@ -221,7 +227,7 @@ function generateBreadcrumbs(pathname: string) {
   return breadcrumbs;
 }
 
-// Header Component
+// App Header Component
 function AppHeader() {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -312,13 +318,19 @@ function AppHeader() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem className="text-xs sm:text-sm">
-                  <User className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>Profile</span>
+                <DropdownMenuItem
+                  onClick={() => navigate('/terms')}
+                  className="text-xs sm:text-sm cursor-pointer"
+                >
+                  <ScrollText className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>Terms of Service</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="text-xs sm:text-sm">
-                  <Settings className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>Settings</span>
+                <DropdownMenuItem
+                  onClick={() => navigate('/privacy')}
+                  className="text-xs sm:text-sm cursor-pointer"
+                >
+                  <Shield className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                  <span>Privacy Policy</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

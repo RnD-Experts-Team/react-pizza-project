@@ -20,6 +20,9 @@ import ResetPassword from './pages/auth/ResetPassword';
 // Main Pages
 import Dashboard from './pages/Dashboard';
 import Pizza from './pages/Pizza';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -97,6 +100,36 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <Pizza />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/settings" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <Settings />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/terms" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <TermsOfService />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/privacy" 
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <PrivacyPolicy />
                     </MainLayout>
                   </ProtectedRoute>
                 } 
