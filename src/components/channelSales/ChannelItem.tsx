@@ -2,7 +2,8 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import type { ChannelDataProps, iconMap } from '@/types/channelSales';
+import type { ChannelDataProps,  } from '@/types/channelSales';
+import  {  iconMap } from '@/types/channelSales';
 import { GlobeAltIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 interface ChannelItemProps {
@@ -20,7 +21,8 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
   isLast = false,
   isMobile = false
 }) => {
-  const IconComponent = channel.icon ? channel.icon : GlobeAltIcon;
+  const IconComponent = channel.icon && iconMap[channel.icon] ? iconMap[channel.icon] : GlobeAltIcon;
+
   const TrendIcon = channel.trend === 'up' ? ChevronUpIcon : ChevronDownIcon;
   
   const getPercentageColor = (variant: string) => {

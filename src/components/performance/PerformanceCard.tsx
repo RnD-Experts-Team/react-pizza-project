@@ -1,7 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { PerformanceItemProps, iconMap } from '@/types/performance'; // Make sure iconMap is imported
+import type { PerformanceItemProps } from '@/types/performance'; // Make sure iconMap is imported
+import { iconMap } from '@/types/performance';
 
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -16,7 +17,8 @@ export const PerformanceCard: React.FC<PerformanceCardProps> = ({
   isLoading = false,
   isMobile = false
 }) => {
-  const IconComponent = item.icon; // Access icon component directly from item
+  const IconComponent = iconMap[item.icon]; // Access icon component directly from item
+
   
   return (
     <Card 
@@ -41,7 +43,7 @@ export const PerformanceCard: React.FC<PerformanceCardProps> = ({
         <IconComponent className={cn(
           "text-foreground",
           isMobile ? "h-3 w-3" : "h-5 w-5"
-        )} size={isMobile ? 16 : 24} />
+        )}  />
       </CardHeader>
       <CardContent className={cn(
         "space-y-2",

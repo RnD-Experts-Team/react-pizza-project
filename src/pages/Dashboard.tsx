@@ -19,6 +19,7 @@ import {FrameScreen} from "../components/dashboard/Y copy.tsx";
 import { InfoSection } from '@/components/InfoSection';
 import {InfoCards} from "../components/InfoCards";
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
+import { DSQRDashboard } from '../components/DSQRDashboard';
 
 
 
@@ -86,8 +87,11 @@ const Dashboard: React.FC = () => {
         <InfoSection></InfoSection>
         <InfoCards></InfoCards>
         <ChannelSalesDashboard></ChannelSalesDashboard>
-        <Dsqr></Dsqr>
-        <FrameScreen></FrameScreen>
+        {/* <Dsqr></Dsqr>
+        <FrameScreen></FrameScreen> */}
+        <DSQRDashboard></DSQRDashboard>
+
+
 
 
 

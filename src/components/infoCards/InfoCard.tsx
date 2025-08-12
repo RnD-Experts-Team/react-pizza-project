@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { CardDataProps, iconMap } from '@/types/infoCards';
+import type { CardDataProps } from '@/types/infoCards';
+import {iconMap} from '@/types/infoCards';
+
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 
 interface InfoCardProps {
@@ -17,7 +19,8 @@ export const InfoCard: React.FC<InfoCardProps> = ({
   isLoading = false,
   isMobile = false
 }) => {
-  const IconComponent = card.icon ? card.icon : CurrencyDollarIcon;
+  const IconComponent = card.icon && iconMap[card.icon] ? iconMap[card.icon] : CurrencyDollarIcon;
+
   
   return (
     <Card className={cn(
