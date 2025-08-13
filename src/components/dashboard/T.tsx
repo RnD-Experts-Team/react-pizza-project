@@ -1,11 +1,10 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { 
-  ChartBarIcon, 
-  ArrowPathIcon, 
-   
-  PencilIcon 
+import {
+  ChartBarIcon,
+  ArrowPathIcon,
+  PencilIcon,
 } from '@heroicons/react/24/outline';
 
 // Icon mapping for better type safety and easier maintenance
@@ -61,15 +60,17 @@ const defaultData: PerformanceItemProps[] = [
   },
 ];
 
-const PerformanceCard: React.FC<{ item: PerformanceItemProps }> = ({ item }) => {
+const PerformanceCard: React.FC<{ item: PerformanceItemProps }> = ({
+  item,
+}) => {
   const IconComponent = iconMap[item.icon];
-  
+
   return (
     <Card className="w-full h-full shadow-md hover:shadow-lg transition-shadow duration-200">
-      <CardHeader 
+      <CardHeader
         className={cn(
-          "flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-md",
-          item.bgColor
+          'flex flex-row items-center justify-between space-y-0 pb-2 rounded-t-md',
+          item.bgColor,
         )}
       >
         <CardTitle className="text-sm font-medium text-foreground">
@@ -87,34 +88,27 @@ const PerformanceCard: React.FC<{ item: PerformanceItemProps }> = ({ item }) => 
           </span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
-            Weekly
-          </span>
-          <span className="text-sm text-foreground">
-            {item.weekly}
-          </span>
+          <span className="text-sm text-muted-foreground">Weekly</span>
+          <span className="text-sm text-foreground">{item.weekly}</span>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export const InfoSection: React.FC<InfoSectionProps> = ({ 
-  title = "Sales Performance Overview",
+export const InfoSection: React.FC<InfoSectionProps> = ({
+  title = 'Sales Performance Overview',
   data = defaultData,
-  className
+  className,
 }) => {
   return (
-    <section className={cn(
-      "w-full p-4 md:p-6 lg:p-8 space-y-6",
-      className
-    )}>
+    <section className={cn('w-full p-4 md:p-6 lg:p-8 space-y-6', className)}>
       <header className="text-center">
         <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">
           {title}
         </h1>
       </header>
-      
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
         {data.map((item, index) => (
           <PerformanceCard key={index} item={item} />

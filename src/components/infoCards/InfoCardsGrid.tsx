@@ -15,18 +15,20 @@ export const InfoCardsGrid: React.FC<InfoCardsGridProps> = ({
   data,
   showIcons = true,
   isLoading = false,
-  className
+  className,
 }) => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={cn(
-      // Always 2x2 grid
-      "grid grid-cols-2 grid-rows-2",
-      // Responsive gap
-      isMobile ? "gap-2" : "gap-4 md:gap-6",
-      className
-    )}>
+    <div
+      className={cn(
+        // Always 2x2 grid
+        'grid grid-cols-2 grid-rows-2',
+        // Responsive gap
+        isMobile ? 'gap-2' : 'gap-4 md:gap-6',
+        className,
+      )}
+    >
       {data.slice(0, 4).map((card, index) => (
         <InfoCard
           key={card.id || `${card.title}-${index}`}

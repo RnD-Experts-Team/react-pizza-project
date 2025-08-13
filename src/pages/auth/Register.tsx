@@ -1,25 +1,25 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../../components/ui/card";
-import { Alert, AlertDescription } from "../../components/ui/alert";
-import { useAuth } from "../../hooks/useAuth";
-import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
+} from '../../components/ui/card';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { useAuth } from '../../hooks/useAuth';
+import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    password_confirmation: "",
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +32,7 @@ const Register: React.FC = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   };
 
@@ -40,27 +40,27 @@ const Register: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.name) {
-      newErrors.name = "Name is required";
+      newErrors.name = 'Name is required';
     } else if (formData.name.length < 2) {
-      newErrors.name = "Name must be at least 2 characters";
+      newErrors.name = 'Name must be at least 2 characters';
     }
 
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Email is invalid";
+      newErrors.email = 'Email is invalid';
     }
 
     if (!formData.password) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = 'Password must be at least 6 characters';
     }
 
     if (!formData.password_confirmation) {
-      newErrors.password_confirmation = "Password confirmation is required";
+      newErrors.password_confirmation = 'Password confirmation is required';
     } else if (formData.password !== formData.password_confirmation) {
-      newErrors.password_confirmation = "Passwords do not match";
+      newErrors.password_confirmation = 'Passwords do not match';
     }
 
     setErrors(newErrors);
@@ -78,16 +78,16 @@ const Register: React.FC = () => {
         formData.name,
         formData.email,
         formData.password,
-        formData.password_confirmation
+        formData.password_confirmation,
       );
 
       if (success) {
-        navigate("/verify-email", { state: { email: formData.email } });
+        navigate('/verify-email', { state: { email: formData.email } });
       } else {
-        setErrors({ general: "Registration failed. Please try again." });
+        setErrors({ general: 'Registration failed. Please try again.' });
       }
     } catch (error) {
-      setErrors({ general: "Registration failed. Please try again." });
+      setErrors({ general: 'Registration failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +135,7 @@ const Register: React.FC = () => {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
-                className={`h-12 ${errors.name ? "border-destructive" : ""}`}
+                className={`h-12 ${errors.name ? 'border-destructive' : ''}`}
               />
               {errors.name && (
                 <p className="text-destructive text-sm">{errors.name}</p>
@@ -157,7 +157,7 @@ const Register: React.FC = () => {
                 value={formData.email}
                 onChange={handleChange}
                 placeholder="your@email.com"
-                className={`h-12 ${errors.email ? "border-destructive" : ""}`}
+                className={`h-12 ${errors.email ? 'border-destructive' : ''}`}
               />
               {errors.email && (
                 <p className="text-destructive text-sm">{errors.email}</p>
@@ -176,12 +176,12 @@ const Register: React.FC = () => {
                 <Input
                   id="password"
                   name="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
                   className={`h-12 pr-12 ${
-                    errors.password ? "border-destructive" : ""
+                    errors.password ? 'border-destructive' : ''
                   }`}
                 />
                 <Button
@@ -215,12 +215,12 @@ const Register: React.FC = () => {
                 <Input
                   id="password_confirmation"
                   name="password_confirmation"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.password_confirmation}
                   onChange={handleChange}
                   placeholder="Confirm your password"
                   className={`h-12 pr-12 ${
-                    errors.password_confirmation ? "border-destructive" : ""
+                    errors.password_confirmation ? 'border-destructive' : ''
                   }`}
                 />
                 <Button
@@ -251,7 +251,7 @@ const Register: React.FC = () => {
                   Creating account...
                 </>
               ) : (
-                "Create Account"
+                'Create Account'
               )}
             </Button>
           </form>
@@ -270,7 +270,7 @@ const Register: React.FC = () => {
 
             <div className="flex flex-col space-y-3 text-center">
               <div className="text-sm text-muted-foreground">
-                Already have an account?{" "}
+                Already have an account?{' '}
                 <Link
                   to="/login"
                   className="font-medium text-primary hover:text-primary/80"

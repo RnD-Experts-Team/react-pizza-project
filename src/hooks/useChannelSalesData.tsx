@@ -10,7 +10,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '33.44%',
     icon: 'doordash',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'grubhub',
@@ -20,7 +20,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '1.83%',
     icon: 'grubhub',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'mobile',
@@ -30,7 +30,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '30.31%',
     icon: 'mobile',
     trend: 'up',
-    variant: 'positive'
+    variant: 'positive',
   },
   {
     id: 'phone',
@@ -40,7 +40,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '13.66%',
     icon: 'phone',
     trend: 'up',
-    variant: 'positive'
+    variant: 'positive',
   },
   {
     id: 'ubereats',
@@ -50,7 +50,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '1.2%',
     icon: 'ubereats',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'website',
@@ -60,8 +60,8 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '19.58%',
     icon: 'website',
     trend: 'down',
-    variant: 'negative'
-  }
+    variant: 'negative',
+  },
 ];
 
 export const useChannelSalesData = () => {
@@ -71,7 +71,7 @@ export const useChannelSalesData = () => {
   const refreshData = async () => {
     setIsLoading(true);
     // Simulate refresh delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setChannels([...defaultChannels]);
     setIsLoading(false);
   };

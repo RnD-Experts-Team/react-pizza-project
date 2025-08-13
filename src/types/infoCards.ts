@@ -1,8 +1,8 @@
-import { 
+import {
   CurrencyDollarIcon,
   ChartBarIcon,
   TrophyIcon,
-  ArrowTrendingUpIcon
+  ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 
 export interface CardDataProps {

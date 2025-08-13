@@ -46,7 +46,6 @@ import { useAuth } from '../../hooks/useAuth';
 import {
   Home,
   Pizza,
-  User,
   LogOut,
   Settings,
   Store,
@@ -293,7 +292,7 @@ function AppHeader() {
                 >
                   <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
                     <AvatarImage
-                      src={user?.avatar}
+                      // src={user?.avatar}
                       alt={user?.name || 'User'}
                     />
                     <AvatarFallback className="text-xs sm:text-sm">

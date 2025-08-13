@@ -1,16 +1,16 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { 
-  TruckIcon,
-  ChartBarIcon,
-  ExclamationCircleIcon,
-  CheckCircleIcon,
-  XCircleIcon
-} from '@heroicons/react/24/outline';
+// import {
+//   TruckIcon,
+//   ChartBarIcon,
+//   ExclamationCircleIcon,
+//   CheckCircleIcon,
+//   XCircleIcon,
+// } from '@heroicons/react/24/outline';
 
 // Type definitions
 interface BasicMetricProps {
@@ -43,9 +43,12 @@ interface PerformanceDashboardProps {
 // Status badge configuration
 const getStatusVariant = (status: string) => {
   switch (status) {
-    case 'OT': return 'default';
-    case 'NA': return 'destructive';
-    default: return 'secondary';
+    case 'OT':
+      return 'default';
+    case 'NA':
+      return 'destructive';
+    default:
+      return 'secondary';
   }
 };
 
@@ -56,14 +59,17 @@ const getStatusBgColor = (statusColor: string) => {
     '#14cd24': 'bg-green-100 border-green-200',
     '#e0b300': 'bg-yellow-100 border-yellow-200',
   };
-  return colorMap[statusColor as keyof typeof colorMap] || 'bg-gray-100 border-gray-200';
+  return (
+    colorMap[statusColor as keyof typeof colorMap] ||
+    'bg-gray-100 border-gray-200'
+  );
 };
 
 // Basic metric row component
-const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({ 
-  label, 
-  value, 
-  isLast = false 
+const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
+  label,
+  value,
+  isLast = false,
 }) => {
   return (
     <div className="space-y-2">
@@ -71,9 +77,7 @@ const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
         <span className="text-sm font-semibold text-muted-foreground">
           {label}
         </span>
-        <span className="text-sm font-bold text-foreground">
-          {value}
-        </span>
+        <span className="text-sm font-bold text-foreground">{value}</span>
       </div>
       {!isLast && <Separator />}
     </div>
@@ -81,29 +85,25 @@ const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
 };
 
 // Detailed metric row with status component
-const DetailedMetricRow: React.FC<DetailedMetricProps & { isLast?: boolean }> = ({ 
-  label, 
-  value, 
-  status, 
-  statusColor, 
-  isLast = false 
-}) => {
+const DetailedMetricRow: React.FC<
+  DetailedMetricProps & { isLast?: boolean }
+> = ({ label, value, status, statusColor, isLast = false }) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between py-1">
         <span className="text-sm font-semibold text-muted-foreground flex-1">
           {label}
         </span>
-        
+
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-foreground">
-            {value}
-          </span>
-          <div className={cn(
-            "flex items-center justify-center w-8 h-6 rounded-sm",
-            getStatusBgColor(statusColor)
-          )}>
-            <Badge 
+          <span className="text-sm font-bold text-foreground">{value}</span>
+          <div
+            className={cn(
+              'flex items-center justify-center w-8 h-6 rounded-sm',
+              getStatusBgColor(statusColor),
+            )}
+          >
+            <Badge
               variant={getStatusVariant(status)}
               className="text-xs px-1 py-0 h-4"
               style={{ color: statusColor }}
@@ -121,36 +121,36 @@ const DetailedMetricRow: React.FC<DetailedMetricProps & { isLast?: boolean }> = 
 // On Track section component
 const OnTrackSection: React.FC = () => (
   <div className="flex items-center py-3">
-    <span className="text-base font-bold text-yellow-600">
-      On Track ?
-    </span>
+    <span className="text-base font-bold text-yellow-600">On Track ?</span>
   </div>
 );
 
 // Performance metrics section
-const PerformanceMetrics: React.FC<{ platform: PlatformData }> = ({ platform }) => {
+const PerformanceMetrics: React.FC<{ platform: PlatformData }> = ({
+  platform,
+}) => {
   return (
     <div className="space-y-3 p-4">
       {/* Basic Metrics */}
       <div className="space-y-2">
         {platform.basicMetrics.map((metric, index) => (
-          <BasicMetricRow 
-            key={`basic-${index}`} 
-            {...metric} 
+          <BasicMetricRow
+            key={`basic-${index}`}
+            {...metric}
             isLast={index === platform.basicMetrics.length - 1}
           />
         ))}
       </div>
-      
+
       {/* On Track Section */}
       <OnTrackSection />
-      
+
       {/* Detailed Metrics */}
       <div className="space-y-2">
         {platform.detailedMetrics.map((metric, index) => (
-          <DetailedMetricRow 
-            key={`detailed-${index}`} 
-            {...metric} 
+          <DetailedMetricRow
+            key={`detailed-${index}`}
+            {...metric}
             isLast={index === platform.detailedMetrics.length - 1}
           />
         ))}
@@ -206,7 +206,7 @@ const defaultPlatforms: PlatformData[] = [
         status: 'NA',
         statusColor: '#c30000',
       },
-    ]
+    ],
   },
   {
     name: 'UberEats',
@@ -253,7 +253,7 @@ const defaultPlatforms: PlatformData[] = [
         status: 'OT',
         statusColor: '#00c610',
       },
-    ]
+    ],
   },
   {
     name: 'GrubHub',
@@ -300,28 +300,25 @@ const defaultPlatforms: PlatformData[] = [
         status: 'OT',
         statusColor: '#00c610',
       },
-    ]
-  }
+    ],
+  },
 ];
 
 // Main Performance Dashboard component
 export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
   platforms = defaultPlatforms,
   className,
-  defaultTab = platforms[0]?.name.toLowerCase()
+  defaultTab = platforms[0]?.name.toLowerCase(),
 }) => {
   return (
-    <div className={cn(
-      "w-full max-w-2xl mx-auto p-4",
-      className
-    )}>
+    <div className={cn('w-full max-w-2xl mx-auto p-4', className)}>
       <Tabs defaultValue={defaultTab} className="w-full">
-        <TabsList 
+        <TabsList
           className="grid w-full mb-0 rounded-b-none shadow-md"
           style={{ gridTemplateColumns: `repeat(${platforms.length}, 1fr)` }}
         >
           {platforms.map((platform) => (
-            <TabsTrigger 
+            <TabsTrigger
               key={platform.name}
               value={platform.name.toLowerCase()}
               className="text-lg font-bold px-4 py-3 data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-gray-200 rounded-t-lg rounded-b-none transition-colors duration-200"
@@ -330,9 +327,9 @@ export const PerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             </TabsTrigger>
           ))}
         </TabsList>
-        
+
         {platforms.map((platform) => (
-          <TabsContent 
+          <TabsContent
             key={platform.name}
             value={platform.name.toLowerCase()}
             className="mt-0"

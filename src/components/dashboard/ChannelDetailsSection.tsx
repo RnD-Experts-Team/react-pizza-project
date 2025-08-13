@@ -15,41 +15,33 @@ export const ChannelDetailsSection = (): React.ReactElement => {
       role="region"
       aria-label="Channel Details"
     >
-      
       <div className="flex items-center justify-between relative self-stretch w-full flex-[0_0_auto]">
-        
         {/* <SimpleIconsUbereats
           className="!relative !w-10 !h-10 !aspect-[1]"
           aria-label="UberEats logo"
         /> */}
         <div className="w-[78px] flex flex-col h-10 items-center justify-between relative">
-          
           <div className="relative w-fit mt-[-1.00px] [font-family:'Inria_Sans-Bold',Helvetica] font-bold text-black text-base tracking-[0] leading-[11.5px] whitespace-nowrap">
-            
             {channelData.name}
           </div>
           <div
             className="relative w-fit [font-family:'Inria_Sans-Regular',Helvetica] font-normal text-[#ff4b4b] text-base text-center tracking-[0] leading-[11.5px] whitespace-nowrap"
             aria-label={`Percentage change: ${channelData.percentage}`}
           >
-            
             {channelData.percentage}
           </div>
         </div>
         <div className="w-[66px] flex flex-col h-10 items-center justify-between relative">
-          
           <div
             className="relative w-fit mt-[-1.00px] [font-family:'Inria_Sans-Bold',Helvetica] font-bold text-black text-base tracking-[0] leading-[11.5px] whitespace-nowrap"
             aria-label={`Price: ${channelData.price}`}
           >
-            
             {channelData.price}
           </div>
           <div
             className="relative w-fit [font-family:'Inria_Sans-Regular',Helvetica] font-normal text-[#777777] text-base text-center tracking-[0] leading-[11.5px] whitespace-nowrap"
             aria-label={`Change: ${channelData.change}`}
           >
-            
             {channelData.change}
           </div>
         </div>

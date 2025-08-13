@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Button } from "../components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '../components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "../components/ui/card";
-import { Input } from "../components/ui/input";
-import { useAuth } from "../hooks/useAuth";
+} from '../components/ui/card';
+import { Input } from '../components/ui/input';
+import { useAuth } from '../hooks/useAuth';
 
 interface Pizza {
   id: number;
@@ -23,7 +23,7 @@ interface Pizza {
 const Pizza: React.FC = () => {
   const [pizzas, setPizzas] = useState<Pizza[]>([]);
   const [filteredPizzas, setFilteredPizzas] = useState<Pizza[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,80 +32,80 @@ const Pizza: React.FC = () => {
   const mockPizzas: Pizza[] = [
     {
       id: 1,
-      name: "Margherita",
+      name: 'Margherita',
       description:
-        "Classic pizza with tomato sauce, mozzarella, and fresh basil",
+        'Classic pizza with tomato sauce, mozzarella, and fresh basil',
       price: 12.99,
       image:
-        "https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=300&h=200&fit=crop",
-      ingredients: ["Tomato Sauce", "Mozzarella", "Fresh Basil", "Olive Oil"],
+        'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=300&h=200&fit=crop',
+      ingredients: ['Tomato Sauce', 'Mozzarella', 'Fresh Basil', 'Olive Oil'],
     },
     {
       id: 2,
-      name: "Pepperoni",
+      name: 'Pepperoni',
       description:
-        "Traditional pizza topped with pepperoni and mozzarella cheese",
+        'Traditional pizza topped with pepperoni and mozzarella cheese',
       price: 15.99,
       image:
-        "https://images.unsplash.com/photo-1628840042765-356cda07504e?w=300&h=200&fit=crop",
-      ingredients: ["Tomato Sauce", "Mozzarella", "Pepperoni"],
+        'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=300&h=200&fit=crop',
+      ingredients: ['Tomato Sauce', 'Mozzarella', 'Pepperoni'],
     },
     {
       id: 3,
-      name: "Quattro Stagioni",
+      name: 'Quattro Stagioni',
       description:
-        "Four seasons pizza with mushrooms, ham, artichokes, and olives",
+        'Four seasons pizza with mushrooms, ham, artichokes, and olives',
       price: 18.99,
       image:
-        "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop",
+        'https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=300&h=200&fit=crop',
       ingredients: [
-        "Tomato Sauce",
-        "Mozzarella",
-        "Mushrooms",
-        "Ham",
-        "Artichokes",
-        "Olives",
+        'Tomato Sauce',
+        'Mozzarella',
+        'Mushrooms',
+        'Ham',
+        'Artichokes',
+        'Olives',
       ],
     },
     {
       id: 4,
-      name: "Hawaiian",
-      description: "Tropical pizza with ham and pineapple",
+      name: 'Hawaiian',
+      description: 'Tropical pizza with ham and pineapple',
       price: 16.99,
       image:
-        "https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=300&h=200&fit=crop",
-      ingredients: ["Tomato Sauce", "Mozzarella", "Ham", "Pineapple"],
+        'https://images.unsplash.com/photo-1565299507177-b0ac66763828?w=300&h=200&fit=crop',
+      ingredients: ['Tomato Sauce', 'Mozzarella', 'Ham', 'Pineapple'],
     },
     {
       id: 5,
-      name: "Vegetarian",
-      description: "Fresh vegetables with bell peppers, mushrooms, and onions",
+      name: 'Vegetarian',
+      description: 'Fresh vegetables with bell peppers, mushrooms, and onions',
       price: 14.99,
       image:
-        "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=300&h=200&fit=crop",
+        'https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?w=300&h=200&fit=crop',
       ingredients: [
-        "Tomato Sauce",
-        "Mozzarella",
-        "Bell Peppers",
-        "Mushrooms",
-        "Onions",
-        "Olives",
+        'Tomato Sauce',
+        'Mozzarella',
+        'Bell Peppers',
+        'Mushrooms',
+        'Onions',
+        'Olives',
       ],
     },
     {
       id: 6,
-      name: "Meat Lovers",
-      description: "Loaded with pepperoni, sausage, ham, and bacon",
+      name: 'Meat Lovers',
+      description: 'Loaded with pepperoni, sausage, ham, and bacon',
       price: 21.99,
       image:
-        "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop",
+        'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop',
       ingredients: [
-        "Tomato Sauce",
-        "Mozzarella",
-        "Pepperoni",
-        "Sausage",
-        "Ham",
-        "Bacon",
+        'Tomato Sauce',
+        'Mozzarella',
+        'Pepperoni',
+        'Sausage',
+        'Ham',
+        'Bacon',
       ],
     },
   ];
@@ -124,7 +124,7 @@ const Pizza: React.FC = () => {
       setPizzas(mockPizzas);
       setFilteredPizzas(mockPizzas);
     } catch (error) {
-      console.error("Error fetching pizzas:", error);
+      console.error('Error fetching pizzas:', error);
     } finally {
       setLoading(false);
     }
@@ -140,8 +140,8 @@ const Pizza: React.FC = () => {
         pizza.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         pizza.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         pizza.ingredients.some((ingredient) =>
-          ingredient.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+          ingredient.toLowerCase().includes(searchTerm.toLowerCase()),
+        ),
     );
     setFilteredPizzas(filtered);
   }, [searchTerm, pizzas]);
@@ -149,9 +149,9 @@ const Pizza: React.FC = () => {
   const handleLogout = async () => {
     try {
       await logout();
-      navigate("/login");
+      navigate('/login');
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     }
   };
 
@@ -174,7 +174,7 @@ const Pizza: React.FC = () => {
                   </span>
                 )}
                 <Button
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate('/dashboard')}
                   variant="outline"
                 >
                   Dashboard
@@ -227,7 +227,7 @@ const Pizza: React.FC = () => {
                         onError={(e) => {
                           const target = e.target as HTMLImageElement;
                           target.src =
-                            "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop";
+                            'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300&h=200&fit=crop';
                         }}
                       />
                     </div>

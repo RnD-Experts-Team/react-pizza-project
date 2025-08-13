@@ -51,7 +51,7 @@ const defaultPlatforms: PlatformCardProps[] = [
       },
     ],
     hasOnTrack: true,
-    onTrackPosition: 'middle'
+    onTrackPosition: 'middle',
   },
   {
     icon: TruckIcon,
@@ -88,7 +88,7 @@ const defaultPlatforms: PlatformCardProps[] = [
       },
     ],
     hasOnTrack: true,
-    onTrackPosition: 'middle'
+    onTrackPosition: 'middle',
   },
   {
     icon: TruckIcon,
@@ -121,17 +121,18 @@ const defaultPlatforms: PlatformCardProps[] = [
       },
     ],
     hasOnTrack: true,
-    onTrackPosition: 'top'
-  }
+    onTrackPosition: 'top',
+  },
 ];
 
 export const useDSQRData = () => {
-  const [platforms, setPlatforms] = useState<PlatformCardProps[]>(defaultPlatforms);
+  const [platforms, setPlatforms] =
+    useState<PlatformCardProps[]>(defaultPlatforms);
   const [isLoading, setIsLoading] = useState(false);
 
   const refreshData = async () => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setPlatforms([...defaultPlatforms]);
     setIsLoading(false);
   };

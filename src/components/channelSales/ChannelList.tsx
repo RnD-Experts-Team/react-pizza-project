@@ -12,7 +12,7 @@ interface ChannelListProps {
 export const ChannelList: React.FC<ChannelListProps> = ({
   channels,
   showIcons = true,
-  showTrendArrows = true
+  showTrendArrows = true,
 }) => {
   const isMobile = useIsMobile();
 

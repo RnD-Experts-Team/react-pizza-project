@@ -1,12 +1,17 @@
 import { useState, useEffect, createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { User, AuthState } from '../types/authTypes.ts';
+import type { AuthState } from '../types/authTypes.ts';
 import { authService } from '../services/authService.ts';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  register: (name: string, email: string, password: string, passwordConfirmation: string) => Promise<boolean>;
+  register: (
+    name: string,
+    email: string,
+    password: string,
+    passwordConfirmation: string,
+  ) => Promise<boolean>;
   refreshUser: () => Promise<void>;
 }
 
@@ -43,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           });
         }
       } else {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
+        setAuthState((prev) => ({ ...prev, isLoading: false }));
       }
     };
 
@@ -52,11 +57,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
-      setAuthState(prev => ({ ...prev, isLoading: true }));
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
       const response = await authService.login({ email, password });
-      
+
       // Handle nested data structure from Laravel
-      if (response.success && response.data && response.data.token && response.data.user) {
+      if (
+        response.success &&
+        response.data &&
+        response.data.token &&
+        response.data.user
+      ) {
         setAuthState({
           user: response.data.user,
           token: response.data.token,
@@ -65,11 +75,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
         return true;
       }
-      
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
       return false;
     } catch (error) {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
       return false;
     }
   };
@@ -94,21 +104,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     name: string,
     email: string,
     password: string,
-    passwordConfirmation: string
+    passwordConfirmation: string,
   ): Promise<boolean> => {
     try {
-      setAuthState(prev => ({ ...prev, isLoading: true }));
+      setAuthState((prev) => ({ ...prev, isLoading: true }));
       const response = await authService.register({
         name,
         email,
         password,
         password_confirmation: passwordConfirmation,
       });
-      
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
       return response.success;
     } catch (error) {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
+      setAuthState((prev) => ({ ...prev, isLoading: false }));
       return false;
     }
   };
@@ -116,7 +126,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshUser = async (): Promise<void> => {
     try {
       const user = await authService.getUserProfile();
-      setAuthState(prev => ({ ...prev, user }));
+      setAuthState((prev) => ({ ...prev, user }));
     } catch (error) {
       console.error('Failed to refresh user:', error);
     }

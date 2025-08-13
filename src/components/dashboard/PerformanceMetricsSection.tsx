@@ -11,10 +11,10 @@ import React from 'react';
 // import line1 from './line-1.svg';
 export const PerformanceMetricsSection = (): React.ReactElement => {
   const basicMetrics = [
-    { label: 'Most Loved Restaurant', value: '0', line: "line1" },
-    { label: 'Optimization Score', value: 'Med', line: "image" },
-    { label: '#1 Top Missing or Incorrect Item', value: '0', line: "line12" },
-    { label: 'Reviews Responded', value: '1', line: "line13" },
+    { label: 'Most Loved Restaurant', value: '0', line: 'line1' },
+    { label: 'Optimization Score', value: 'Med', line: 'image' },
+    { label: '#1 Top Missing or Incorrect Item', value: '0', line: 'line12' },
+    { label: 'Reviews Responded', value: '1', line: 'line13' },
   ];
   const detailedMetrics = [
     {
@@ -23,7 +23,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'NA',
       statusColor: '#c30000',
       backgroundImage: 'url(/vector.svg)',
-      line: "line14",
+      line: 'line14',
     },
     {
       label: 'Cancellations - Sales Lost',
@@ -31,7 +31,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'OT',
       statusColor: '#00c610',
       backgroundImage: 'url(/vector-2.svg)',
-      line: "line15",
+      line: 'line15',
     },
     {
       label: 'Missing or Incorrect Error Charges',
@@ -39,7 +39,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'NA',
       statusColor: '#c30000',
       backgroundImage: 'url(/vector-3.svg)',
-      line: "line16",
+      line: 'line16',
     },
     {
       label: 'Avoidable Wait M.Sec',
@@ -47,7 +47,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'OT',
       statusColor: '#00c610',
       backgroundImage: 'url(/vector-4.svg)',
-      line: "line17",
+      line: 'line17',
     },
     {
       label: 'total Dasher Wait M.Sec',
@@ -55,7 +55,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'NA',
       statusColor: '#c30000',
       backgroundImage: 'url(/vector-5.svg)',
-      line: "line18",
+      line: 'line18',
     },
     {
       label: 'Downtime H.MM',
@@ -63,7 +63,7 @@ export const PerformanceMetricsSection = (): React.ReactElement => {
       status: 'NA',
       statusColor: '#c30000',
       backgroundImage: 'url(/vector-6.svg)',
-      line: "line19",
+      line: 'line19',
     },
   ];
   return (

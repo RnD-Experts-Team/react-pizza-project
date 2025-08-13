@@ -1,8 +1,8 @@
-import { 
-  ChartBarIcon, 
-  ArrowPathIcon, 
+import {
+  ChartBarIcon,
+  ArrowPathIcon,
   PencilIcon,
-  PlusIcon 
+  PlusIcon,
 } from '@heroicons/react/24/outline';
 
 export interface PerformanceItemProps {

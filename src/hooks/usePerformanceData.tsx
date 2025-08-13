@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { PerformanceItemProps } from '@/types/performance';
-
 
 const defaultData: PerformanceItemProps[] = [
   {
@@ -40,7 +39,7 @@ export const usePerformanceData = () => {
   const refreshData = async () => {
     setIsLoading(true);
     // Simulate refresh delay
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     setData([...defaultData]); // Create new array reference to trigger re-render
     setIsLoading(false);
   };

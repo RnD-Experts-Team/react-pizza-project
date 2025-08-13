@@ -12,7 +12,12 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Switch } from '../components/ui/switch';
 import { Separator } from '../components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '../components/ui/tabs';
 import { Alert, AlertDescription } from '../components/ui/alert';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
@@ -33,15 +38,15 @@ const Settings: React.FC = () => {
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  
+
   // Form states
   const [profileData, setProfileData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    // firstName: user?.firstName || '',
+    // lastName: user?.lastName || '',
     email: user?.email || '',
-    phone: user?.phone || '',
+    // phone: user?.phone || '',
   });
-  
+
   // const [addressData, setAddressData] = useState({
   //   street: '',
   //   city: '',
@@ -49,42 +54,42 @@ const Settings: React.FC = () => {
   //   zipCode: '',
   //   isDefault: true,
   // });
-  
+
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
   });
-  
+
   const [notifications, setNotifications] = useState({
     orderUpdates: true,
     promotions: true,
     newsletter: false,
     smsNotifications: true,
   });
-  
+
   const [privacy, setPrivacy] = useState({
     profileVisibility: 'private',
     dataSharing: false,
     analytics: true,
   });
-  
+
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
   });
-  
+
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSaveProfile = async () => {
     setIsLoading(true);
     setSaveStatus(null);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSaveStatus('Profile updated successfully!');
     } catch (error) {
       setSaveStatus('Failed to update profile. Please try again.');
@@ -92,33 +97,41 @@ const Settings: React.FC = () => {
       setIsLoading(false);
     }
   };
-  
+
   const handleSavePassword = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       setSaveStatus('New passwords do not match.');
       return;
     }
-    
+
     setIsLoading(true);
     setSaveStatus(null);
-    
+
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       setSaveStatus('Password updated successfully!');
-      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
     } catch (error) {
       setSaveStatus('Failed to update password. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleDeleteAccount = async () => {
-    if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        'Are you sure you want to delete your account? This action cannot be undone.',
+      )
+    ) {
       try {
         // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         await logout();
         navigate('/login');
       } catch (error) {
@@ -140,9 +153,19 @@ const Settings: React.FC = () => {
       </div>
 
       {saveStatus && (
-        <Alert className={`mb-6 ${saveStatus.includes('successfully') ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : 'border-red-200 bg-red-50 dark:bg-red-900/20'}`}>
-          <CheckCircle className={`h-4 w-4 ${saveStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`} />
-          <AlertDescription className={saveStatus.includes('successfully') ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'}>
+        <Alert
+          className={`mb-6 ${saveStatus.includes('successfully') ? 'border-green-200 bg-green-50 dark:bg-green-900/20' : 'border-red-200 bg-red-50 dark:bg-red-900/20'}`}
+        >
+          <CheckCircle
+            className={`h-4 w-4 ${saveStatus.includes('successfully') ? 'text-green-600' : 'text-red-600'}`}
+          />
+          <AlertDescription
+            className={
+              saveStatus.includes('successfully')
+                ? 'text-green-700 dark:text-green-300'
+                : 'text-red-700 dark:text-red-300'
+            }
+          >
             {saveStatus}
           </AlertDescription>
         </Alert>
@@ -154,7 +177,10 @@ const Settings: React.FC = () => {
             <User className="h-4 w-4" />
             <span className="hidden sm:inline">Profile</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2"
+          >
             <Bell className="h-4 w-4" />
             <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
@@ -187,8 +213,8 @@ const Settings: React.FC = () => {
                   <Label htmlFor="firstName">First Name</Label>
                   <Input
                     id="firstName"
-                    value={profileData.firstName}
-                    onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                    // value={profileData.firstName}
+                    // onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
                     placeholder="Enter your first name"
                   />
                 </div>
@@ -196,36 +222,42 @@ const Settings: React.FC = () => {
                   <Label htmlFor="lastName">Last Name</Label>
                   <Input
                     id="lastName"
-                    value={profileData.lastName}
-                    onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                    // value={profileData.lastName}
+                    // onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
                     placeholder="Enter your last name"
                   />
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email Address</Label>
                 <Input
                   id="email"
                   type="email"
                   value={profileData.email}
-                  onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                  onChange={(e) =>
+                    setProfileData({ ...profileData, email: e.target.value })
+                  }
                   placeholder="Enter your email"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input
                   id="phone"
                   type="tel"
-                  value={profileData.phone}
-                  onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                  // value={profileData.phone}
+                  // onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
                   placeholder="Enter your phone number"
                 />
               </div>
-              
-              <Button onClick={handleSaveProfile} disabled={isLoading} className="w-full md:w-auto">
+
+              <Button
+                onClick={handleSaveProfile}
+                disabled={isLoading}
+                className="w-full md:w-auto"
+              >
                 <Save className="h-4 w-4 mr-2" />
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -247,7 +279,12 @@ const Settings: React.FC = () => {
                     id="currentPassword"
                     type={showPasswords.current ? 'text' : 'password'}
                     value={passwordData.currentPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     placeholder="Enter current password"
                   />
                   <Button
@@ -255,13 +292,22 @@ const Settings: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPasswords({ ...showPasswords, current: !showPasswords.current })}
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        current: !showPasswords.current,
+                      })
+                    }
                   >
-                    {showPasswords.current ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.current ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
                 <div className="relative">
@@ -269,7 +315,12 @@ const Settings: React.FC = () => {
                     id="newPassword"
                     type={showPasswords.new ? 'text' : 'password'}
                     value={passwordData.newPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        newPassword: e.target.value,
+                      })
+                    }
                     placeholder="Enter new password"
                   />
                   <Button
@@ -277,13 +328,22 @@ const Settings: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPasswords({ ...showPasswords, new: !showPasswords.new })}
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        new: !showPasswords.new,
+                      })
+                    }
                   >
-                    {showPasswords.new ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.new ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <div className="relative">
@@ -291,7 +351,12 @@ const Settings: React.FC = () => {
                     id="confirmPassword"
                     type={showPasswords.confirm ? 'text' : 'password'}
                     value={passwordData.confirmPassword}
-                    onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        confirmPassword: e.target.value,
+                      })
+                    }
                     placeholder="Confirm new password"
                   />
                   <Button
@@ -299,14 +364,27 @@ const Settings: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPasswords({ ...showPasswords, confirm: !showPasswords.confirm })}
+                    onClick={() =>
+                      setShowPasswords({
+                        ...showPasswords,
+                        confirm: !showPasswords.confirm,
+                      })
+                    }
                   >
-                    {showPasswords.confirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPasswords.confirm ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
-              
-              <Button onClick={handleSavePassword} disabled={isLoading} className="w-full md:w-auto">
+
+              <Button
+                onClick={handleSavePassword}
+                disabled={isLoading}
+                className="w-full md:w-auto"
+              >
                 <Save className="h-4 w-4 mr-2" />
                 {isLoading ? 'Updating...' : 'Update Password'}
               </Button>
@@ -333,12 +411,17 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={notifications.orderUpdates}
-                  onCheckedChange={(checked) => setNotifications({ ...notifications, orderUpdates: checked })}
+                  onCheckedChange={(checked) =>
+                    setNotifications({
+                      ...notifications,
+                      orderUpdates: checked,
+                    })
+                  }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Promotions & Offers</Label>
@@ -348,12 +431,14 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={notifications.promotions}
-                  onCheckedChange={(checked) => setNotifications({ ...notifications, promotions: checked })}
+                  onCheckedChange={(checked) =>
+                    setNotifications({ ...notifications, promotions: checked })
+                  }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Newsletter</Label>
@@ -363,12 +448,14 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={notifications.newsletter}
-                  onCheckedChange={(checked) => setNotifications({ ...notifications, newsletter: checked })}
+                  onCheckedChange={(checked) =>
+                    setNotifications({ ...notifications, newsletter: checked })
+                  }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">SMS Notifications</Label>
@@ -378,7 +465,12 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={notifications.smsNotifications}
-                  onCheckedChange={(checked) => setNotifications({ ...notifications, smsNotifications: checked })}
+                  onCheckedChange={(checked) =>
+                    setNotifications({
+                      ...notifications,
+                      smsNotifications: checked,
+                    })
+                  }
                 />
               </div>
             </CardContent>
@@ -404,12 +496,14 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={privacy.dataSharing}
-                  onCheckedChange={(checked) => setPrivacy({ ...privacy, dataSharing: checked })}
+                  onCheckedChange={(checked) =>
+                    setPrivacy({ ...privacy, dataSharing: checked })
+                  }
                 />
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label className="text-base">Analytics</Label>
@@ -419,7 +513,9 @@ const Settings: React.FC = () => {
                 </div>
                 <Switch
                   checked={privacy.analytics}
-                  onCheckedChange={(checked) => setPrivacy({ ...privacy, analytics: checked })}
+                  onCheckedChange={(checked) =>
+                    setPrivacy({ ...privacy, analytics: checked })
+                  }
                 />
               </div>
             </CardContent>
@@ -445,7 +541,7 @@ const Settings: React.FC = () => {
                   <div className="w-6 h-6 bg-white border-2 border-gray-300 rounded"></div>
                   <span>Light</span>
                 </Button>
-                
+
                 <Button
                   variant={theme === 'dark' ? 'default' : 'outline'}
                   onClick={() => setTheme('dark')}
@@ -454,7 +550,7 @@ const Settings: React.FC = () => {
                   <div className="w-6 h-6 bg-gray-800 border-2 border-gray-600 rounded"></div>
                   <span>Dark</span>
                 </Button>
-                
+
                 <Button
                   variant={theme === 'system' ? 'default' : 'outline'}
                   onClick={() => setTheme('system')}
@@ -479,10 +575,13 @@ const Settings: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
-                <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2">Delete Account</h3>
+                <h3 className="font-semibold text-red-800 dark:text-red-200 mb-2">
+                  Delete Account
+                </h3>
                 <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-                  Once you delete your account, there is no going back. Please be certain.
-                  All your data, including order history, preferences, and saved addresses will be permanently deleted.
+                  Once you delete your account, there is no going back. Please
+                  be certain. All your data, including order history,
+                  preferences, and saved addresses will be permanently deleted.
                 </p>
                 <Button
                   variant="destructive"

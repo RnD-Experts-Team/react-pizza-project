@@ -18,7 +18,7 @@ const ResetPassword: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || '';
-  
+
   const [formData, setFormData] = useState({
     email: email,
     password: '',
@@ -74,12 +74,12 @@ const ResetPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
     setSuccessMessage('');
-    
+
     try {
       const response = await authService.resetPassword({
         email: formData.email,
@@ -87,7 +87,7 @@ const ResetPassword: React.FC = () => {
         password_confirmation: formData.password_confirmation,
         otp: formData.otp,
       });
-      
+
       if (response.success) {
         setSuccessMessage('Password reset successfully!');
         setTimeout(() => {
@@ -95,7 +95,8 @@ const ResetPassword: React.FC = () => {
         }, 2000);
       } else {
         setErrors({
-          general: response.message || 'Password reset failed. Please try again.',
+          general:
+            response.message || 'Password reset failed. Please try again.',
         });
       }
     } catch (error) {
@@ -114,7 +115,8 @@ const ResetPassword: React.FC = () => {
               Reset Password
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Enter your new password and the verification code sent to your email
+              Enter your new password and the verification code sent to your
+              email
             </CardDescription>
           </div>
         </CardHeader>

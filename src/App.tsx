@@ -1,4 +1,9 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
 
@@ -32,112 +37,112 @@ function App() {
           <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>
               {/* Public Routes (Auth Pages) */}
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
                   <PublicRoute>
                     <AuthLayout>
                       <Login />
                     </AuthLayout>
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/register" 
+              <Route
+                path="/register"
                 element={
                   <PublicRoute>
                     <AuthLayout>
                       <Register />
                     </AuthLayout>
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/verify-email" 
+              <Route
+                path="/verify-email"
                 element={
                   <PublicRoute>
                     <AuthLayout>
                       <VerifyEmail />
                     </AuthLayout>
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/forgot-password" 
+              <Route
+                path="/forgot-password"
                 element={
                   <PublicRoute>
                     <AuthLayout>
                       <ForgotPassword />
                     </AuthLayout>
                   </PublicRoute>
-                } 
+                }
               />
-              <Route 
-                path="/reset-password" 
+              <Route
+                path="/reset-password"
                 element={
                   <PublicRoute>
                     <AuthLayout>
                       <ResetPassword />
                     </AuthLayout>
                   </PublicRoute>
-                } 
+                }
               />
-              
+
               {/* Protected Routes (Main App) */}
-              <Route 
-                path="/dashboard" 
+              <Route
+                path="/dashboard"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <Dashboard />
                     </MainLayout>
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/pizza" 
+              <Route
+                path="/pizza"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <Pizza />
                     </MainLayout>
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/settings" 
+              <Route
+                path="/settings"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <Settings />
                     </MainLayout>
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/terms" 
+              <Route
+                path="/terms"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <TermsOfService />
                     </MainLayout>
                   </ProtectedRoute>
-                } 
+                }
               />
-              <Route 
-                path="/privacy" 
+              <Route
+                path="/privacy"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <PrivacyPolicy />
                     </MainLayout>
                   </ProtectedRoute>
-                } 
+                }
               />
-              
+
               {/* Default Route */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              
+
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>

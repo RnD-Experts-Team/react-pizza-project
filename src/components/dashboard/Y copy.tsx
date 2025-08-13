@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { 
+import {
   TruckIcon,
   ChartBarIcon,
   MagnifyingGlassIcon,
   EyeIcon,
   EyeSlashIcon,
-  ExclamationCircleIcon,
-  CheckCircleIcon,
-  XCircleIcon
+  // ExclamationCircleIcon,
+  // CheckCircleIcon,
+  // XCircleIcon
 } from '@heroicons/react/24/outline';
 
 // Type definitions
@@ -51,9 +51,12 @@ interface PerformanceDashboardProps {
 // Status badge configuration
 const getStatusVariant = (status: string) => {
   switch (status) {
-    case 'OT': return 'default';
-    case 'NA': return 'destructive';
-    default: return 'secondary';
+    case 'OT':
+      return 'default';
+    case 'NA':
+      return 'destructive';
+    default:
+      return 'secondary';
   }
 };
 
@@ -64,14 +67,17 @@ const getStatusBgColor = (statusColor: string) => {
     '#14cd24': 'bg-green-100 border-green-200',
     '#e0b300': 'bg-yellow-100 border-yellow-200',
   };
-  return colorMap[statusColor as keyof typeof colorMap] || 'bg-gray-100 border-gray-200';
+  return (
+    colorMap[statusColor as keyof typeof colorMap] ||
+    'bg-gray-100 border-gray-200'
+  );
 };
 
 // Basic metric row component
-const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({ 
-  label, 
-  value, 
-  isLast = false 
+const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
+  label,
+  value,
+  isLast = false,
 }) => {
   return (
     <div className="space-y-2">
@@ -79,9 +85,7 @@ const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
         <span className="text-sm font-semibold text-muted-foreground">
           {label}
         </span>
-        <span className="text-sm font-bold text-foreground">
-          {value}
-        </span>
+        <span className="text-sm font-bold text-foreground">{value}</span>
       </div>
       {!isLast && <Separator />}
     </div>
@@ -89,29 +93,25 @@ const BasicMetricRow: React.FC<BasicMetricProps & { isLast?: boolean }> = ({
 };
 
 // Detailed metric row with status component
-const DetailedMetricRow: React.FC<DetailedMetricProps & { isLast?: boolean }> = ({ 
-  label, 
-  value, 
-  status, 
-  statusColor, 
-  isLast = false 
-}) => {
+const DetailedMetricRow: React.FC<
+  DetailedMetricProps & { isLast?: boolean }
+> = ({ label, value, status, statusColor, isLast = false }) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between py-1">
         <span className="text-sm font-semibold text-muted-foreground flex-1">
           {label}
         </span>
-        
+
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-foreground">
-            {value}
-          </span>
-          <div className={cn(
-            "flex items-center justify-center w-8 h-6 rounded-sm",
-            getStatusBgColor(statusColor)
-          )}>
-            <Badge 
+          <span className="text-sm font-bold text-foreground">{value}</span>
+          <div
+            className={cn(
+              'flex items-center justify-center w-8 h-6 rounded-sm',
+              getStatusBgColor(statusColor),
+            )}
+          >
+            <Badge
               variant={getStatusVariant(status)}
               className="text-xs px-1 py-0 h-4"
               style={{ color: statusColor }}
@@ -129,25 +129,24 @@ const DetailedMetricRow: React.FC<DetailedMetricProps & { isLast?: boolean }> = 
 // On Track section component
 const OnTrackSection: React.FC = () => (
   <div className="flex items-center py-3">
-    <span className="text-base font-bold text-yellow-600">
-      On Track ?
-    </span>
+    <span className="text-base font-bold text-yellow-600">On Track ?</span>
   </div>
 );
 
 // Performance metrics section
-const PerformanceMetrics: React.FC<{ 
+const PerformanceMetrics: React.FC<{
   platform: PlatformData;
   searchTerm: string;
   hiddenMetrics: string[];
 }> = ({ platform, searchTerm, hiddenMetrics }) => {
-  const filteredBasicMetrics = platform.basicMetrics.filter(metric =>
-    metric.label.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredBasicMetrics = platform.basicMetrics.filter((metric) =>
+    metric.label.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
-  const filteredDetailedMetrics = platform.detailedMetrics.filter(metric =>
-    metric.label.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    !hiddenMetrics.includes(metric.label)
+  const filteredDetailedMetrics = platform.detailedMetrics.filter(
+    (metric) =>
+      metric.label.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !hiddenMetrics.includes(metric.label),
   );
 
   return (
@@ -156,37 +155,43 @@ const PerformanceMetrics: React.FC<{
       {filteredBasicMetrics.length > 0 && (
         <div className="space-y-2">
           {filteredBasicMetrics.map((metric, index) => (
-            <BasicMetricRow 
-              key={`basic-${index}`} 
-              {...metric} 
-              isLast={index === filteredBasicMetrics.length - 1 && filteredDetailedMetrics.length === 0}
+            <BasicMetricRow
+              key={`basic-${index}`}
+              {...metric}
+              isLast={
+                index === filteredBasicMetrics.length - 1 &&
+                filteredDetailedMetrics.length === 0
+              }
             />
           ))}
         </div>
       )}
-      
+
       {/* On Track Section */}
-      {(filteredBasicMetrics.length > 0 || filteredDetailedMetrics.length > 0) && <OnTrackSection />}
-      
+      {(filteredBasicMetrics.length > 0 ||
+        filteredDetailedMetrics.length > 0) && <OnTrackSection />}
+
       {/* Filtered Detailed Metrics */}
       {filteredDetailedMetrics.length > 0 && (
         <div className="space-y-2">
           {filteredDetailedMetrics.map((metric, index) => (
-            <DetailedMetricRow 
-              key={`detailed-${index}`} 
-              {...metric} 
+            <DetailedMetricRow
+              key={`detailed-${index}`}
+              {...metric}
               isLast={index === filteredDetailedMetrics.length - 1}
             />
           ))}
         </div>
       )}
-      
+
       {/* No results message */}
-      {searchTerm && filteredBasicMetrics.length === 0 && filteredDetailedMetrics.length === 0 && (
-        <div className="text-center py-8 text-muted-foreground">
-          No metrics found matching "{searchTerm}"
-        </div>
-      )}
+      {searchTerm &&
+        filteredBasicMetrics.length === 0 &&
+        filteredDetailedMetrics.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            No metrics found matching "{searchTerm}"
+          </div>
+        )}
     </div>
   );
 };
@@ -238,7 +243,7 @@ const defaultPlatforms: PlatformData[] = [
         status: 'NA',
         statusColor: '#c30000',
       },
-    ]
+    ],
   },
   {
     name: 'UberEats',
@@ -285,7 +290,7 @@ const defaultPlatforms: PlatformData[] = [
         status: 'OT',
         statusColor: '#00c610',
       },
-    ]
+    ],
   },
   {
     name: 'GrubHub',
@@ -332,18 +337,20 @@ const defaultPlatforms: PlatformData[] = [
         status: 'OT',
         statusColor: '#00c610',
       },
-    ]
-  }
+    ],
+  },
 ];
 
 // Get platform icon based on name
 const getPlatformIcon = (platformName: string) => {
   const iconMap = {
-    'doordash': TruckIcon,
-    'ubereats': TruckIcon,
-    'grubhub': TruckIcon,
+    doordash: TruckIcon,
+    ubereats: TruckIcon,
+    grubhub: TruckIcon,
   };
-  return iconMap[platformName.toLowerCase() as keyof typeof iconMap] || ChartBarIcon;
+  return (
+    iconMap[platformName.toLowerCase() as keyof typeof iconMap] || ChartBarIcon
+  );
 };
 
 // Enhanced Performance Dashboard component
@@ -353,20 +360,21 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
   defaultTab,
   showSearch = true,
   showMetricToggle = true,
-  enableCustomization = false
+  enableCustomization = false,
 }) => {
-  const initialTab = defaultTab || platforms[0]?.name.toLowerCase() || 'doordash';
+  const initialTab =
+    defaultTab || platforms[0]?.name.toLowerCase() || 'doordash';
   const [searchTerm, setSearchTerm] = useState('');
   const [hiddenMetrics, setHiddenMetrics] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState(initialTab);
 
-  const currentPlatform = platforms.find(p => p.name.toLowerCase() === activeTab);
+  // const currentPlatform = platforms.find(p => p.name.toLowerCase() === activeTab);
 
   const toggleMetricVisibility = (metricLabel: string) => {
-    setHiddenMetrics(prev => 
-      prev.includes(metricLabel) 
-        ? prev.filter(m => m !== metricLabel)
-        : [...prev, metricLabel]
+    setHiddenMetrics((prev) =>
+      prev.includes(metricLabel)
+        ? prev.filter((m) => m !== metricLabel)
+        : [...prev, metricLabel],
     );
   };
 
@@ -376,19 +384,16 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
   };
 
   return (
-    <div className={cn(
-      "w-full max-w-2xl mx-auto p-4",
-      className
-    )}>
+    <div className={cn('w-full max-w-2xl mx-auto p-4', className)}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList 
+        <TabsList
           className="grid w-full mb-0 rounded-b-none shadow-md"
           style={{ gridTemplateColumns: `repeat(${platforms.length}, 1fr)` }}
         >
           {platforms.map((platform) => {
             const IconComponent = getPlatformIcon(platform.name);
             return (
-              <TabsTrigger 
+              <TabsTrigger
                 key={platform.name}
                 value={platform.name.toLowerCase()}
                 className="text-lg font-bold px-4 py-3 data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-gray-200 rounded-t-lg rounded-b-none transition-colors duration-200 flex items-center gap-2"
@@ -399,9 +404,9 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
             );
           })}
         </TabsList>
-        
+
         {platforms.map((platform) => (
-          <TabsContent 
+          <TabsContent
             key={platform.name}
             value={platform.name.toLowerCase()}
             className="mt-0"
@@ -421,25 +426,26 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
                         />
                       </div>
                     )}
-                    
+
                     <div className="flex items-center gap-2">
-                      {enableCustomization && platform.detailedMetrics.slice(0, 3).map((metric) => (
-                        <Button
-                          key={metric.label}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => toggleMetricVisibility(metric.label)}
-                          className="text-xs"
-                          title={`Toggle ${metric.label}`}
-                        >
-                          {hiddenMetrics.includes(metric.label) ? (
-                            <EyeSlashIcon className="w-3 h-3" />
-                          ) : (
-                            <EyeIcon className="w-3 h-3" />
-                          )}
-                        </Button>
-                      ))}
-                      
+                      {enableCustomization &&
+                        platform.detailedMetrics.slice(0, 3).map((metric) => (
+                          <Button
+                            key={metric.label}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleMetricVisibility(metric.label)}
+                            className="text-xs"
+                            title={`Toggle ${metric.label}`}
+                          >
+                            {hiddenMetrics.includes(metric.label) ? (
+                              <EyeSlashIcon className="w-3 h-3" />
+                            ) : (
+                              <EyeIcon className="w-3 h-3" />
+                            )}
+                          </Button>
+                        ))}
+
                       {(searchTerm || hiddenMetrics.length > 0) && (
                         <Button
                           variant="ghost"
@@ -452,16 +458,27 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
                       )}
                     </div>
                   </div>
-                  
+
                   {showMetricToggle && (
                     <div className="flex items-center justify-between text-sm text-muted-foreground">
                       <span>
-                        Showing {platform.basicMetrics.filter(m => 
-                          m.label.toLowerCase().includes(searchTerm.toLowerCase())
-                        ).length + platform.detailedMetrics.filter(m => 
-                          m.label.toLowerCase().includes(searchTerm.toLowerCase()) && 
-                          !hiddenMetrics.includes(m.label)
-                        ).length} of {platform.basicMetrics.length + platform.detailedMetrics.length} metrics
+                        Showing{' '}
+                        {platform.basicMetrics.filter((m) =>
+                          m.label
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase()),
+                        ).length +
+                          platform.detailedMetrics.filter(
+                            (m) =>
+                              m.label
+                                .toLowerCase()
+                                .includes(searchTerm.toLowerCase()) &&
+                              !hiddenMetrics.includes(m.label),
+                          ).length}{' '}
+                        of{' '}
+                        {platform.basicMetrics.length +
+                          platform.detailedMetrics.length}{' '}
+                        metrics
                       </span>
                       {hiddenMetrics.length > 0 && (
                         <span className="text-xs">
@@ -472,9 +489,9 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
                   )}
                 </CardHeader>
               )}
-              
+
               <CardContent className="p-4 pt-0">
-                <PerformanceMetrics 
+                <PerformanceMetrics
                   platform={platform}
                   searchTerm={searchTerm}
                   hiddenMetrics={hiddenMetrics}
@@ -492,22 +509,20 @@ const PerformanceDashboardEnhanced: React.FC<PerformanceDashboardProps> = ({
 const BasicPerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
   platforms = defaultPlatforms,
   className,
-  defaultTab
+  defaultTab,
 }) => {
-  const initialTab = defaultTab || platforms[0]?.name.toLowerCase() || 'doordash';
+  const initialTab =
+    defaultTab || platforms[0]?.name.toLowerCase() || 'doordash';
 
   return (
-    <div className={cn(
-      "w-full max-w-2xl mx-auto p-4",
-      className
-    )}>
+    <div className={cn('w-full max-w-2xl mx-auto p-4', className)}>
       <Tabs defaultValue={initialTab} className="w-full">
-        <TabsList 
+        <TabsList
           className="grid w-full mb-0 rounded-b-none shadow-md"
           style={{ gridTemplateColumns: `repeat(${platforms.length}, 1fr)` }}
         >
           {platforms.map((platform) => (
-            <TabsTrigger 
+            <TabsTrigger
               key={platform.name}
               value={platform.name.toLowerCase()}
               className="text-lg font-bold px-4 py-3 data-[state=active]:bg-white data-[state=active]:text-black data-[state=inactive]:bg-gray-200 rounded-t-lg rounded-b-none transition-colors duration-200"
@@ -516,16 +531,16 @@ const BasicPerformanceDashboard: React.FC<PerformanceDashboardProps> = ({
             </TabsTrigger>
           ))}
         </TabsList>
-        
+
         {platforms.map((platform) => (
-          <TabsContent 
+          <TabsContent
             key={platform.name}
             value={platform.name.toLowerCase()}
             className="mt-0"
           >
             <Card className="rounded-t-none border-t-0 shadow-lg min-h-[420px]">
               <CardContent className="p-4">
-                <PerformanceMetrics 
+                <PerformanceMetrics
                   platform={platform}
                   searchTerm=""
                   hiddenMetrics={[]}

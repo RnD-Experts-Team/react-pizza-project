@@ -3,13 +3,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { 
+import {
   DevicePhoneMobileIcon,
   ComputerDesktopIcon,
   GlobeAltIcon,
   TruckIcon,
   ChevronUpIcon,
-  ChevronDownIcon
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 
 // Icon mapping for different channel types
@@ -51,7 +51,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '33.44%',
     icon: 'doordash',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'grubhub',
@@ -61,7 +61,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '1.83%',
     icon: 'grubhub',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'mobile',
@@ -71,7 +71,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '30.31%',
     icon: 'mobile',
     trend: 'up',
-    variant: 'positive'
+    variant: 'positive',
   },
   {
     id: 'phone',
@@ -81,7 +81,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '13.66%',
     icon: 'phone',
     trend: 'up',
-    variant: 'positive'
+    variant: 'positive',
   },
   {
     id: 'ubereats',
@@ -91,7 +91,7 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '1.2%',
     icon: 'ubereats',
     trend: 'down',
-    variant: 'negative'
+    variant: 'negative',
   },
   {
     id: 'website',
@@ -101,8 +101,8 @@ const defaultChannels: ChannelDataProps[] = [
     marketShare: '19.58%',
     icon: 'website',
     trend: 'down',
-    variant: 'negative'
-  }
+    variant: 'negative',
+  },
 ];
 
 const ChannelItem: React.FC<{
@@ -113,7 +113,7 @@ const ChannelItem: React.FC<{
 }> = ({ channel, showIcon = true, showTrendArrow = true, isLast = false }) => {
   const IconComponent = channel.icon ? iconMap[channel.icon] : GlobeAltIcon;
   const TrendIcon = channel.trend === 'up' ? ChevronUpIcon : ChevronDownIcon;
-  
+
   const getPercentageColor = (variant: string) => {
     switch (variant) {
       case 'positive':
@@ -144,11 +144,11 @@ const ChannelItem: React.FC<{
           <h3 className="text-sm md:text-base font-bold text-foreground whitespace-nowrap">
             {channel.name}
           </h3>
-          <Badge 
+          <Badge
             variant={channel.variant === 'positive' ? 'default' : 'destructive'}
             className={cn(
-              "text-xs font-normal",
-              getPercentageColor(channel.variant || 'neutral')
+              'text-xs font-normal',
+              getPercentageColor(channel.variant || 'neutral'),
             )}
           >
             {channel.percentage}
@@ -168,39 +168,33 @@ const ChannelItem: React.FC<{
         {/* Right: Trend Arrow */}
         {showTrendArrow && (
           <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center">
-            <TrendIcon 
-              className={cn(
-                "w-6 h-6",
-                getTrendColor(channel.trend || 'down')
-              )} 
+            <TrendIcon
+              className={cn('w-6 h-6', getTrendColor(channel.trend || 'down'))}
             />
           </div>
         )}
       </div>
-      
+
       {!isLast && <Separator className="mx-2.5" />}
     </div>
   );
 };
 
 export const ChannelSalesDashboard: React.FC<ChannelSalesDashboardProps> = ({
-  title = "Channel Sales",
+  title = 'Channel Sales',
   channels = defaultChannels,
   className,
   showIcons = true,
-  showTrendArrows = true
+  showTrendArrows = true,
 }) => {
   return (
-    <Card className={cn(
-      "w-full max-w-md mx-auto shadow-lg",
-      className
-    )}>
+    <Card className={cn('w-full max-w-md mx-auto shadow-lg', className)}>
       <CardHeader className="bg-[#7f675b] text-white rounded-t-lg">
         <CardTitle className="text-lg md:text-xl font-bold text-center">
           {title}
         </CardTitle>
       </CardHeader>
-      
+
       <CardContent className="p-0">
         <div className="space-y-0">
           {channels.map((channel, index) => (

@@ -13,7 +13,7 @@ interface PlatformContainerProps {
 export const PlatformContainer: React.FC<PlatformContainerProps> = ({
   platforms,
   layout = 'horizontal',
-  className
+  className,
 }) => {
   const isMobile = useIsMobile();
 
@@ -21,7 +21,7 @@ export const PlatformContainer: React.FC<PlatformContainerProps> = ({
     if (isMobile) {
       return 'flex flex-col gap-4';
     }
-    
+
     switch (layout) {
       case 'vertical':
         return 'flex flex-col gap-6';
@@ -33,7 +33,7 @@ export const PlatformContainer: React.FC<PlatformContainerProps> = ({
   };
 
   return (
-    <div className={cn("w-full", getLayoutClasses(), className)}>
+    <div className={cn('w-full', getLayoutClasses(), className)}>
       {platforms.map((platform, index) => (
         <PlatformCard
           key={`platform-${index}`}

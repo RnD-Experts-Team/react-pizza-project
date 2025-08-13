@@ -7,7 +7,7 @@ import type {
   ForgotPasswordRequest,
   ResetPasswordRequest,
   AuthResponse,
-  User
+  User,
 } from '../types/authTypes.ts';
 
 // Base API URL - update to your actual domain
@@ -18,7 +18,7 @@ const authApi = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
+    Accept: 'application/json',
   },
 });
 
@@ -48,7 +48,7 @@ authApi.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const authService = {
@@ -59,13 +59,17 @@ export const authService = {
   },
 
   // Verify email with OTP
-  verifyEmailOtp: async (data: VerifyEmailOtpRequest): Promise<AuthResponse> => {
+  verifyEmailOtp: async (
+    data: VerifyEmailOtpRequest,
+  ): Promise<AuthResponse> => {
     const response = await authApi.post('/verify-email', data);
     return response.data;
   },
 
   // Resend verification OTP
-  resendVerificationOtp: async (data: ResendVerificationOtpRequest): Promise<AuthResponse> => {
+  resendVerificationOtp: async (
+    data: ResendVerificationOtpRequest,
+  ): Promise<AuthResponse> => {
     const response = await authApi.post('/resend-verification-otp', data);
     return response.data;
   },
@@ -73,17 +77,23 @@ export const authService = {
   // Login user
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await authApi.post('/login', data);
-    
+
     // Save token from nested data structure
-    if (response.data.success && response.data.data && response.data.data.token) {
+    if (
+      response.data.success &&
+      response.data.data &&
+      response.data.data.token
+    ) {
       localStorage.setItem('auth_token', response.data.data.token);
     }
-    
+
     return response.data;
   },
 
   // Forgot password
-  forgotPassword: async (data: ForgotPasswordRequest): Promise<AuthResponse> => {
+  forgotPassword: async (
+    data: ForgotPasswordRequest,
+  ): Promise<AuthResponse> => {
     const response = await authApi.post('/forgot-password', data);
     return response.data;
   },
@@ -111,16 +121,19 @@ export const authService = {
   // Refresh token
   refreshToken: async (): Promise<AuthResponse> => {
     const response = await authApi.post('/refresh-token');
-    
+
     // Save new token from nested data structure
-    if (response.data.success && response.data.data && response.data.data.token) {
+    if (
+      response.data.success &&
+      response.data.data &&
+      response.data.data.token
+    ) {
       localStorage.setItem('auth_token', response.data.data.token);
     }
-    
+
     return response.data;
   },
 };
 
 // Export the refresh function for use in interceptor
 export const refreshToken = authService.refreshToken;
-

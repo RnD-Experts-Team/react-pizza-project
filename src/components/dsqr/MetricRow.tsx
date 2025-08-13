@@ -10,24 +10,28 @@ interface MetricRowProps extends MetricDataProps {
   isMobile?: boolean;
 }
 
-export const MetricRow: React.FC<MetricRowProps> = ({ 
-  label, 
-  value, 
+export const MetricRow: React.FC<MetricRowProps> = ({
+  label,
+  value,
   multiline = false,
   isLast = false,
-  isMobile = false
+  isMobile = false,
 }) => {
   return (
-    <div className={cn("space-y-2", isMobile && "space-y-1")}>
-      <div className={cn(
-        "flex items-center justify-between",
-        isMobile ? "py-1" : "py-2"
-      )}>
-        <span className={cn(
-          "font-semibold text-muted-foreground",
-          isMobile ? "text-xs" : "text-sm",
-          multiline ? "leading-relaxed" : "whitespace-nowrap"
-        )}>
+    <div className={cn('space-y-2', isMobile && 'space-y-1')}>
+      <div
+        className={cn(
+          'flex items-center justify-between',
+          isMobile ? 'py-1' : 'py-2',
+        )}
+      >
+        <span
+          className={cn(
+            'font-semibold text-muted-foreground',
+            isMobile ? 'text-xs' : 'text-sm',
+            multiline ? 'leading-relaxed' : 'whitespace-nowrap',
+          )}
+        >
           {multiline ? (
             <span className="block">
               {label.split('\n').map((line, index) => (
@@ -41,10 +45,12 @@ export const MetricRow: React.FC<MetricRowProps> = ({
             label
           )}
         </span>
-        <span className={cn(
-          "font-bold text-foreground",
-          isMobile ? "text-xs" : "text-sm"
-        )}>
+        <span
+          className={cn(
+            'font-bold text-foreground',
+            isMobile ? 'text-xs' : 'text-sm',
+          )}
+        >
           {value}
         </span>
       </div>
@@ -58,26 +64,30 @@ interface MetricRowWithStatusProps extends MetricWithStatusProps {
   isMobile?: boolean;
 }
 
-export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({ 
-  label, 
-  value, 
-  status, 
-  statusColor, 
+export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
+  label,
+  value,
+  status,
+  statusColor,
   multiline = false,
   isLast = false,
-  isMobile = false
+  isMobile = false,
 }) => {
   return (
-    <div className={cn("space-y-2", isMobile && "space-y-1")}>
-      <div className={cn(
-        "flex items-center justify-between",
-        isMobile ? "py-1" : "py-2"
-      )}>
-        <span className={cn(
-          "font-semibold text-muted-foreground flex-1",
-          isMobile ? "text-xs" : "text-sm",
-          multiline ? "leading-relaxed" : "whitespace-nowrap"
-        )}>
+    <div className={cn('space-y-2', isMobile && 'space-y-1')}>
+      <div
+        className={cn(
+          'flex items-center justify-between',
+          isMobile ? 'py-1' : 'py-2',
+        )}
+      >
+        <span
+          className={cn(
+            'font-semibold text-muted-foreground flex-1',
+            isMobile ? 'text-xs' : 'text-sm',
+            multiline ? 'leading-relaxed' : 'whitespace-nowrap',
+          )}
+        >
           {multiline ? (
             <span className="block">
               {label.split('\n').map((line, index) => (
@@ -91,27 +101,28 @@ export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
             label
           )}
         </span>
-        
-        <div className={cn(
-          "flex items-center",
-          isMobile ? "gap-1" : "gap-2"
-        )}>
-          <span className={cn(
-            "font-bold text-foreground",
-            isMobile ? "text-xs" : "text-sm"
-          )}>
+
+        <div className={cn('flex items-center', isMobile ? 'gap-1' : 'gap-2')}>
+          <span
+            className={cn(
+              'font-bold text-foreground',
+              isMobile ? 'text-xs' : 'text-sm',
+            )}
+          >
             {value}
           </span>
-          <div className={cn(
-            "flex items-center justify-center rounded-sm",
-            getStatusBgColor(statusColor),
-            isMobile ? "w-6 h-5" : "w-8 h-6"
-          )}>
-            <Badge 
+          <div
+            className={cn(
+              'flex items-center justify-center rounded-sm',
+              getStatusBgColor(statusColor),
+              isMobile ? 'w-6 h-5' : 'w-8 h-6',
+            )}
+          >
+            <Badge
               variant={getStatusVariant(status)}
               className={cn(
-                "px-1 py-0",
-                isMobile ? "text-xs h-3" : "text-xs h-4"
+                'px-1 py-0',
+                isMobile ? 'text-xs h-3' : 'text-xs h-4',
               )}
               style={{ color: statusColor }}
             >

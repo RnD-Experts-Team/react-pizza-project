@@ -18,7 +18,7 @@ const VerifyEmail: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || '';
-  
+
   const [formData, setFormData] = useState({
     email: email,
     otp: '',
@@ -59,18 +59,18 @@ const VerifyEmail: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
     setSuccessMessage('');
-    
+
     try {
       const response = await authService.verifyEmailOtp({
         email: formData.email,
         otp: formData.otp,
       });
-      
+
       if (response.success) {
         setSuccessMessage('Email verified successfully!');
         setTimeout(() => {
@@ -97,17 +97,18 @@ const VerifyEmail: React.FC = () => {
     setIsResending(true);
     setSuccessMessage('');
     setErrors({});
-    
+
     try {
       const response = await authService.resendVerificationOtp({
         email: formData.email,
       });
-      
+
       if (response.success) {
         setSuccessMessage('OTP sent successfully! Please check your email.');
       } else {
         setErrors({
-          general: response.message || 'Failed to resend OTP. Please try again.',
+          general:
+            response.message || 'Failed to resend OTP. Please try again.',
         });
       }
     } catch (error) {
