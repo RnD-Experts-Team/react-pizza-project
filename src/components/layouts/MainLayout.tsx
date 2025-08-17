@@ -53,6 +53,7 @@ import {
   Check,
   ScrollText,
   Shield,
+  Users,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -84,6 +85,11 @@ function AppSidebar() {
       title: 'Pizzas',
       url: '/pizza',
       icon: Pizza,
+    },
+    {
+      title: 'User Management',
+      url: '/user-management',
+      icon: Users,
     },
     {
       title: 'Settings',
@@ -216,7 +222,21 @@ function generateBreadcrumbs(pathname: string) {
       if (segment === 'dashboard') return;
 
       const href = '/' + pathSegments.slice(0, index + 1).join('/');
-      const label = segment.charAt(0).toUpperCase() + segment.slice(1);
+      let label = segment.charAt(0).toUpperCase() + segment.slice(1);
+      
+      // Handle special cases for better readability
+      if (segment === 'user-management') {
+        label = 'User Management';
+      } else if (segment === 'create-user') {
+        label = 'Create User';
+      } else if (segment === 'edit-user') {
+        label = 'Edit User';
+      } else if (segment === 'create-role') {
+        label = 'Create Role';
+      } else if (segment === 'create-permission') {
+        label = 'Create Permission';
+      }
+      
       const isActive = index === pathSegments.length - 1;
 
       breadcrumbs.push({ label, href, isActive });

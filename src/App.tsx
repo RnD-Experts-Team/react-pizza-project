@@ -29,6 +29,13 @@ import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Settings from './pages/Settings';
 
+// User Management Pages
+import UserManagement from './pages/UserManagement';
+import CreateUser from './pages/CreateUser';
+import EditUser from './pages/EditUser';
+import CreateRole from './pages/CreateRole';
+import CreatePermission from './pages/CreatePermission';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
@@ -135,6 +142,58 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <PrivacyPolicy />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* User Management Routes */}
+              <Route
+                path="/user-management"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserManagement />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-management/create-user"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreateUser />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-management/edit-user/:id"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <EditUser />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-management/create-role"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreateRole />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-management/create-permission"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreatePermission />
                     </MainLayout>
                   </ProtectedRoute>
                 }
