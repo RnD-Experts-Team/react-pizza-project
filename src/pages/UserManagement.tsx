@@ -4,12 +4,11 @@ import type { User, Role, Permission } from '@/types/userManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Users, UserPlus, Shield, Key, Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Users, UserPlus, Shield, Key, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const UserManagement: React.FC = () => {
@@ -19,30 +18,26 @@ const UserManagement: React.FC = () => {
       fetchUsers,
       fetchRoles,
       fetchPermissions,
-      deleteUser,
-      assignRolesToUser,
-      givePermissionsToUser
+      deleteUser
     }
   } = useUserManagement();
 
   const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions'>('users');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   useEffect(() => {
-    fetchUsers({ search: searchTerm, role: selectedRole });
+    fetchUsers();
     fetchRoles();
     fetchPermissions();
-  }, [searchTerm, selectedRole]);
+  }, []);
 
   const handleDeleteUser = async () => {
     if (userToDelete) {
       await deleteUser(userToDelete.id);
       setDeleteDialogOpen(false);
       setUserToDelete(null);
-      fetchUsers({ search: searchTerm, role: selectedRole });
+      fetchUsers();
     }
   };
 
@@ -148,30 +143,6 @@ const UserManagement: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-                >
-                  <option value="">All Roles</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.name}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="space-y-4">
                 {users.map((user) => (
                   <Card key={user.id} className="p-4">
@@ -186,16 +157,22 @@ const UserManagement: React.FC = () => {
                           <h3 className="font-semibold">{user.name}</h3>
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                           <div className="flex gap-2 mt-2">
-                            {user.roles && user.roles.map((role) => (
-                              <Badge key={role.id} className={getRoleColor(role.name)}>
-                                {role.name}
+                            {user.roles && user.roles.length > 0 ? (
+                              user.roles.map((role) => (
+                                <Badge key={role.id} className={getRoleColor(role.name)}>
+                                  {role.name}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground">
+                                No Role
                               </Badge>
-                            ))}
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link to={`/user-management/user/${user.id}`}>
+                        <Link to={`/user-management/user-detail/${user.id}`}>
                           <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -253,7 +230,7 @@ const UserManagement: React.FC = () => {
                         key={page}
                         variant={pagination.current_page === page ? "default" : "outline"}
                         size="sm"
-                        onClick={() => fetchUsers({ search: searchTerm, role: selectedRole, page })}
+                        onClick={() => fetchUsers({ page })}
                       >
                         {page}
                       </Button>

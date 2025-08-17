@@ -1531,8 +1531,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
 };
 
 export default useUserManagement;"
--src/pages/auth/createPermission.tsx:"
-import React, { useState } from 'react';
+-src/pages/createPermission.tsx:"import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import type { CreatePermissionForm } from '@/types/userManagement';
@@ -1844,7 +1843,7 @@ const CreatePermission: React.FC = () => {
 };
 
 export default CreatePermission;"
--src/pages/auth/CreateRole.tsx:"
+-src/pages/CreateRole.tsx:"
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserManagement } from '@/hooks/useUserManagement';
@@ -2273,8 +2272,7 @@ const CreateRole: React.FC = () => {
 };
 
 export default CreateRole;"
--src/pages/auth/CreateUser.tsx :"
-import React, { useState, useEffect } from 'react';
+-src/pages/CreateUser.tsx :"import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import type { CreateUserForm, Role, Permission } from '@/types/userManagement';
@@ -2292,8 +2290,6 @@ interface FormErrors {
   email?: string;
   password?: string;
   password_confirmation?: string;
-  roles?: string;
-  permissions?: string;
 }
 
 const CreateUser: React.FC = () => {
@@ -2320,7 +2316,7 @@ const CreateUser: React.FC = () => {
   useEffect(() => {
     fetchRoles();
     fetchPermissions();
-  }, []);
+  }, [fetchRoles, fetchPermissions]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
@@ -2355,11 +2351,6 @@ const CreateUser: React.FC = () => {
       errors.password_confirmation = 'Passwords do not match';
     }
 
-    // Roles validation
-    if (formData.roles.length === 0) {
-      errors.roles = 'At least one role must be selected';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -2374,28 +2365,21 @@ const CreateUser: React.FC = () => {
     }
   };
 
-  const handleRoleToggle = (roleId: number) => {
-    const roleIdStr = roleId.toString();
+  const handleRoleToggle = (role: Role) => {
     setFormData(prev => ({
       ...prev,
-      roles: prev.roles.includes(roleIdStr)
-        ? prev.roles.filter(id => id !== roleIdStr)
-        : [...prev.roles, roleIdStr]
+      roles: prev.roles.includes(role.name)
+        ? prev.roles.filter(name => name !== role.name)
+        : [...prev.roles, role.name]
     }));
-    
-    // Clear role error when user selects a role
-    if (formErrors.roles) {
-      setFormErrors(prev => ({ ...prev, roles: undefined }));
-    }
   };
 
-  const handlePermissionToggle = (permissionId: number) => {
-    const permissionIdStr = permissionId.toString();
+  const handlePermissionToggle = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permissionIdStr)
-        ? prev.permissions.filter(id => id !== permissionIdStr)
-        : [...prev.permissions, permissionIdStr]
+      permissions: prev.permissions.includes(permission.name)
+        ? prev.permissions.filter(name => name !== permission.name)
+        : [...prev.permissions, permission.name]
     }));
   };
 
@@ -2408,10 +2392,12 @@ const CreateUser: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await createUser(formData);
-      navigate('/user-management', { 
-        state: { message: 'User created successfully!' }
-      });
+      const success = await createUser(formData);
+      if (success) {
+        navigate('/user-management', { 
+          state: { message: 'User created successfully!' }
+        });
+      }
     } catch (err) {
       console.error('Failed to create user:', err);
     } finally {
@@ -2584,10 +2570,10 @@ const CreateUser: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Roles *
+              Roles (Optional)
             </CardTitle>
             <CardDescription>
-              Select one or more roles for this user
+              Select roles for this user (leave empty for no role)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -2595,9 +2581,9 @@ const CreateUser: React.FC = () => {
               {roles.map((role) => (
                 <div
                   key={role.id}
-                  onClick={() => handleRoleToggle(role.id)}
+                  onClick={() => handleRoleToggle(role)}
                   className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                    formData.roles.includes(role.id.toString())
+                    formData.roles.includes(role.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -2632,8 +2618,10 @@ const CreateUser: React.FC = () => {
                 </div>
               ))}
             </div>
-            {formErrors.roles && (
-              <p className="text-sm text-destructive mt-2">{formErrors.roles}</p>
+            {formData.roles.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                No roles selected - user will be created without any role
+              </p>
             )}
           </CardContent>
         </Card>
@@ -2653,9 +2641,9 @@ const CreateUser: React.FC = () => {
               {permissions.map((permission) => (
                 <div
                   key={permission.id}
-                  onClick={() => handlePermissionToggle(permission.id)}
+                  onClick={() => handlePermissionToggle(permission)}
                   className={`cursor-pointer p-2 rounded-md border transition-all ${
-                    formData.permissions.includes(permission.id.toString())
+                    formData.permissions.includes(permission.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -2705,9 +2693,9 @@ const CreateUser: React.FC = () => {
   );
 };
 
-export default CreateUser;"
--src/pages/auth/EditUser.tsx:"
-import React, { useState, useEffect } from 'react';
+export default CreateUser;
+"
+-src/pages/EditUser.tsx:"import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import type { UpdateUserForm, User, Role, Permission } from '@/types/userManagement';
@@ -2723,7 +2711,6 @@ import { Link } from 'react-router-dom';
 
 interface FormErrors {
   name?: string;
-  roles?: string;
 }
 
 const EditUser: React.FC = () => {
@@ -2731,7 +2718,7 @@ const EditUser: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { state, actions } = useUserManagement();
   const { roles, permissions, loading, error } = state;
-  const { fetchRoles, fetchPermissions, fetchUserById, updateUser, assignRolesToUser, givePermissionsToUser } = actions;
+  const { fetchRoles, fetchPermissions, fetchUserById, updateUser } = actions;
 
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UpdateUserForm>({
@@ -2763,8 +2750,8 @@ const EditUser: React.FC = () => {
           setUser(userResponse);
           setFormData({
             name: userResponse.name,
-            roles: userResponse.roles.map(role => role.id.toString()),
-            permissions: userResponse.permissions.map(permission => permission.id.toString())
+            roles: userResponse.roles.map(role => role.name),
+            permissions: userResponse.permissions.map(permission => permission.name)
           });
         }
       } catch (err) {
@@ -2776,7 +2763,7 @@ const EditUser: React.FC = () => {
     };
 
     loadData();
-  }, [id]);
+  }, [id, fetchUserById, fetchRoles, fetchPermissions, navigate]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
@@ -2786,11 +2773,6 @@ const EditUser: React.FC = () => {
       errors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
       errors.name = 'Name must be at least 2 characters long';
-    }
-
-    // Roles validation
-    if (formData.roles.length === 0) {
-      errors.roles = 'At least one role must be selected';
     }
 
     setFormErrors(errors);
@@ -2807,28 +2789,21 @@ const EditUser: React.FC = () => {
     }
   };
 
-  const handleRoleToggle = (roleId: number) => {
-    const roleIdStr = roleId.toString();
+  const handleRoleToggle = (role: Role) => {
     setFormData(prev => ({
       ...prev,
-      roles: prev.roles.includes(roleIdStr)
-        ? prev.roles.filter(id => id !== roleIdStr)
-        : [...prev.roles, roleIdStr]
+      roles: prev.roles.includes(role.name)
+        ? prev.roles.filter(name => name !== role.name)
+        : [...prev.roles, role.name]
     }));
-    
-    // Clear role error when user selects a role
-    if (formErrors.roles) {
-      setFormErrors(prev => ({ ...prev, roles: undefined }));
-    }
   };
 
-  const handlePermissionToggle = (permissionId: number) => {
-    const permissionIdStr = permissionId.toString();
+  const handlePermissionToggle = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permissionIdStr)
-        ? prev.permissions.filter(id => id !== permissionIdStr)
-        : [...prev.permissions, permissionIdStr]
+      permissions: prev.permissions.includes(permission.name)
+        ? prev.permissions.filter(name => name !== permission.name)
+        : [...prev.permissions, permission.name]
     }));
   };
 
@@ -2842,15 +2817,17 @@ const EditUser: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Update user basic info
-      await updateUser(user.id, {
+      const success = await updateUser(user.id, {
         name: formData.name,
         roles: formData.roles,
         permissions: formData.permissions
       });
 
-      navigate('/user-management', { 
-        state: { message: 'User updated successfully!' }
-      });
+      if (success) {
+        navigate('/user-management', { 
+          state: { message: 'User updated successfully!' }
+        });
+      }
     } catch (err) {
       console.error('Failed to update user:', err);
     } finally {
@@ -2891,8 +2868,8 @@ const EditUser: React.FC = () => {
   const hasChanges = () => {
     if (!user) return false;
     
-    const originalRoles = user.roles.map(role => role.id.toString()).sort();
-    const originalPermissions = user.permissions.map(permission => permission.id.toString()).sort();
+    const originalRoles = user.roles.map(role => role.name).sort();
+    const originalPermissions = user.permissions.map(permission => permission.name).sort();
     const currentRoles = [...formData.roles].sort();
     const currentPermissions = [...formData.permissions].sort();
     
@@ -3014,21 +2991,27 @@ const EditUser: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-4">
-              {user.roles.map((role) => (
-                <Badge key={role.id} className={getRoleColor(role.name)}>
-                  {role.name}
+              {user.roles.length > 0 ? (
+                user.roles.map((role) => (
+                  <Badge key={role.id} className={getRoleColor(role.name)}>
+                    {role.name}
+                  </Badge>
+                ))
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  No Role
                 </Badge>
-              ))}
+              )}
             </div>
             <Separator className="my-4" />
-            <h4 className="font-medium mb-3">Update Roles *</h4>
+            <h4 className="font-medium mb-3">Update Roles (Optional)</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {roles.map((role) => (
                 <div
                   key={role.id}
-                  onClick={() => handleRoleToggle(role.id)}
+                  onClick={() => handleRoleToggle(role)}
                   className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                    formData.roles.includes(role.id.toString())
+                    formData.roles.includes(role.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -3063,8 +3046,10 @@ const EditUser: React.FC = () => {
                 </div>
               ))}
             </div>
-            {formErrors.roles && (
-              <p className="text-sm text-destructive mt-2">{formErrors.roles}</p>
+            {formData.roles.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                No roles selected - user will have no role assigned
+              </p>
             )}
           </CardContent>
         </Card>
@@ -3101,9 +3086,9 @@ const EditUser: React.FC = () => {
               {permissions.map((permission) => (
                 <div
                   key={permission.id}
-                  onClick={() => handlePermissionToggle(permission.id)}
+                  onClick={() => handlePermissionToggle(permission)}
                   className={`cursor-pointer p-2 rounded-md border transition-all ${
-                    formData.permissions.includes(permission.id.toString())
+                    formData.permissions.includes(permission.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -3157,19 +3142,304 @@ const EditUser: React.FC = () => {
 };
 
 export default EditUser;"
--src/pages/auth/UserManagement.tsx:"
+-src/pages/UserDetail.tsx:"
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useUserManagement } from '@/hooks/useUserManagement';
+import type { User } from '@/types/userManagement';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ArrowLeft, Edit, Shield, Key, User as UserIcon, Mail, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const UserDetail: React.FC = () => {
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const { actions } = useUserManagement();
+  const { fetchUserById } = actions;
+
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!id) {
+        navigate('/user-management');
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const userResponse = await fetchUserById(parseInt(id));
+        if (userResponse) {
+          setUser(userResponse);
+        } else {
+          setError('User not found');
+        }
+      } catch (err) {
+        setError('Failed to load user data');
+        console.error('Failed to load user data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUser();
+  }, [id, fetchUserById, navigate]);
+
+  const getUserInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const getRoleColor = (roleName: string) => {
+    const colors: { [key: string]: string } = {
+      'admin': 'bg-red-100 text-red-800',
+      'manager': 'bg-blue-100 text-blue-800',
+      'user': 'bg-green-100 text-green-800',
+      'editor': 'bg-purple-100 text-purple-800',
+    };
+    return colors[roleName.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  };
+
+  const getPermissionColor = (permissionName: string) => {
+    const colors: { [key: string]: string } = {
+      'create': 'bg-green-100 text-green-800',
+      'read': 'bg-blue-100 text-blue-800',
+      'update': 'bg-yellow-100 text-yellow-800',
+      'delete': 'bg-red-100 text-red-800',
+    };
+    const key = permissionName.toLowerCase().split(' ')[0] || permissionName.toLowerCase();
+    return colors[key] || 'bg-gray-100 text-gray-800';
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading user details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !user) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center py-12">
+          <UserIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-semibold mb-2">User Not Found</h2>
+          <p className="text-muted-foreground mb-4">
+            {error || "The user you're looking for doesn't exist."}
+          </p>
+          <Link to="/user-management">
+            <Button>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to User Management
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center gap-4 mb-6">
+        <Link to="/user-management">
+          <Button variant="ghost" size="sm">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to User Management
+          </Button>
+        </Link>
+        <div className="flex items-center gap-4 flex-1">
+          <Avatar className="h-16 w-16">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+              {getUserInitials(user.name)}
+            </AvatarFallback>
+          </Avatar>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{user.name}</h1>
+            <p className="text-muted-foreground mt-1">
+              User details and permissions overview
+            </p>
+          </div>
+        </div>
+        <Link to={`/user-management/edit-user/${user.id}`}>
+          <Button>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit User
+          </Button>
+        </Link>
+      </div>
+
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserIcon className="h-5 w-5" />
+              User Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Email</p>
+                  <p className="text-sm text-muted-foreground">{user.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Email Verified</p>
+                  <p className="text-sm text-muted-foreground">
+                    {user.email_verified_at ? formatDate(user.email_verified_at) : 'Not verified'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Created</p>
+                  <p className="text-sm text-muted-foreground">{formatDate(user.created_at)}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="text-sm font-medium">Last Updated</p>
+                  <p className="text-sm text-muted-foreground">{formatDate(user.updated_at)}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5" />
+              Assigned Roles
+            </CardTitle>
+            <CardDescription>
+              Roles assigned to this user and their associated permissions
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {user.roles.length > 0 ? (
+              <div className="space-y-4">
+                {user.roles.map((role) => (
+                  <Card key={role.id} className="p-4 border-l-4 border-l-primary/20">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Badge className={getRoleColor(role.name)}>
+                          {role.name}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Guard: {role.guard_name}
+                        </span>
+                      </div>
+                    </div>
+                    {role.permissions && role.permissions.length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium mb-2">Role Permissions:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {role.permissions.map((permission) => (
+                            <Badge
+                              key={permission.id}
+                              variant="outline"
+                              className={getPermissionColor(permission.name)}
+                            >
+                              {permission.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No roles assigned to this user</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Direct Permissions
+            </CardTitle>
+            <CardDescription>
+              Permissions granted directly to this user (beyond role permissions)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {user.permissions.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {user.permissions.map((permission) => (
+                  <Badge
+                    key={permission.id}
+                    variant="outline"
+                    className={getPermissionColor(permission.name)}
+                  >
+                    {permission.name}
+                  </Badge>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Key className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">No direct permissions assigned to this user</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default UserDetail;
+"
+
+-src/pages/UserManagement.tsx:"import React, { useState, useEffect } from 'react';
 import { useUserManagement } from '@/hooks/useUserManagement';
 import type { User, Role, Permission } from '@/types/userManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
-import { Users, UserPlus, Shield, Key, Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Users, UserPlus, Shield, Key, Edit, Trash2, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const UserManagement: React.FC = () => {
@@ -3179,30 +3449,26 @@ const UserManagement: React.FC = () => {
       fetchUsers,
       fetchRoles,
       fetchPermissions,
-      deleteUser,
-      assignRolesToUser,
-      givePermissionsToUser
+      deleteUser
     }
   } = useUserManagement();
 
   const [activeTab, setActiveTab] = useState<'users' | 'roles' | 'permissions'>('users');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   useEffect(() => {
-    fetchUsers({ search: searchTerm, role: selectedRole });
+    fetchUsers();
     fetchRoles();
     fetchPermissions();
-  }, [searchTerm, selectedRole]);
+  }, []);
 
   const handleDeleteUser = async () => {
     if (userToDelete) {
       await deleteUser(userToDelete.id);
       setDeleteDialogOpen(false);
       setUserToDelete(null);
-      fetchUsers({ search: searchTerm, role: selectedRole });
+      fetchUsers();
     }
   };
 
@@ -3308,30 +3574,6 @@ const UserManagement: React.FC = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search users..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  className="px-3 py-2 border border-input rounded-md bg-background text-sm"
-                >
-                  <option value="">All Roles</option>
-                  {roles.map((role) => (
-                    <option key={role.id} value={role.name}>
-                      {role.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               <div className="space-y-4">
                 {users.map((user) => (
                   <Card key={user.id} className="p-4">
@@ -3346,16 +3588,22 @@ const UserManagement: React.FC = () => {
                           <h3 className="font-semibold">{user.name}</h3>
                           <p className="text-sm text-muted-foreground">{user.email}</p>
                           <div className="flex gap-2 mt-2">
-                            {user.roles && user.roles.map((role) => (
-                              <Badge key={role.id} className={getRoleColor(role.name)}>
-                                {role.name}
+                            {user.roles && user.roles.length > 0 ? (
+                              user.roles.map((role) => (
+                                <Badge key={role.id} className={getRoleColor(role.name)}>
+                                  {role.name}
+                                </Badge>
+                              ))
+                            ) : (
+                              <Badge variant="outline" className="text-muted-foreground">
+                                No Role
                               </Badge>
-                            ))}
+                            )}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Link to={`/user-management/user/${user.id}`}>
+                        <Link to={`/user-management/user-detail/${user.id}`}>
                           <Button variant="ghost" size="sm">
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -3413,7 +3661,7 @@ const UserManagement: React.FC = () => {
                         key={page}
                         variant={pagination.current_page === page ? "default" : "outline"}
                         size="sm"
-                        onClick={() => fetchUsers({ search: searchTerm, role: selectedRole, page })}
+                        onClick={() => fetchUsers({ page })}
                       >
                         {page}
                       </Button>

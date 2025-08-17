@@ -33,6 +33,7 @@ import Settings from './pages/Settings';
 import UserManagement from './pages/UserManagement';
 import CreateUser from './pages/CreateUser';
 import EditUser from './pages/EditUser';
+import UserDetail from './pages/UserDetail';
 import CreateRole from './pages/CreateRole';
 import CreatePermission from './pages/CreatePermission';
 
@@ -174,6 +175,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <EditUser />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-management/user-detail/:id"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserDetail />
                     </MainLayout>
                   </ProtectedRoute>
                 }

@@ -14,7 +14,6 @@ import { Link } from 'react-router-dom';
 
 interface FormErrors {
   name?: string;
-  roles?: string;
 }
 
 const EditUser: React.FC = () => {
@@ -22,7 +21,7 @@ const EditUser: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { state, actions } = useUserManagement();
   const { roles, permissions, loading, error } = state;
-  const { fetchRoles, fetchPermissions, fetchUserById, updateUser, assignRolesToUser, givePermissionsToUser } = actions;
+  const { fetchRoles, fetchPermissions, fetchUserById, updateUser } = actions;
 
   const [user, setUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UpdateUserForm>({
@@ -54,8 +53,8 @@ const EditUser: React.FC = () => {
           setUser(userResponse);
           setFormData({
             name: userResponse.name,
-            roles: userResponse.roles.map(role => role.id.toString()),
-            permissions: userResponse.permissions.map(permission => permission.id.toString())
+            roles: userResponse.roles.map(role => role.name),
+            permissions: userResponse.permissions.map(permission => permission.name)
           });
         }
       } catch (err) {
@@ -67,7 +66,7 @@ const EditUser: React.FC = () => {
     };
 
     loadData();
-  }, [id]);
+  }, [id, fetchUserById, fetchRoles, fetchPermissions, navigate]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
@@ -77,11 +76,6 @@ const EditUser: React.FC = () => {
       errors.name = 'Name is required';
     } else if (formData.name.trim().length < 2) {
       errors.name = 'Name must be at least 2 characters long';
-    }
-
-    // Roles validation
-    if (formData.roles.length === 0) {
-      errors.roles = 'At least one role must be selected';
     }
 
     setFormErrors(errors);
@@ -98,28 +92,21 @@ const EditUser: React.FC = () => {
     }
   };
 
-  const handleRoleToggle = (roleId: number) => {
-    const roleIdStr = roleId.toString();
+  const handleRoleToggle = (role: Role) => {
     setFormData(prev => ({
       ...prev,
-      roles: prev.roles.includes(roleIdStr)
-        ? prev.roles.filter(id => id !== roleIdStr)
-        : [...prev.roles, roleIdStr]
+      roles: prev.roles.includes(role.name)
+        ? prev.roles.filter(name => name !== role.name)
+        : [...prev.roles, role.name]
     }));
-    
-    // Clear role error when user selects a role
-    if (formErrors.roles) {
-      setFormErrors(prev => ({ ...prev, roles: undefined }));
-    }
   };
 
-  const handlePermissionToggle = (permissionId: number) => {
-    const permissionIdStr = permissionId.toString();
+  const handlePermissionToggle = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permissionIdStr)
-        ? prev.permissions.filter(id => id !== permissionIdStr)
-        : [...prev.permissions, permissionIdStr]
+      permissions: prev.permissions.includes(permission.name)
+        ? prev.permissions.filter(name => name !== permission.name)
+        : [...prev.permissions, permission.name]
     }));
   };
 
@@ -133,15 +120,17 @@ const EditUser: React.FC = () => {
     setIsSubmitting(true);
     try {
       // Update user basic info
-      await updateUser(user.id, {
+      const success = await updateUser(user.id, {
         name: formData.name,
         roles: formData.roles,
         permissions: formData.permissions
       });
 
-      navigate('/user-management', { 
-        state: { message: 'User updated successfully!' }
-      });
+      if (success) {
+        navigate('/user-management', { 
+          state: { message: 'User updated successfully!' }
+        });
+      }
     } catch (err) {
       console.error('Failed to update user:', err);
     } finally {
@@ -182,8 +171,8 @@ const EditUser: React.FC = () => {
   const hasChanges = () => {
     if (!user) return false;
     
-    const originalRoles = user.roles.map(role => role.id.toString()).sort();
-    const originalPermissions = user.permissions.map(permission => permission.id.toString()).sort();
+    const originalRoles = user.roles.map(role => role.name).sort();
+    const originalPermissions = user.permissions.map(permission => permission.name).sort();
     const currentRoles = [...formData.roles].sort();
     const currentPermissions = [...formData.permissions].sort();
     
@@ -305,21 +294,27 @@ const EditUser: React.FC = () => {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2 mb-4">
-              {user.roles.map((role) => (
-                <Badge key={role.id} className={getRoleColor(role.name)}>
-                  {role.name}
+              {user.roles.length > 0 ? (
+                user.roles.map((role) => (
+                  <Badge key={role.id} className={getRoleColor(role.name)}>
+                    {role.name}
+                  </Badge>
+                ))
+              ) : (
+                <Badge variant="outline" className="text-muted-foreground">
+                  No Role
                 </Badge>
-              ))}
+              )}
             </div>
             <Separator className="my-4" />
-            <h4 className="font-medium mb-3">Update Roles *</h4>
+            <h4 className="font-medium mb-3">Update Roles (Optional)</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {roles.map((role) => (
                 <div
                   key={role.id}
-                  onClick={() => handleRoleToggle(role.id)}
+                  onClick={() => handleRoleToggle(role)}
                   className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                    formData.roles.includes(role.id.toString())
+                    formData.roles.includes(role.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -354,8 +349,10 @@ const EditUser: React.FC = () => {
                 </div>
               ))}
             </div>
-            {formErrors.roles && (
-              <p className="text-sm text-destructive mt-2">{formErrors.roles}</p>
+            {formData.roles.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                No roles selected - user will have no role assigned
+              </p>
             )}
           </CardContent>
         </Card>
@@ -392,9 +389,9 @@ const EditUser: React.FC = () => {
               {permissions.map((permission) => (
                 <div
                   key={permission.id}
-                  onClick={() => handlePermissionToggle(permission.id)}
+                  onClick={() => handlePermissionToggle(permission)}
                   className={`cursor-pointer p-2 rounded-md border transition-all ${
-                    formData.permissions.includes(permission.id.toString())
+                    formData.permissions.includes(permission.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}

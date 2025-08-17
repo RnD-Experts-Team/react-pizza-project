@@ -16,8 +16,6 @@ interface FormErrors {
   email?: string;
   password?: string;
   password_confirmation?: string;
-  roles?: string;
-  permissions?: string;
 }
 
 const CreateUser: React.FC = () => {
@@ -44,7 +42,7 @@ const CreateUser: React.FC = () => {
   useEffect(() => {
     fetchRoles();
     fetchPermissions();
-  }, []);
+  }, [fetchRoles, fetchPermissions]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
@@ -79,11 +77,6 @@ const CreateUser: React.FC = () => {
       errors.password_confirmation = 'Passwords do not match';
     }
 
-    // Roles validation
-    if (formData.roles.length === 0) {
-      errors.roles = 'At least one role must be selected';
-    }
-
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -98,28 +91,21 @@ const CreateUser: React.FC = () => {
     }
   };
 
-  const handleRoleToggle = (roleId: number) => {
-    const roleIdStr = roleId.toString();
+  const handleRoleToggle = (role: Role) => {
     setFormData(prev => ({
       ...prev,
-      roles: prev.roles.includes(roleIdStr)
-        ? prev.roles.filter(id => id !== roleIdStr)
-        : [...prev.roles, roleIdStr]
+      roles: prev.roles.includes(role.name)
+        ? prev.roles.filter(name => name !== role.name)
+        : [...prev.roles, role.name]
     }));
-    
-    // Clear role error when user selects a role
-    if (formErrors.roles) {
-      setFormErrors(prev => ({ ...prev, roles: undefined }));
-    }
   };
 
-  const handlePermissionToggle = (permissionId: number) => {
-    const permissionIdStr = permissionId.toString();
+  const handlePermissionToggle = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permissionIdStr)
-        ? prev.permissions.filter(id => id !== permissionIdStr)
-        : [...prev.permissions, permissionIdStr]
+      permissions: prev.permissions.includes(permission.name)
+        ? prev.permissions.filter(name => name !== permission.name)
+        : [...prev.permissions, permission.name]
     }));
   };
 
@@ -132,10 +118,12 @@ const CreateUser: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await createUser(formData);
-      navigate('/user-management', { 
-        state: { message: 'User created successfully!' }
-      });
+      const success = await createUser(formData);
+      if (success) {
+        navigate('/user-management', { 
+          state: { message: 'User created successfully!' }
+        });
+      }
     } catch (err) {
       console.error('Failed to create user:', err);
     } finally {
@@ -308,10 +296,10 @@ const CreateUser: React.FC = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Shield className="h-5 w-5" />
-              Roles *
+              Roles (Optional)
             </CardTitle>
             <CardDescription>
-              Select one or more roles for this user
+              Select roles for this user (leave empty for no role)
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -319,9 +307,9 @@ const CreateUser: React.FC = () => {
               {roles.map((role) => (
                 <div
                   key={role.id}
-                  onClick={() => handleRoleToggle(role.id)}
+                  onClick={() => handleRoleToggle(role)}
                   className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                    formData.roles.includes(role.id.toString())
+                    formData.roles.includes(role.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -356,8 +344,10 @@ const CreateUser: React.FC = () => {
                 </div>
               ))}
             </div>
-            {formErrors.roles && (
-              <p className="text-sm text-destructive mt-2">{formErrors.roles}</p>
+            {formData.roles.length === 0 && (
+              <p className="text-sm text-muted-foreground mt-2">
+                No roles selected - user will be created without any role
+              </p>
             )}
           </CardContent>
         </Card>
@@ -377,9 +367,9 @@ const CreateUser: React.FC = () => {
               {permissions.map((permission) => (
                 <div
                   key={permission.id}
-                  onClick={() => handlePermissionToggle(permission.id)}
+                  onClick={() => handlePermissionToggle(permission)}
                   className={`cursor-pointer p-2 rounded-md border transition-all ${
-                    formData.permissions.includes(permission.id.toString())
+                    formData.permissions.includes(permission.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
