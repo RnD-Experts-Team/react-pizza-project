@@ -54,6 +54,7 @@ import {
   ScrollText,
   Shield,
   Users,
+  ShieldCheck,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -90,6 +91,11 @@ function AppSidebar() {
       title: 'User Management',
       url: '/user-management',
       icon: Users,
+    },
+    {
+      title: 'Auth Rules',
+      url: '/auth-rules',
+      icon: ShieldCheck,
     },
     {
       title: 'Settings',
@@ -235,6 +241,8 @@ function generateBreadcrumbs(pathname: string) {
         label = 'Create Role';
       } else if (segment === 'create-permission') {
         label = 'Create Permission';
+      } else if (segment === 'auth-rules') {
+        label = 'Authorization Rules';
       }
       
       const isActive = index === pathSegments.length - 1;

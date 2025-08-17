@@ -28,6 +28,7 @@ import Pizza from './pages/Pizza';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Settings from './pages/Settings';
+import AuthRulesManagement from './pages/AuthRulesManagement';
 
 // User Management Pages
 import UserManagement from './pages/UserManagement';
@@ -143,6 +144,16 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <PrivacyPolicy />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/auth-rules"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AuthRulesManagement />
                     </MainLayout>
                   </ProtectedRoute>
                 }
