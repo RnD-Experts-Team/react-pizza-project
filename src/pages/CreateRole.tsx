@@ -17,19 +17,13 @@ interface FormErrors {
   permissions?: string;
 }
 
-interface LocalRoleForm {
-  name: string;
-  guard_name: string;
-  permissions: number[];
-}
-
 const CreateRole: React.FC = () => {
   const navigate = useNavigate();
   const { state, actions } = useUserManagement();
   const { permissions, loading, error } = state;
   const { fetchPermissions, createRole } = actions;
 
-  const [formData, setFormData] = useState<LocalRoleForm>({
+  const [formData, setFormData] = useState<CreateRoleForm>({
     name: '',
     guard_name: 'web',
     permissions: []
@@ -37,11 +31,10 @@ const CreateRole: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
     fetchPermissions();
-  }, []);
+  }, [fetchPermissions]);
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {};
@@ -81,12 +74,12 @@ const CreateRole: React.FC = () => {
     }
   };
 
-  const handlePermissionToggle = (permissionId: number) => {
+  const handlePermissionToggle = (permission: Permission) => {
     setFormData(prev => ({
       ...prev,
-      permissions: prev.permissions.includes(permissionId)
-        ? prev.permissions.filter(id => id !== permissionId)
-        : [...prev.permissions, permissionId]
+      permissions: prev.permissions.includes(permission.name)
+        ? prev.permissions.filter(name => name !== permission.name)
+        : [...prev.permissions, permission.name]
     }));
     
     // Clear permission error when user selects a permission
@@ -104,15 +97,12 @@ const CreateRole: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      // Convert permission IDs to strings as expected by the API
-      const roleData: CreateRoleForm = {
-        ...formData,
-        permissions: formData.permissions.map(id => id.toString())
-      };
-      await createRole(roleData);
-      navigate('/user-management', { 
-        state: { message: 'Role created successfully!' }
-      });
+      const success = await createRole(formData);
+      if (success) {
+        navigate('/user-management', { 
+          state: { message: 'Role created successfully!' }
+        });
+      }
     } catch (err) {
       console.error('Failed to create role:', err);
     } finally {
@@ -133,52 +123,27 @@ const CreateRole: React.FC = () => {
     return colors[key] || 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   };
 
-  const getPermissionCategories = () => {
-    const categories = new Set<string>();
-    permissions.forEach(permission => {
-      const category = permission.name.split(' ')[1] || 'general';
-      categories.add(category.toLowerCase());
-    });
-    return Array.from(categories).sort();
-  };
-
-  const getFilteredPermissions = () => {
-    if (selectedCategory === 'all') {
-      return permissions;
-    }
-    return permissions.filter(permission => {
-      const category = permission.name.split(' ')[1] || 'general';
-      return category.toLowerCase() === selectedCategory;
-    });
-  };
-
-  const selectAllInCategory = () => {
-    const categoryPermissions = getFilteredPermissions();
-    const categoryIds = categoryPermissions.map(p => p.id);
-    const allSelected = categoryIds.every(id => formData.permissions.includes(id));
+  const selectAllPermissions = () => {
+    const allSelected = permissions.every(permission => formData.permissions.includes(permission.name));
     
     if (allSelected) {
-      // Deselect all in category
+      // Deselect all
       setFormData(prev => ({
         ...prev,
-        permissions: prev.permissions.filter(id => !categoryIds.includes(id))
+        permissions: []
       }));
     } else {
-      // Select all in category
+      // Select all
       setFormData(prev => ({
         ...prev,
-        permissions: [...new Set([...prev.permissions, ...categoryIds])]
+        permissions: permissions.map(permission => permission.name)
       }));
     }
   };
 
-  const getCategorySelectionStatus = () => {
-    const categoryPermissions = getFilteredPermissions();
-    const categoryIds = categoryPermissions.map(p => p.id);
-    const selectedCount = categoryIds.filter(id => formData.permissions.includes(id)).length;
-    
-    if (selectedCount === 0) return 'none';
-    if (selectedCount === categoryIds.length) return 'all';
+  const getSelectionStatus = () => {
+    if (formData.permissions.length === 0) return 'none';
+    if (formData.permissions.length === permissions.length) return 'all';
     return 'partial';
   };
 
@@ -193,9 +158,7 @@ const CreateRole: React.FC = () => {
     );
   }
 
-  const categories = getPermissionCategories();
-  const filteredPermissions = getFilteredPermissions();
-  const selectionStatus = getCategorySelectionStatus();
+  const selectionStatus = getSelectionStatus();
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -276,64 +239,33 @@ const CreateRole: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {/* Permission Categories Filter */}
+            {/* Select All Button */}
             <div className="mb-6">
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-4">
                 <Button
                   type="button"
-                  variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                  variant="outline"
                   size="sm"
-                  onClick={() => setSelectedCategory('all')}
+                  onClick={selectAllPermissions}
                 >
-                  All ({permissions.length})
+                  {selectionStatus === 'all' ? 'Deselect All' : 'Select All'} ({permissions.length})
                 </Button>
-                {categories.map((category) => {
-                  const categoryCount = permissions.filter(p => {
-                    const cat = p.name.split(' ')[1] || 'general';
-                    return cat.toLowerCase() === category;
-                  }).length;
-                  
-                  return (
-                    <Button
-                      key={category}
-                      type="button"
-                      variant={selectedCategory === category ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => setSelectedCategory(category)}
-                    >
-                      {category.charAt(0).toUpperCase() + category.slice(1)} ({categoryCount})
-                    </Button>
-                  );
-                })}
+                {selectionStatus === 'partial' && (
+                  <Badge variant="outline">
+                    {formData.permissions.length} of {permissions.length} selected
+                  </Badge>
+                )}
               </div>
-              
-              {selectedCategory !== 'all' && (
-                <div className="flex items-center gap-2 mb-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={selectAllInCategory}
-                  >
-                    {selectionStatus === 'all' ? 'Deselect All' : 'Select All'} in {selectedCategory}
-                  </Button>
-                  {selectionStatus === 'partial' && (
-                    <Badge variant="outline">
-                      Partially Selected
-                    </Badge>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Permissions Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {filteredPermissions.map((permission) => (
+              {permissions.map((permission) => (
                 <div
                   key={permission.id}
-                  onClick={() => handlePermissionToggle(permission.id)}
+                  onClick={() => handlePermissionToggle(permission)}
                   className={`cursor-pointer p-3 rounded-lg border-2 transition-all ${
-                    formData.permissions.includes(permission.id)
+                    formData.permissions.includes(permission.name)
                       ? 'border-primary bg-primary/5'
                       : 'border-border hover:border-primary/50'
                   }`}
@@ -353,10 +285,10 @@ const CreateRole: React.FC = () => {
               ))}
             </div>
 
-            {filteredPermissions.length === 0 && (
+            {permissions.length === 0 && (
               <div className="text-center py-8">
                 <Key className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No permissions found in this category</p>
+                <p className="text-muted-foreground">No permissions found</p>
               </div>
             )}
 
@@ -374,11 +306,11 @@ const CreateRole: React.FC = () => {
                   </h4>
                   <div className="flex flex-wrap gap-2">
                     {permissions
-                      .filter(p => formData.permissions.includes(p.id))
+                      .filter(p => formData.permissions.includes(p.name))
                       .map((permission) => (
                         <Badge
                           key={permission.id}
-                          onClick={() => handlePermissionToggle(permission.id)}
+                          onClick={() => handlePermissionToggle(permission)}
                           className={`cursor-pointer ${getPermissionColor(permission.name)}`}
                         >
                           {permission.name}
