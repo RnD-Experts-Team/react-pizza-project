@@ -93,6 +93,11 @@ function AppSidebar() {
       icon: Users,
     },
     {
+      title: 'Service Client Management',
+      url: '/service-client-management',
+      icon: ShieldCheck,
+    },
+    {
       title: 'Auth Rules',
       url: '/auth-rules',
       icon: ShieldCheck,
@@ -233,6 +238,8 @@ function generateBreadcrumbs(pathname: string) {
       // Handle special cases for better readability
       if (segment === 'user-management') {
         label = 'User Management';
+      } else if (segment === 'service-client-management') {
+        label = 'Service Client Management';
       } else if (segment === 'create-user') {
         label = 'Create User';
       } else if (segment === 'edit-user') {

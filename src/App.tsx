@@ -38,6 +38,9 @@ import UserDetail from './pages/UserDetail';
 import CreateRole from './pages/CreateRole';
 import CreatePermission from './pages/CreatePermission';
 
+// Service Client Management Pages
+import ServiceClientManagement from './pages/ServiceClientManagement';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
@@ -216,6 +219,18 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <CreatePermission />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Service Client Management Routes */}
+              <Route
+                path="/service-client-management"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ServiceClientManagement />
                     </MainLayout>
                   </ProtectedRoute>
                 }
