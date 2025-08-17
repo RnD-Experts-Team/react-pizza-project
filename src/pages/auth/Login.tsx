@@ -57,15 +57,20 @@ const Login: React.FC = () => {
 
     if (!validateForm()) return;
 
+    // Clear any previous general errors
+    setErrors((prev) => ({ ...prev, general: '' }));
     setIsLoading(true);
+    
     try {
-      const success = await login(formData.email, formData.password);
-      if (success) {
+      const result = await login(formData.email, formData.password);
+      
+      if (result.success) {
         navigate('/dashboard');
       } else {
-        setErrors({ general: 'Invalid email or password' });
+        setErrors({ general: result.message || 'Invalid email or password' });
       }
     } catch (error) {
+      console.error('Login error:', error);
       setErrors({ general: 'Login failed. Please try again.' });
     } finally {
       setIsLoading(false);
