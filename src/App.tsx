@@ -4,7 +4,7 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-import { AuthProvider } from './hooks/useAuth';
+// import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
 
 // Components
@@ -44,7 +44,7 @@ import ServiceClientManagement from './pages/ServiceClientManagement';
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
-      <AuthProvider>
+      {/* <AuthProvider> */}
         <Router>
           <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>
@@ -244,7 +244,7 @@ function App() {
             </Routes>
           </div>
         </Router>
-      </AuthProvider>
+      {/* </AuthProvider> */}
     </ThemeProvider>
   );
 }

@@ -11,17 +11,19 @@ import {
   CardTitle,
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { authService } from '../../services/authService';
 import { Mail, CheckCircle } from 'lucide-react';
 
+// Redux auth hook import
+import { useReduxAuth } from '../../hooks/useReduxAuth';
+
 const ForgotPassword: React.FC = () => {
-  const [formData, setFormData] = useState({
-    email: '',
-  });
+  const [formData, setFormData] = useState({ email: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+
+  // Redux actions and state
+  const { forgotPassword, isLoading, error, clearError } = useReduxAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,6 +31,7 @@ const ForgotPassword: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+    if (error) clearError();
   };
 
   const validateForm = (): boolean => {
@@ -49,15 +52,13 @@ const ForgotPassword: React.FC = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
     setSuccessMessage('');
+    clearError();
 
     try {
-      const response = await authService.forgotPassword({
-        email: formData.email,
-      });
+      const result = await forgotPassword({ email: formData.email });
 
-      if (response.success) {
+      if (result.type.endsWith('/fulfilled')) {
         setSuccessMessage('Password reset instructions sent to your email!');
         setTimeout(() => {
           navigate('/reset-password', { state: { email: formData.email } });
@@ -65,16 +66,14 @@ const ForgotPassword: React.FC = () => {
       } else {
         setErrors({
           general:
-            response.message ||
+            error ||
             'Failed to send reset instructions. Please try again.',
         });
       }
-    } catch (error) {
+    } catch (err) {
       setErrors({
         general: 'Failed to send reset instructions. Please try again.',
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -95,13 +94,13 @@ const ForgotPassword: React.FC = () => {
 
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {errors.general && (
+            {(errors.general || error) && (
               <Alert
                 variant="destructive"
                 className="border-red-500/50 bg-red-500/10"
               >
                 <AlertDescription className="text-red-600">
-                  {errors.general}
+                  {errors.general || error}
                 </AlertDescription>
               </Alert>
             )}

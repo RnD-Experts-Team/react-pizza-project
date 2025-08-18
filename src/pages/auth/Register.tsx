@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { useAuth } from '../../hooks/useAuth';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Register: React.FC = () => {
@@ -22,10 +22,11 @@ const Register: React.FC = () => {
     password_confirmation: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const { register } = useAuth();
+  
+  // Redux auth hook
+  const { register, isLoading, error, clearError, setRegistrationEmail } = useReduxAuth();
   const navigate = useNavigate();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +35,7 @@ const Register: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+    if (error) clearError();
   };
 
   const validateForm = (): boolean => {
@@ -72,24 +74,27 @@ const Register: React.FC = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
-    try {
-      const success = await register(
-        formData.name,
-        formData.email,
-        formData.password,
-        formData.password_confirmation,
-      );
+    clearError();
 
-      if (success) {
+    try {
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        password_confirmation: formData.password_confirmation,
+      });
+
+      if (result.type.endsWith('/fulfilled')) {
+        // Set registration email for verification step
+        setRegistrationEmail(formData.email);
         navigate('/verify-email', { state: { email: formData.email } });
       } else {
-        setErrors({ general: 'Registration failed. Please try again.' });
+        setErrors({ 
+          general: error || 'Registration failed. Please try again.' 
+        });
       }
-    } catch (error) {
+    } catch (err) {
       setErrors({ general: 'Registration failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -109,13 +114,13 @@ const Register: React.FC = () => {
 
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {errors.general && (
+            {(errors.general || error) && (
               <Alert
                 variant="destructive"
                 className="border-red-500/50 bg-red-500/10"
               >
                 <AlertDescription className="text-red-600">
-                  {errors.general}
+                  {errors.general || error}
                 </AlertDescription>
               </Alert>
             )}

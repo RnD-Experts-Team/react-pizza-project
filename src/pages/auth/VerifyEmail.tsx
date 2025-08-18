@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { authService } from '../../services/authService';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Mail, Shield, CheckCircle, RefreshCw } from 'lucide-react';
 
 const VerifyEmail: React.FC = () => {
@@ -24,9 +24,18 @@ const VerifyEmail: React.FC = () => {
     otp: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+
+  // Redux hooks
+  const { 
+    verifyEmail, 
+    resendOtp, 
+    isLoading, 
+    error, 
+    clearError,
+    registrationEmail 
+  } = useReduxAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,6 +43,7 @@ const VerifyEmail: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+    if (error) clearError();
   };
 
   const validateForm = (): boolean => {
@@ -62,34 +72,35 @@ const VerifyEmail: React.FC = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
     setSuccessMessage('');
+    clearError();
 
     try {
-      const response = await authService.verifyEmailOtp({
+      const result = await verifyEmail({
         email: formData.email,
         otp: formData.otp,
       });
 
-      if (response.success) {
+      if (result.type.endsWith('/fulfilled')) {
         setSuccessMessage('Email verified successfully!');
         setTimeout(() => {
           navigate('/login');
         }, 2000);
       } else {
         setErrors({
-          general: response.message || 'Verification failed. Please try again.',
+          general: error || 'Verification failed. Please try again.',
         });
       }
-    } catch (error) {
+    } catch (err) {
       setErrors({ general: 'Verification failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const handleResendOtp = async () => {
-    if (!formData.email) {
+    // Use the email from Redux state if available, otherwise use form data
+    const emailToUse = registrationEmail || formData.email;
+    
+    if (!emailToUse) {
       setErrors({ email: 'Email is required to resend OTP' });
       return;
     }
@@ -97,21 +108,21 @@ const VerifyEmail: React.FC = () => {
     setIsResending(true);
     setSuccessMessage('');
     setErrors({});
+    clearError();
 
     try {
-      const response = await authService.resendVerificationOtp({
-        email: formData.email,
+      const result = await resendOtp({
+        email: emailToUse,
       });
 
-      if (response.success) {
+      if (result.type.endsWith('/fulfilled')) {
         setSuccessMessage('OTP sent successfully! Please check your email.');
       } else {
         setErrors({
-          general:
-            response.message || 'Failed to resend OTP. Please try again.',
+          general: error || 'Failed to resend OTP. Please try again.',
         });
       }
-    } catch (error) {
+    } catch (err) {
       setErrors({ general: 'Failed to resend OTP. Please try again.' });
     } finally {
       setIsResending(false);
@@ -134,13 +145,13 @@ const VerifyEmail: React.FC = () => {
 
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {errors.general && (
+            {(errors.general || error) && (
               <Alert
                 variant="destructive"
                 className="border-red-500/50 bg-red-500/10"
               >
                 <AlertDescription className="text-red-600">
-                  {errors.general}
+                  {errors.general || error}
                 </AlertDescription>
               </Alert>
             )}
@@ -166,7 +177,7 @@ const VerifyEmail: React.FC = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email}
+                value={formData.email || registrationEmail || ''}
                 onChange={handleChange}
                 placeholder="your@email.com"
                 className={`h-12 ${errors.email ? 'border-destructive' : ''}`}

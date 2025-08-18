@@ -42,7 +42,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '../ui/sidebar';
-import { useAuth } from '../../hooks/useAuth';
+// Update to useReduxAuth
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import {
   Home,
   Pizza,
@@ -120,7 +121,6 @@ function AppSidebar() {
               {currentStore.name}
             </span>
           </div>
-
           {/* Store Selector Dropdown */}
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -184,7 +184,6 @@ function AppSidebar() {
           </Popover>
         </div>
       </SidebarHeader>
-
       <SidebarContent className="bg-sidebar">
         <SidebarGroup>
           <SidebarGroupLabel className="px-2 sm:px-3 text-xs sm:text-sm">
@@ -234,7 +233,7 @@ function generateBreadcrumbs(pathname: string) {
 
       const href = '/' + pathSegments.slice(0, index + 1).join('/');
       let label = segment.charAt(0).toUpperCase() + segment.slice(1);
-      
+
       // Handle special cases for better readability
       if (segment === 'user-management') {
         label = 'User Management';
@@ -251,7 +250,7 @@ function generateBreadcrumbs(pathname: string) {
       } else if (segment === 'auth-rules') {
         label = 'Authorization Rules';
       }
-      
+
       const isActive = index === pathSegments.length - 1;
 
       breadcrumbs.push({ label, href, isActive });
@@ -263,7 +262,7 @@ function generateBreadcrumbs(pathname: string) {
 
 // App Header Component
 function AppHeader() {
-  const { user, logout, isAuthenticated } = useAuth();
+  const { user, logout, isAuthenticated } = useReduxAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -379,7 +378,6 @@ function AppHeader() {
           )}
         </div>
       </div>
-
       {/* Breadcrumbs Row */}
       <div className="flex items-center px-2 sm:px-4 py-1 sm:py-2 bg-muted/30">
         <Breadcrumb>
@@ -419,7 +417,6 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
-
         <main className="flex flex-1 flex-col gap-2 sm:gap-4 p-2 sm:p-4 pt-0 min-h-[100vh] rounded-lg bg-muted/50 md:min-h-min">
           {children}
         </main>

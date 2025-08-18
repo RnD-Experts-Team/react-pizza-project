@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '../components/ui/card';
 import { Input } from '../components/ui/input';
-import { useAuth } from '../hooks/useAuth';
+import { useReduxAuth } from '../hooks/useReduxAuth';
 
 interface Pizza {
   id: number;
@@ -25,7 +25,7 @@ const Pizza: React.FC = () => {
   const [filteredPizzas, setFilteredPizzas] = useState<Pizza[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout } = useReduxAuth();
   const navigate = useNavigate();
 
   // Mock pizza data

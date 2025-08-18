@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { authService } from '../../services/authService';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Mail, Lock, Shield, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 const ResetPassword: React.FC = () => {
@@ -26,10 +26,12 @@ const ResetPassword: React.FC = () => {
     otp: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Redux hook
+  const { resetPassword, isLoading, error, clearError } = useReduxAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,6 +39,7 @@ const ResetPassword: React.FC = () => {
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
+    if (error) clearError();
   };
 
   const validateForm = (): boolean => {
@@ -77,32 +80,29 @@ const ResetPassword: React.FC = () => {
 
     if (!validateForm()) return;
 
-    setIsLoading(true);
     setSuccessMessage('');
+    clearError();
 
     try {
-      const response = await authService.resetPassword({
+      const result = await resetPassword({
         email: formData.email,
         password: formData.password,
         password_confirmation: formData.password_confirmation,
         otp: formData.otp,
       });
 
-      if (response.success) {
+      if (result.type.endsWith('/fulfilled')) {
         setSuccessMessage('Password reset successfully!');
         setTimeout(() => {
           navigate('/login');
         }, 2000);
       } else {
         setErrors({
-          general:
-            response.message || 'Password reset failed. Please try again.',
+          general: error || 'Password reset failed. Please try again.',
         });
       }
-    } catch (error) {
+    } catch (err) {
       setErrors({ general: 'Password reset failed. Please try again.' });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -115,21 +115,20 @@ const ResetPassword: React.FC = () => {
               Reset Password
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Enter your new password and the verification code sent to your
-              email
+              Enter your new password and the verification code sent to your email
             </CardDescription>
           </div>
         </CardHeader>
 
         <CardContent className="space-y-6">
           <form onSubmit={handleSubmit} className="space-y-6">
-            {errors.general && (
+            {(errors.general || error) && (
               <Alert
                 variant="destructive"
                 className="border-red-500/50 bg-red-500/10"
               >
                 <AlertDescription className="text-red-600">
-                  {errors.general}
+                  {errors.general || error}
                 </AlertDescription>
               </Alert>
             )}
@@ -206,9 +205,7 @@ const ResetPassword: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your new password"
-                  className={`h-12 pr-12 ${
-                    errors.password ? 'border-destructive' : ''
-                  }`}
+                  className={`h-12 pr-12 ${errors.password ? 'border-destructive' : ''}`}
                 />
                 <Button
                   type="button"

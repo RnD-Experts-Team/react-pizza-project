@@ -8,21 +8,22 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
-import { useAuth } from '../hooks/useAuth.tsx';
-import { authService } from '../services/authService.ts';
-import type { User } from '../types/authTypes.ts';
-// import {InfoSection2} from "../components/dashboard/T.tsx";
-// import {InfoCards} from "../components/dashboard/P copy.tsx";
-// import {ChannelSalesDashboard} from "../components/dashboard/O.tsx";
-// import {Dsqr} from "../components/dashboard/U.tsx";
-// import {FrameScreen} from "../components/dashboard/Y copy.tsx";
+import { useReduxAuth } from '../hooks/useReduxAuth';
+import type { User } from '../types/authTypes';
 import { InfoSection } from '@/components/InfoSection';
 import { InfoCards } from '../components/InfoCards';
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
 import { DSQRDashboard } from '../components/DSQRDashboard';
 
 const Dashboard: React.FC = () => {
-  const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const { 
+    user, 
+    logout, 
+    isAuthenticated, 
+    isLoading, 
+    getUserProfile 
+  } = useReduxAuth();
+  
   const [userProfile, setUserProfile] = useState<User | null>(user);
   const [profileLoading, setProfileLoading] = useState(false);
   const [error, setError] = useState('');
@@ -34,14 +35,24 @@ const Dashboard: React.FC = () => {
     }
   }, [isAuthenticated, isLoading, navigate]);
 
+  // Update local userProfile when Redux user changes
+  useEffect(() => {
+    setUserProfile(user);
+  }, [user]);
+
   const fetchUserProfile = async () => {
     setProfileLoading(true);
     setError('');
 
     try {
-      const profile = await authService.getUserProfile();
-      setUserProfile(profile);
-    } catch (error) {
+      const result = await getUserProfile();
+      if (result.type.endsWith('/fulfilled')) {
+        // Profile will be updated automatically via Redux state
+        setError('');
+      } else {
+        setError('Failed to load user profile');
+      }
+    } catch (err) {
       setError('Failed to load user profile');
     } finally {
       setProfileLoading(false);
@@ -82,8 +93,6 @@ const Dashboard: React.FC = () => {
         <InfoSection></InfoSection>
         <InfoCards></InfoCards>
         <ChannelSalesDashboard></ChannelSalesDashboard>
-        {/* <Dsqr></Dsqr>
-        <FrameScreen></FrameScreen> */}
         <DSQRDashboard></DSQRDashboard>
 
         <div className="max-w-4xl mx-auto">
