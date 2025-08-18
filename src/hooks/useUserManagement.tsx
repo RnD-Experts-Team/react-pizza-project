@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import type {
   User,
-  Role,
-  Permission,
+  // Role,
+  // Permission,
   UserManagementState,
   UsersQueryParams,
   CreateUserForm,
@@ -11,7 +11,7 @@ import type {
   CreatePermissionForm,
   AssignRolesForm,
   AssignPermissionsForm,
-  PaginationMeta
+  // PaginationMeta
 } from '../types/userManagement';
 import { userManagementService } from '../services/userManagementService';
 

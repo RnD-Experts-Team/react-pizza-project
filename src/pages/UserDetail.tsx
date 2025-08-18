@@ -5,7 +5,7 @@ import type { User } from '@/types/userManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+// import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ArrowLeft, Edit, Shield, Key, User as UserIcon, Mail, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';

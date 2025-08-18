@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type {
   AuthRule,
-  AuthRulesResponse,
+  // AuthRulesResponse,
   CreateAuthRulePathDSLRequest,
   CreateAuthRuleRouteNameRequest,
   TestAuthRuleRequest,

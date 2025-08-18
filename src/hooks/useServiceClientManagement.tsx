@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
 import type {
-  ServiceClient,
+  // ServiceClient,
   ServiceClientManagementState,
   ServiceClientsQueryParams,
   CreateServiceClientForm,
   RotateTokenForm,
-  PaginationMeta,
+  // PaginationMeta,
   TokenDisplayData,
 } from '../types/serviceClient';
 import { serviceClientService } from '../services/serviceClientService';

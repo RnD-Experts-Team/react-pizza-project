@@ -18,7 +18,7 @@ interface FormErrors {
 const CreatePermission: React.FC = () => {
   const navigate = useNavigate();
   const { state, actions } = useUserManagement();
-  const { loading, error } = state;
+  const {  error } = state;
   const { createPermission } = actions;
 
   const [formData, setFormData] = useState<CreatePermissionForm>({
@@ -87,7 +87,7 @@ const CreatePermission: React.FC = () => {
     
     const name = formData.name.trim();
     const action = name.split(' ')[0]?.toLowerCase() || 'action';
-    const resource = name.split(' ')[1]?.toLowerCase() || 'resource';
+    // const resource = name.split(' ')[1]?.toLowerCase() || 'resource';
     
     const colors: { [key: string]: string } = {
       'create': 'bg-green-100 text-green-800',

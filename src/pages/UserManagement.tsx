@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useUserManagement } from '@/hooks/useUserManagement';
-import type { User, Role, Permission } from '@/types/userManagement';
+import type { User } from '@/types/userManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Users, UserPlus, Shield, Key, Edit, Trash2, Eye } from 'lucide-react';
