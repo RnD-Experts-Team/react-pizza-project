@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { tokenStorage } from '../utils/tokenStorage';
 import type {
   RegisterRequest,
   VerifyEmailOtpRequest,
@@ -10,7 +11,7 @@ import type {
   User,
 } from '../types/authTypes.ts';
 
-// Base API URL - update to your actual domain
+// Base API URL - updated to localhost:8000
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1/auth';
 
 // Track if we're currently refreshing to prevent multiple refresh attempts
@@ -35,6 +36,20 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = [];
 };
 
+// Function to get token from Redux store first, then localStorage
+const getTokenFromStore = (): string | null => {
+  // Try to get token from Redux store first (if available)
+  if (typeof window !== 'undefined' && (window as any).__REDUX_STORE__) {
+    const reduxState = (window as any).__REDUX_STORE__.getState();
+    if (reduxState.auth?.token) {
+      return reduxState.auth.token;
+    }
+  }
+  
+  // Fallback to localStorage
+  return tokenStorage.getToken();
+};
+
 // Create axios instance with default config
 const authApi = axios.create({
   baseURL: API_BASE_URL,
@@ -44,9 +59,9 @@ const authApi = axios.create({
   },
 });
 
-// Add token to requests if available
+// Add token to requests if available - updated to check Redux store first
 authApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = getTokenFromStore();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -72,7 +87,7 @@ authApi.interceptors.response.use(
       // Check if we've exceeded max refresh attempts
       if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
         console.error('Max refresh attempts exceeded');
-        localStorage.removeItem('auth_token');
+        tokenStorage.removeToken();
         delete authApi.defaults.headers.Authorization;
         refreshAttempts = 0;
         isRefreshing = false;
@@ -104,7 +119,7 @@ authApi.interceptors.response.use(
         
         if (refreshResponse.data.success && refreshResponse.data.data?.token) {
           const newToken = refreshResponse.data.data.token;
-          localStorage.setItem('auth_token', newToken);
+          tokenStorage.setToken(newToken);
           authApi.defaults.headers.Authorization = `Bearer ${newToken}`;
           processQueue(null, newToken);
           
@@ -127,7 +142,7 @@ authApi.interceptors.response.use(
         
         // Refresh failed, clear everything and redirect
         processQueue(refreshError, null);
-        localStorage.removeItem('auth_token');
+        tokenStorage.removeToken();
         delete authApi.defaults.headers.Authorization;
         
         // Reset refresh attempts
@@ -207,14 +222,14 @@ export const authService = {
     try {
       const response = await authApi.post('/login', data);
 
-      // Save token from nested data structure
+      // Save token using encrypted storage
       if (
         response.data.success &&
         response.data.data &&
         response.data.data.token
       ) {
         const token = response.data.data.token;
-        localStorage.setItem('auth_token', token);
+        tokenStorage.setToken(token);
         authApi.defaults.headers.Authorization = `Bearer ${token}`;
         // Reset refresh attempts on successful login
         refreshAttempts = 0;
@@ -269,10 +284,10 @@ export const authService = {
     }
   },
 
-  // Get user profile
+  // Get user profile - updated to match new API response structure
   getUserProfile: async (): Promise<User> => {
     const response = await authApi.get('/me');
-    // Extract user from nested data structure
+    // Extract user from the new API response structure
     return response.data.data.user;
   },
 
@@ -280,14 +295,14 @@ export const authService = {
   logout: async (): Promise<AuthResponse> => {
     try {
       const response = await authApi.post('/logout');
-      localStorage.removeItem('auth_token');
+      tokenStorage.removeToken();
       delete authApi.defaults.headers.Authorization;
       // Reset refresh attempts on logout
       refreshAttempts = 0;
       return response.data;
     } catch (error) {
       // Even if logout fails on server, clear local storage
-      localStorage.removeItem('auth_token');
+      tokenStorage.removeToken();
       delete authApi.defaults.headers.Authorization;
       refreshAttempts = 0;
       throw error;
@@ -298,18 +313,29 @@ export const authService = {
   refreshToken: async (): Promise<AuthResponse> => {
     const response = await authApi.post('/refresh-token');
 
-    // Save new token from nested data structure
+    // Save new token using encrypted storage
     if (
       response.data.success &&
       response.data.data &&
       response.data.data.token
     ) {
       const token = response.data.data.token;
-      localStorage.setItem('auth_token', token);
+      tokenStorage.setToken(token);
       authApi.defaults.headers.Authorization = `Bearer ${token}`;
     }
 
     return response.data;
+  },
+
+  // Get current token from storage (checks Redux store first, then localStorage)
+  getCurrentToken: (): string | null => {
+    return getTokenFromStore();
+  },
+
+  // Check if valid token exists
+  hasValidToken: (): boolean => {
+    const token = getTokenFromStore();
+    return !!token && tokenStorage.hasValidToken();
   },
 };
 

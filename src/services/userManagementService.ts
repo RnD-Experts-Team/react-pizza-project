@@ -15,11 +15,13 @@ import type {
   ErrorResponse
 } from '../types/userManagement';
 
+import { tokenStorage } from '../utils/tokenStorage';
+
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';
 
 // Helper function to get auth headers
 const getAuthHeaders = (): HeadersInit => {
-  const token = localStorage.getItem('auth_token');
+  const token = tokenStorage.getToken();
   return {
     'Authorization': `Bearer ${token}`,
     'Accept': 'application/json',

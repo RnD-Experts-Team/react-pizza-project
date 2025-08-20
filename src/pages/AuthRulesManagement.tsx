@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuthRules } from '../hooks/useAuthRules';
+import { useReduxAuthRules } from '../hooks/useReduxAuthRules';
 import type { AuthRuleFormData, TestAuthRuleRequest } from '../types/authRules';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -50,7 +50,7 @@ const AuthRulesManagement: React.FC = () => {
     clearError,
     clearTestResult,
     refreshRules,
-  } = useAuthRules();
+  } = useReduxAuthRules();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);

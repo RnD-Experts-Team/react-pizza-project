@@ -8,12 +8,13 @@ import type {
   ToggleAuthRuleStatusResponse,
   AuthRulesFilters,
 } from '../types/authRules';
+import { tokenStorage } from '../utils/tokenStorage';
 
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';
 
 class AuthRulesService {
   private getAuthHeaders(): HeadersInit {
-    const token = localStorage.getItem('auth_token');
+    const token = tokenStorage.getToken();
     return {
       'Authorization': `Bearer ${token}`,
       'Accept': 'application/json',
@@ -97,7 +98,7 @@ class AuthRulesService {
     const response = await fetch(`${API_BASE_URL}/auth-rules/${ruleId}/toggle-status`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        'Authorization': `Bearer ${tokenStorage.getToken()}`,
         'Accept': 'application/json',
       },
     });

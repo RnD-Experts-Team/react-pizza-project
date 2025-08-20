@@ -1,0 +1,543 @@
+Auth -> Permission Management -> Role Management -> User Management -> Service client management -> 
+Authorization rules management -> Store management -> user role store assignment -> Role hierarchy management
+
+in the auth section I have the following APIs :
+#####
+1.	Register http://localhost:8000/api/v1/auth/register we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "name": "sam doe",
+    "email": "sam@example.com",
+    "password": "password123",
+    "password_confirmation": "password123"
+} “
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "User registered successfully. Please verify your email with the OTP sent.",
+    "data": {
+        "user": {
+            "name": "sam doe",
+            "email": "sam@example.com",
+            "updated_at": "2025-08-19T15:48:12.000000Z",
+            "created_at": "2025-08-19T15:48:12.000000Z",
+            "id": 9
+        }
+    }
+}"
+#####
+2.	Verify Email OTP http://localhost:8000/api/v1/auth/verify-email we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "email": "sam@example.com",
+    "otp": "830065"
+}“
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "Email verified successfully"
+}"
+#####
+3.	Resend Verification OTP http://localhost:8000/api/v1/auth/resend-verification-otp we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "email": "samy@example.com"
+}“
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "Verification OTP sent successfully"
+}"
+#####
+4.	Forgot Password http://localhost:8000/api/v1/auth/forgot-password we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "email": "john@example.com"
+}“
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "Password reset OTP sent to your email"
+}"
+#####
+5.	Reset Password http://localhost:8000/api/v1/auth/reset-password we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "email": "samy@example.com",
+    "password": "newpassword123",
+    "password_confirmation": "newpassword123",
+    "otp": "298763"
+}“
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "Password reset successfully"
+}"
+#####
+6.	Login http://localhost:8000/api/v1/auth/login we should give the Accept which is application/json and the content is also application/json 
+in the header and the body should be like :”
+{
+    "email": "charliemiller1118@gmail.com",
+    "password": "password"
+}“
+ the success result will be something like :"
+{
+    "success": true,
+    "message": "Login successful",
+    "data": {
+        "user": {
+            "id": 5,
+            "name": "charlie",
+            "email": "charliemiller1118@gmail.com",
+            "email_verified_at": "2025-08-13T14:14:43.000000Z",
+            "created_at": "2025-08-13T14:13:29.000000Z",
+            "updated_at": "2025-08-13T14:14:43.000000Z",
+            "global_roles": [
+                {
+                    "id": 1,
+                    "name": "super-admin",
+                    "guard_name": "web",
+                    "permissions": [
+                        {
+                            "id": 1,
+                            "name": "manage users",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 2,
+                            "name": "manage roles",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 3,
+                            "name": "manage permissions",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 4,
+                            "name": "manage service clients",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 5,
+                            "name": "manage auth rules",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 7,
+                            "name": "export json data",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 8,
+                            "name": "export data",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 9,
+                            "name": "asdf",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 10,
+                            "name": "asdfasd",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 11,
+                            "name": "manage stores",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 12,
+                            "name": "manage user role assignments",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 13,
+                            "name": "manage role hierarchy",
+                            "guard_name": "web"
+                        }
+                    ]
+                }
+            ],
+            "global_permissions": [],
+            "all_permissions": [
+                {
+                    "id": 1,
+                    "name": "manage users",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 2,
+                    "name": "manage roles",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 3,
+                    "name": "manage permissions",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 4,
+                    "name": "manage service clients",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 5,
+                    "name": "manage auth rules",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 7,
+                    "name": "export json data",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 8,
+                    "name": "export data",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 9,
+                    "name": "asdf",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 10,
+                    "name": "asdfasd",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 11,
+                    "name": "manage stores",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 12,
+                    "name": "manage user role assignments",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 13,
+                    "name": "manage role hierarchy",
+                    "guard_name": "web"
+                }
+            ],
+            "stores": [],
+            "summary": {
+                "total_stores": 0,
+                "total_roles": 1,
+                "total_permissions": 12,
+                "manageable_users_count": 0
+            }
+        },
+        "token": "20|5HkG6E75zGlk13gdDpdoNJfZLcopMB1hHiyCkLjv0e7ef751",
+        "token_type": "Bearer"
+    }
+}"
+#####
+7.	Get User Profile http://localhost:8000/api/v1/auth/me we should give the auth_token the Accept which is application/json  
+in the header and there is no body , if the auth token was valid the success result will be something like :"
+{
+    "success": true,
+    "data": {
+        "user": {
+            "id": 5,
+            "name": "charlie",
+            "email": "charliemiller1118@gmail.com",
+            "email_verified_at": "2025-08-13T14:14:43.000000Z",
+            "created_at": "2025-08-13T14:13:29.000000Z",
+            "updated_at": "2025-08-13T14:14:43.000000Z",
+            "global_roles": [
+                {
+                    "id": 1,
+                    "name": "super-admin",
+                    "guard_name": "web",
+                    "permissions": [
+                        {
+                            "id": 1,
+                            "name": "manage users",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 2,
+                            "name": "manage roles",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 3,
+                            "name": "manage permissions",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 4,
+                            "name": "manage service clients",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 5,
+                            "name": "manage auth rules",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 7,
+                            "name": "export json data",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 8,
+                            "name": "export data",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 9,
+                            "name": "asdf",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 10,
+                            "name": "asdfasd",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 11,
+                            "name": "manage stores",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 12,
+                            "name": "manage user role assignments",
+                            "guard_name": "web"
+                        },
+                        {
+                            "id": 13,
+                            "name": "manage role hierarchy",
+                            "guard_name": "web"
+                        }
+                    ]
+                }
+            ],
+            "global_permissions": [],
+            "all_permissions": [
+                {
+                    "id": 1,
+                    "name": "manage users",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 2,
+                    "name": "manage roles",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 3,
+                    "name": "manage permissions",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 4,
+                    "name": "manage service clients",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 5,
+                    "name": "manage auth rules",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 7,
+                    "name": "export json data",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 8,
+                    "name": "export data",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 9,
+                    "name": "asdf",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 10,
+                    "name": "asdfasd",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 11,
+                    "name": "manage stores",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 12,
+                    "name": "manage user role assignments",
+                    "guard_name": "web"
+                },
+                {
+                    "id": 13,
+                    "name": "manage role hierarchy",
+                    "guard_name": "web"
+                }
+            ],
+            "stores": [],
+            "summary": {
+                "total_stores": 0,
+                "total_roles": 1,
+                "total_permissions": 12,
+                "manageable_users_count": 0
+            }
+        }
+    }
+}"
+#####
+8.	Refresh Token http://localhost:8000/api/v1/auth/refresh-token we should give the auth_token the Accept which is application/json  
+in the header and there is no body , if the auth token was valid the success result will be something like :"
+{
+    "success": true,
+    "message": "Token refreshed successfully",
+    "data": {
+        "token": "21|7wIaupVN6bBZNvkee67OdBxPWoZEgB7cFoUcchp333e99b42",
+        "token_type": "Bearer"
+    }
+}"
+#####
+9.	Logout http://localhost:8000/api/v1/auth/logout we should give the auth_token the Accept which is application/json  
+in the header and there is no body , if the auth token was valid the success result will be something like :"
+{
+    "success": true,
+    "message": "Logged out successfully"
+}"
+## Frontend Architecture Overview
+
+### Authentication Workflow: End-to-End
+
+#### 1. User Registration
+- User submits registration data (name, email, password)
+- Frontend uses the `registerUser` thunk in `authSlice.ts`, which calls `authService.register` to hit the `/register` API endpoint
+- Backend responds, and if successful, the Redux state is updated to move to the email verification step
+
+#### 2. Email Verification
+- User inputs OTP received by email
+- Frontend calls the `verifyEmailOtp` thunk, which uses `authService.verifyEmailOtp` to hit `/verify-email`
+- If verified, Redux state is updated to reflect account completion
+
+#### 3. Resend Verification
+- User requests another OTP
+- `resendVerificationOtp` thunk is called, using `authService.resendVerificationOtp`
+
+#### 4. Login
+- User provides credentials
+- Frontend calls `loginUser` thunk which uses `authService.login` to POST to `/login`
+- On success:
+  - The JWT/auth token is saved to both Redux state (`auth.token`) and localStorage (via `tokenStorage`)
+  - User object (including roles, permissions, stores, summary) is cached to sessionStorage for fast access and UX (`cacheStorage`)
+  - Redux state is updated to reflect authenticated status
+- If login fails, Redux state updates with errors
+
+#### 5. Fetch User Profile
+- After login or app initialization, the frontend calls `getUserProfile` thunk (which wraps `authService.getUserProfile`) to fetch up-to-date user info using the token
+- On success, the details are cached to sessionStorage and Redux
+- Permissions/roles from the profile are used for permission-based rendering
+
+#### 6. Permissions and Roles
+- Menu items, routes, and components use the `useReduxAuth` hook's helper functions (`hasPermission`, `hasRole`, etc.) to show/hide UI dynamically based on the user's permissions and roles pulled from session (or Redux) cache
+
+#### 7. Password Reset
+- **Forgot password:** Uses `forgotPassword` thunk (`authService.forgotPassword`) for sending reset email
+- **Reset password:** Uses `resetPassword` thunk (`authService.resetPassword`) to POST new password and OTP
+
+#### 8. Logout
+- User triggers logout
+- Frontend calls `logoutUser` thunk (`authService.logout`)
+- On completion (or failure):
+  - Redux state is cleared of user/token
+  - LocalStorage token and sessionStorage cache are cleared for full security and UX reset
+
+#### 9. Token Refresh (If Implemented)
+- If protected endpoint gets 401, interceptor tries to refresh the token using `/refresh-token`, updating all storages on success
+- On repeated failure, app forcibly returns to login
+
+---
+
+## Data Flow and Storage
+
+- **Auth token** is stored in both Redux (immediate app state) and localStorage (survives browser reload)
+- **User profile** (including roles/permissions/stores/summary) is cached in sessionStorage for fast access and UX (`cacheStorage.ts`), as well as in Redux for simpler state management
+- **Cache expiry** enforced (~30 min); cache is cleared automatically on logout
+- **On app start**, the cache and token state are used to restore authentication and permissions instantly before making any API calls
+
+---
+
+## File Responsibilities
+
+### `/src/services/authService.ts`
+- Handles all direct API communication (register, login, logout, verify, password reset, get user profile, token refresh)
+- Adds authentication token to requests
+- Implements token refresh and error handling logic
+
+### `/src/types/authTypes.ts`
+- Defines all TypeScript interfaces for auth-related objects (user, permissions, roles, summary, and request/response formats)
+- Ensures strong typing and maintainability
+
+### `/src/utils/tokenStorage.ts`
+- Utility for encrypted storage and retrieval of the auth token in localStorage
+- Offers methods for set, get, and remove
+- Ensures persistent login between browser reloads
+
+### `/src/utils/cacheStorage.ts`
+- Utility for storing extended user profile, permissions/roles, stores, and summary in sessionStorage
+- Implements caching with expiry and methods for set, get, validate, and clear cache
+- Facilitates fast permission checks
+
+### `/src/store/slices/authSlice.ts`
+- The Redux slice (using Redux Toolkit), combines all authentication async thunks, state, reducers, and cache integration
+- Manages UI state, error, loading, and all data related to authentication, tokens, user info, and cached permissions
+- Extra reducers handle API calls (login, register, verification, token refresh, etc.) and integrate cache usage
+- Ensures that on logout all user and auth info is properly cleared
+
+### `/src/hooks/useReduxAuth.tsx`
+- Exposes all auth thunks, state selectors, and utility methods in an easy-to-consume React hook
+- Provides the permission/role-check helper functions
+- Used for permission-based rendering in components and layouts
+- Handles app initialization, cache validity check, and user info refresh logic
+
+### `/src/components/AuthInitializer.tsx`
+- React component that ensures auth state is initialized before rendering children
+- Used to wrap the app/root, provides a loading screen while state/caches are restored
+- Handles profile fetch only once to prevent request loops
+
+### `/src/components/MainLayout.tsx`
+- Provides the main app layout including sidebar and header
+- Renders sidebar links and UI elements conditionally using permission and role helpers from `useReduxAuth`
+- Ensures only allowed links are visible to authenticated users
+- Uses data cached in Redux/sessionStorage for fast permission checks
+
+### `/src/App.tsx`
+- Top-level routing and layout
+- Utilizes `AuthInitializer` to ensure the app doesn't render until authentication state is ready
+- Route protection is handled with higher-order components and permission guard components
+- Loads different layouts and routes based on authentication and permissions
+
+---
+
+## Permission & Role-Based Rendering
+
+Anywhere in the app where a component, link, or route should be hidden (or protected) based on user roles or permissions, you use helpers from `useReduxAuth` (e.g., `hasPermission('manage users')`).
+
+- These helpers use the cached permissions/roles data for instant UX
+- Sidebar links, protected routes, buttons, and even page access can be controlled
+
+---
+
+## Workflow Summary
+
+**Registration → Verification → Login:** User progresses through authentication steps, with states and tokens being stored and managed securely.
+
+**App Initialization:** App boots, `AuthInitializer` restores/caches auth state from localStorage/sessionStorage, ensuring seamless user experience across browser sessions.
+
+
+in the permission section I have the following APIs :
+#####
+1. 

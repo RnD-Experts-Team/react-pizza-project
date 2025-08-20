@@ -9,6 +9,7 @@ import type {
   RotateTokenForm,
   ServiceClientsQueryParams,
 } from '../types/serviceClient';
+import { tokenStorage } from '../utils/tokenStorage';
 
 // Base API URL
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';
@@ -24,7 +25,7 @@ const serviceClientApi = axios.create({
 
 // Add token to requests if available
 serviceClientApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = tokenStorage.getToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -37,7 +38,7 @@ serviceClientApi.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       // Token expired or invalid, redirect to login
-      localStorage.removeItem('auth_token');
+      tokenStorage.removeToken();
       window.location.href = '/login';
     }
     return Promise.reject(error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useUserManagement } from '@/hooks/useUserManagement';
+import { useUserManagement } from '@/hooks/useReduxUserManagement';
 import type { User } from '@/types/userManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

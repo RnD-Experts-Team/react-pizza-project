@@ -42,7 +42,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '../ui/sidebar';
-// Update to useReduxAuth
 import { useReduxAuth } from '../../hooks/useReduxAuth';
 import {
   Home,
@@ -71,47 +70,68 @@ const stores = [
   { id: 5, name: 'University Campus', address: '100 College St' },
 ];
 
-// App Sidebar Component
+// --- Permission/role definitions for menu items ---
+const MENU_PERMISSION_MAP: {
+  [key: string]: { permission?: string; role?: string }
+} = {
+  'User Management': { permission: 'manage users' },
+  'Service Client Management': { permission: 'manage service clients' },
+  'Auth Rules': { permission: 'manage auth rules' },
+  'Settings': {}, // Shown to all authenticated users; restrict if you wish
+};
+
 function AppSidebar() {
   const location = useLocation();
   const [currentStore, setCurrentStore] = useState(stores[0]);
   const [open, setOpen] = useState(false);
+  const {
+    hasPermission,
+    hasRole,
+    isAuthenticated
+  } = useReduxAuth();
 
+  // Define menu items with titles and permissions
   const menuItems = [
     {
       title: 'Dashboard',
       url: '/dashboard',
       icon: Home,
+      show: true, // Always shown if authenticated
     },
     {
       title: 'Pizzas',
       url: '/pizza',
       icon: Pizza,
+      show: true,
     },
     {
       title: 'User Management',
       url: '/user-management',
       icon: Users,
+      show: hasPermission('manage users'),
     },
     {
       title: 'Service Client Management',
       url: '/service-client-management',
       icon: ShieldCheck,
+      show: hasPermission('manage service clients'),
     },
     {
       title: 'Auth Rules',
       url: '/auth-rules',
       icon: ShieldCheck,
+      show: hasPermission('manage auth rules'),
     },
     {
       title: 'Settings',
       url: '/settings',
       icon: Settings,
+      show: true,
     },
   ];
 
   return (
-    <Sidebar className="bg-sidebar  border-r border-sidebar-border">
+    <Sidebar className="bg-sidebar border-r border-sidebar-border">
       <SidebarHeader className="bg-sidebar">
         {/* Current Store Display */}
         <div className="px-2 sm:px-3 py-2 sm:py-3">
@@ -191,23 +211,25 @@ function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.pathname === item.url}
-                    className="mx-1 sm:mx-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent"
-                  >
-                    <Link
-                      to={item.url}
-                      className="flex items-center space-x-2 sm:space-x-3"
+              {menuItems
+                .filter(item => isAuthenticated && item.show)
+                .map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={location.pathname === item.url}
+                      className="mx-1 sm:mx-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent"
                     >
-                      <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate">{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+                      <Link
+                        to={item.url}
+                        className="flex items-center space-x-2 sm:space-x-3"
+                      >
+                        <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -252,7 +274,6 @@ function generateBreadcrumbs(pathname: string) {
       }
 
       const isActive = index === pathSegments.length - 1;
-
       breadcrumbs.push({ label, href, isActive });
     });
   }

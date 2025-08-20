@@ -4,12 +4,13 @@ import {
   Route,
   Navigate,
 } from 'react-router-dom';
-// import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
+import { AuthInitializer } from './components/AuthInitializer';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
+import { PermissionBasedRoute } from './components/PermissionBasedRoute';
 
 // Layouts
 import AuthLayout from './components/layouts/AuthLayout';
@@ -41,10 +42,22 @@ import CreatePermission from './pages/CreatePermission';
 // Service Client Management Pages
 import ServiceClientManagement from './pages/ServiceClientManagement';
 
+// Unauthorized component
+const UnauthorizedPage = () => (
+  <MainLayout>
+    <div className="flex items-center justify-center min-h-[400px]">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h2>
+        <p className="text-gray-600">You don't have permission to access this page.</p>
+      </div>
+    </div>
+  </MainLayout>
+);
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
-      {/* <AuthProvider> */}
+      <AuthInitializer>
         <Router>
           <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>
@@ -100,6 +113,16 @@ function App() {
                 }
               />
 
+              {/* Unauthorized Page */}
+              <Route
+                path="/unauthorized"
+                element={
+                  <ProtectedRoute>
+                    <UnauthorizedPage />
+                  </ProtectedRoute>
+                }
+              />
+
               {/* Protected Routes (Main App) */}
               <Route
                 path="/dashboard"
@@ -151,76 +174,99 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* Permission-based routes */}
               <Route
                 path="/auth-rules"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage auth rules" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <AuthRulesManagement />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
 
-              {/* User Management Routes */}
+              {/* User Management Routes - Require specific permissions */}
               <Route
                 path="/user-management"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage users" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <UserManagement />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
               <Route
                 path="/user-management/create-user"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage users" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <CreateUser />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
               <Route
                 path="/user-management/edit-user/:id"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage users" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <EditUser />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
               <Route
                 path="/user-management/user-detail/:id"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage users" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <UserDetail />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
               <Route
                 path="/user-management/create-role"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage roles" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <CreateRole />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
               <Route
                 path="/user-management/create-permission"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage permissions" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <CreatePermission />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
 
@@ -228,11 +274,14 @@ function App() {
               <Route
                 path="/service-client-management"
                 element={
-                  <ProtectedRoute>
+                  <PermissionBasedRoute 
+                    permissions="manage service clients" 
+                    redirectTo="/unauthorized"
+                  >
                     <MainLayout>
                       <ServiceClientManagement />
                     </MainLayout>
-                  </ProtectedRoute>
+                  </PermissionBasedRoute>
                 }
               />
 
@@ -244,7 +293,7 @@ function App() {
             </Routes>
           </div>
         </Router>
-      {/* </AuthProvider> */}
+      </AuthInitializer>
     </ThemeProvider>
   );
 }
