@@ -5,6 +5,7 @@ import authRulesReducer from './slices/authRulesSlice';
 import serviceClientReducer from './slices/serviceClientSlice';
 import storeManagementReducer from './slices/storeManagementSlice';
 import userRoleStoreAssignmentReducer from './slices/userRoleStoreAssignmentSlice';
+import roleHierarchyReducer from './slices/roleHierarchySlice';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     authRules: authRulesReducer, // <--- add this reducer
     storeManagement: storeManagementReducer,
     userRoleStoreAssignment: userRoleStoreAssignmentReducer,
+    roleHierarchy: roleHierarchyReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

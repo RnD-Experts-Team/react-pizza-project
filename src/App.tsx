@@ -49,6 +49,9 @@ import EditStore from './pages/store-management/EditStore';
 // User Role Assignment Pages
 import { UserRoleAssignmentManagement } from './pages/user-role-assignment';
 
+// Role Hierarchy Management Pages
+import { RoleHierarchyManagement } from './pages/role-hierarchy-management';
+
 // Unauthorized component
 const UnauthorizedPage = () => (
   <MainLayout>
@@ -333,6 +336,21 @@ function App() {
                   >
                     <MainLayout>
                       <UserRoleAssignmentManagement />
+                    </MainLayout>
+                  </PermissionBasedRoute>
+                }
+              />
+
+              {/* Role Hierarchy Management Routes */}
+              <Route
+                path="/role-hierarchy"
+                element={
+                  <PermissionBasedRoute 
+                    permissions="manage role hierarchy" 
+                    redirectTo="/unauthorized"
+                  >
+                    <MainLayout>
+                      <RoleHierarchyManagement />
                     </MainLayout>
                   </PermissionBasedRoute>
                 }

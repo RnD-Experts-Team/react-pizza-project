@@ -45,7 +45,6 @@ import {
 import { useReduxAuth } from '../../hooks/useReduxAuth';
 import {
   Home,
-  Pizza,
   LogOut,
   Settings,
   Store,
@@ -56,6 +55,7 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
+  GitBranch,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -78,6 +78,7 @@ const MENU_PERMISSION_MAP: {
   'User Management': { permission: 'manage users' },
   'Service Client Management': { permission: 'manage service clients' },
   'Auth Rules': { permission: 'manage auth rules' },
+  'Role Hierarchy': { permission: 'manage role hierarchy' },
   'Settings': {}, // Shown to all authenticated users; restrict if you wish
 };
 
@@ -117,6 +118,12 @@ function AppSidebar() {
       url: '/user-role-assignment',
       icon: UserCheck,
       show: hasPermission('manage user role assignments'),
+    },
+    {
+      title: 'Role Hierarchy',
+      url: '/role-hierarchy',
+      icon: Shield,
+      show: hasPermission('manage role hierarchy'),
     },
     {
       title: 'Service Client Management',
