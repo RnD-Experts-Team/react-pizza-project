@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Mail, Shield, CheckCircle, RefreshCw } from 'lucide-react';
+import type { ApiError } from '../../types/apiErrors';
 
 const VerifyEmail: React.FC = () => {
   const location = useLocation();
@@ -40,18 +41,17 @@ const VerifyEmail: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     if (error) clearError();
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.email) {
+    const emailValue = formData.email || registrationEmail || '';
+    if (!emailValue) {
       newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    } else if (!/\S+@\S+\.\S+/.test(emailValue)) {
       newErrors.email = 'Email is invalid';
     }
 
@@ -74,25 +74,30 @@ const VerifyEmail: React.FC = () => {
 
     setSuccessMessage('');
     clearError();
+    setErrors({});
 
     try {
-      const result = await verifyEmail({
-        email: formData.email,
+      await verifyEmail({
+        email: formData.email || registrationEmail || '',
         otp: formData.otp,
       });
 
-      if (result.type.endsWith('/fulfilled')) {
-        setSuccessMessage('Email verified successfully!');
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        setErrors({
-          general: error || 'Verification failed. Please try again.',
+      setSuccessMessage('Email verified successfully!');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+    } catch (err) {
+      const e = err as ApiError;
+      const fieldErrs: Record<string, string> = {};
+      if (e.fieldErrors) {
+        Object.entries(e.fieldErrors).forEach(([field, msg]) => {
+          fieldErrs[field] = Array.isArray(msg) ? msg[0] : (msg as string);
         });
       }
-    } catch (err) {
-      setErrors({ general: 'Verification failed. Please try again.' });
+      setErrors({
+        ...fieldErrs,
+        general: e.message || 'Verification failed. Please try again.',
+      });
     }
   };
 
@@ -111,23 +116,26 @@ const VerifyEmail: React.FC = () => {
     clearError();
 
     try {
-      const result = await resendOtp({
-        email: emailToUse,
-      });
-
-      if (result.type.endsWith('/fulfilled')) {
-        setSuccessMessage('OTP sent successfully! Please check your email.');
-      } else {
-        setErrors({
-          general: error || 'Failed to resend OTP. Please try again.',
-        });
-      }
+      await resendOtp({ email: emailToUse });
+      setSuccessMessage('OTP sent successfully! Please check your email.');
     } catch (err) {
-      setErrors({ general: 'Failed to resend OTP. Please try again.' });
+      const e = err as ApiError;
+      const fieldErrs: Record<string, string> = {};
+      if (e.fieldErrors?.email) {
+        fieldErrs.email = Array.isArray(e.fieldErrors.email)
+          ? e.fieldErrors.email[0]
+          : e.fieldErrors.email;
+      }
+      setErrors({
+        ...fieldErrs,
+        general: e.message || 'Failed to resend OTP. Please try again.',
+      });
     } finally {
       setIsResending(false);
     }
   };
+
+  const effectiveEmail = formData.email || registrationEmail || '';
 
   return (
     <div>
@@ -177,7 +185,7 @@ const VerifyEmail: React.FC = () => {
                 id="email"
                 name="email"
                 type="email"
-                value={formData.email || registrationEmail || ''}
+                value={effectiveEmail}
                 onChange={handleChange}
                 placeholder="your@email.com"
                 className={`h-12 ${errors.email ? 'border-destructive' : ''}`}

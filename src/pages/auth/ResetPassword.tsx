@@ -13,6 +13,7 @@ import {
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { useReduxAuth } from '../../hooks/useReduxAuth';
 import { Mail, Lock, Shield, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import type { ApiError } from '../../types/apiErrors';
 
 const ResetPassword: React.FC = () => {
   const location = useLocation();
@@ -36,9 +37,7 @@ const ResetPassword: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     if (error) clearError();
   };
 
@@ -77,32 +76,36 @@ const ResetPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setSuccessMessage('');
     clearError();
+    setErrors({});
 
     try {
-      const result = await resetPassword({
+      await resetPassword({
         email: formData.email,
         password: formData.password,
         password_confirmation: formData.password_confirmation,
         otp: formData.otp,
       });
 
-      if (result.type.endsWith('/fulfilled')) {
-        setSuccessMessage('Password reset successfully!');
-        setTimeout(() => {
-          navigate('/login');
-        }, 2000);
-      } else {
-        setErrors({
-          general: error || 'Password reset failed. Please try again.',
+      setSuccessMessage('Password reset successfully!');
+      setTimeout(() => navigate('/login'), 2000);
+    } catch (err) {
+      const e = err as ApiError;
+
+      const fieldErrs: Record<string, string> = {};
+      if (e.fieldErrors) {
+        Object.entries(e.fieldErrors).forEach(([field, msg]) => {
+          fieldErrs[field] = Array.isArray(msg) ? msg[0] : (msg as string);
         });
       }
-    } catch (err) {
-      setErrors({ general: 'Password reset failed. Please try again.' });
+
+      setErrors({
+        ...fieldErrs,
+        general: e.message || 'Password reset failed. Please try again.',
+      });
     }
   };
 

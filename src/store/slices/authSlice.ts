@@ -1,3 +1,4 @@
+// src/store/slices/authSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { authService } from '../../services/authService';
@@ -14,6 +15,8 @@ import type {
   User,
   UserCacheData,
 } from '../../types/authTypes';
+import type { ApiError } from '../../types/apiErrors';
+import { toApiError } from '../../utils/toApiErrors';
 
 // Define the auth state interface
 interface AuthState {
@@ -111,7 +114,7 @@ export const initializeAuth = createAsyncThunk(
 
       // No valid cache, but we have token - we'll fetch data later
       return { token, user: null, fromCache: false };
-    } catch (error: any) {
+    } catch {
       // Clear everything on error
       tokenStorage.removeToken();
       cacheStorage.clearCacheData();
@@ -121,7 +124,11 @@ export const initializeAuth = createAsyncThunk(
 );
 
 // FIXED: Separate thunk for fetching fresh user data
-export const fetchUserProfile = createAsyncThunk(
+export const fetchUserProfile = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: ApiError }
+>(
   'auth/fetchUserProfile',
   async (_, { rejectWithValue }) => {
     try {
@@ -129,14 +136,18 @@ export const fetchUserProfile = createAsyncThunk(
       // Cache the new data
       cacheStorage.setCacheData(extractCacheData(user));
       return user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to fetch user profile');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
 // New async thunk to refresh cache data
-export const refreshCacheData = createAsyncThunk(
+export const refreshCacheData = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: ApiError }
+>(
   'auth/refreshCacheData',
   async (_, { rejectWithValue }) => {
     try {
@@ -144,108 +155,155 @@ export const refreshCacheData = createAsyncThunk(
       // Update cache
       cacheStorage.setCacheData(extractCacheData(user));
       return user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to refresh cache data');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
 // Async thunks for auth operations
-export const registerUser = createAsyncThunk(
+export const registerUser = createAsyncThunk<
+  { response: AuthResponse; email: string },
+  RegisterRequest,
+  { rejectValue: ApiError }
+>(
   'auth/register',
-  async (data: RegisterRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.register(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Registration failed');
+        return rejectWithValue({
+          message: response.message || 'Registration failed',
+          // if API returns validation errors
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return { response, email: data.email };
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Registration failed');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const verifyEmailOtp = createAsyncThunk(
+export const verifyEmailOtp = createAsyncThunk<
+  AuthResponse,
+  VerifyEmailOtpRequest,
+  { rejectValue: ApiError }
+>(
   'auth/verifyEmailOtp',
-  async (data: VerifyEmailOtpRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.verifyEmailOtp(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Email verification failed');
+        return rejectWithValue({
+          message: response.message || 'Email verification failed',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Email verification failed');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const resendVerificationOtp = createAsyncThunk(
+export const resendVerificationOtp = createAsyncThunk<
+  AuthResponse,
+  ResendVerificationOtpRequest,
+  { rejectValue: ApiError }
+>(
   'auth/resendVerificationOtp',
-  async (data: ResendVerificationOtpRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.resendVerificationOtp(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Failed to resend verification code');
+        return rejectWithValue({
+          message: response.message || 'Failed to resend verification code',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to resend verification code');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<
+  AuthResponse,
+  LoginRequest,
+  { rejectValue: ApiError }
+>(
   'auth/login',
-  async (data: LoginRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.login(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Login failed');
+        return rejectWithValue({
+          message: response.message || 'Login failed',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       // Cache user data if user is present in response
       if (response.data?.user) {
         cacheStorage.setCacheData(extractCacheData(response.data.user));
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Login failed');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const forgotPassword = createAsyncThunk(
+export const forgotPassword = createAsyncThunk<
+  AuthResponse,
+  ForgotPasswordRequest,
+  { rejectValue: ApiError }
+>(
   'auth/forgotPassword',
-  async (data: ForgotPasswordRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.forgotPassword(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Failed to send password reset email');
+        return rejectWithValue({
+          message: response.message || 'Failed to send password reset email',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to send password reset email');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const resetPassword = createAsyncThunk(
+export const resetPassword = createAsyncThunk<
+  AuthResponse,
+  ResetPasswordRequest,
+  { rejectValue: ApiError }
+>(
   'auth/resetPassword',
-  async (data: ResetPasswordRequest, { rejectWithValue }) => {
+  async (data, { rejectWithValue }) => {
     try {
       const response = await authService.resetPassword(data);
       if (!response.success) {
-        return rejectWithValue(response.message || 'Password reset failed');
+        return rejectWithValue({
+          message: response.message || 'Password reset failed',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Password reset failed');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const getUserProfile = createAsyncThunk(
+export const getUserProfile = createAsyncThunk<
+  User,
+  void,
+  { rejectValue: ApiError }
+>(
   'auth/getUserProfile',
   async (_, { rejectWithValue }) => {
     try {
@@ -253,13 +311,17 @@ export const getUserProfile = createAsyncThunk(
       // Update cache with fresh data
       cacheStorage.setCacheData(extractCacheData(user));
       return user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to get user profile');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const logoutUser = createAsyncThunk(
+export const logoutUser = createAsyncThunk<
+  null,
+  void,
+  { rejectValue: ApiError }
+>(
   'auth/logout',
   async (_, { rejectWithValue }) => {
     try {
@@ -267,25 +329,32 @@ export const logoutUser = createAsyncThunk(
       // Clear cache on logout
       cacheStorage.clearCacheData();
       return null;
-    } catch (error: any) {
+    } catch (error) {
       // Even if logout fails on server, we still want to clear local state and cache
       cacheStorage.clearCacheData();
-      return null;
+      return rejectWithValue(toApiError(error));
     }
   }
 );
 
-export const refreshToken = createAsyncThunk(
+export const refreshToken = createAsyncThunk<
+  AuthResponse,
+  void,
+  { rejectValue: ApiError }
+>(
   'auth/refreshToken',
   async (_, { rejectWithValue }) => {
     try {
       const response = await authService.refreshToken();
       if (!response.success) {
-        return rejectWithValue(response.message || 'Token refresh failed');
+        return rejectWithValue({
+          message: response.message || 'Token refresh failed',
+          fieldErrors: (response as any).errors ?? response?.data?.errors,
+        });
       }
       return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Token refresh failed');
+    } catch (error) {
+      return rejectWithValue(toApiError(error));
     }
   }
 );
@@ -399,16 +468,19 @@ const authSlice = createSlice({
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
-        // If fetching profile fails, user might not be authenticated
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        state.userCache = null;
-        state.isCacheValid = false;
-        state.cacheExpiry = null;
-        tokenStorage.removeToken();
-        cacheStorage.clearCacheData();
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Failed to fetch user profile';
+        // Only deauth on 401
+        if (err?.status === 401) {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+          state.userCache = null;
+          state.isCacheValid = false;
+          state.cacheExpiry = null;
+          tokenStorage.removeToken();
+          cacheStorage.clearCacheData();
+        }
       })
 
       // Refresh Cache Data
@@ -425,7 +497,8 @@ const authSlice = createSlice({
       })
       .addCase(refreshCacheData.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Failed to refresh cache';
       })
       
       // Register
@@ -440,7 +513,8 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Registration failed';
       })
       
       // Verify Email OTP
@@ -454,7 +528,8 @@ const authSlice = createSlice({
       })
       .addCase(verifyEmailOtp.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Email verification failed';
       })
       
       // Resend Verification OTP
@@ -467,7 +542,8 @@ const authSlice = createSlice({
       })
       .addCase(resendVerificationOtp.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Failed to resend verification code';
       })
       
       // Login
@@ -494,7 +570,8 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Login failed';
         state.isAuthenticated = false;
       })
       
@@ -508,7 +585,8 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Failed to send password reset email';
       })
       
       // Reset Password
@@ -521,7 +599,8 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Password reset failed';
       })
       
       // Get User Profile
@@ -542,16 +621,19 @@ const authSlice = createSlice({
       })
       .addCase(getUserProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
-        // If getting profile fails, user might not be authenticated
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        state.userCache = null;
-        state.isCacheValid = false;
-        state.cacheExpiry = null;
-        tokenStorage.removeToken();
-        cacheStorage.clearCacheData();
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Failed to get user profile';
+        // Only deauth on 401
+        if (err?.status === 401) {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+          state.userCache = null;
+          state.isCacheValid = false;
+          state.cacheExpiry = null;
+          tokenStorage.removeToken();
+          cacheStorage.clearCacheData();
+        }
       })
       
       // Logout
@@ -602,15 +684,19 @@ const authSlice = createSlice({
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        state.userCache = null;
-        state.isCacheValid = false;
-        state.cacheExpiry = null;
-        tokenStorage.removeToken();
-        cacheStorage.clearCacheData();
+        const err = action.payload as ApiError | undefined;
+        state.error = err?.message ?? 'Token refresh failed';
+        // Only deauth on 401
+        if (err?.status === 401) {
+          state.isAuthenticated = false;
+          state.user = null;
+          state.token = null;
+          state.userCache = null;
+          state.isCacheValid = false;
+          state.cacheExpiry = null;
+          tokenStorage.removeToken();
+          cacheStorage.clearCacheData();
+        }
       });
   },
 });

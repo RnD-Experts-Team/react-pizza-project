@@ -15,6 +15,7 @@ import { Mail, CheckCircle } from 'lucide-react';
 
 // Redux auth hook import
 import { useReduxAuth } from '../../hooks/useReduxAuth';
+import type { ApiError } from '../../types/apiErrors';
 
 const ForgotPassword: React.FC = () => {
   const [formData, setFormData] = useState({ email: '' });
@@ -28,9 +29,7 @@ const ForgotPassword: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
     if (error) clearError();
   };
 
@@ -49,30 +48,30 @@ const ForgotPassword: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
+    // if (!validateForm()) return;
 
     setSuccessMessage('');
     clearError();
+    setErrors({});
 
     try {
-      const result = await forgotPassword({ email: formData.email });
+      await forgotPassword({ email: formData.email });
 
-      if (result.type.endsWith('/fulfilled')) {
-        setSuccessMessage('Password reset instructions sent to your email!');
-        setTimeout(() => {
-          navigate('/reset-password', { state: { email: formData.email } });
-        }, 3000);
-      } else {
-        setErrors({
-          general:
-            error ||
-            'Failed to send reset instructions. Please try again.',
-        });
-      }
+      setSuccessMessage('Password reset instructions sent to your email!');
+      setTimeout(() => {
+        navigate('/reset-password', { state: { email: formData.email } });
+      }, 3000);
     } catch (err) {
+      const e = err as ApiError;
+      const fieldErrs: Record<string, string> = {};
+      if (e.fieldErrors?.email) {
+        fieldErrs.email = Array.isArray(e.fieldErrors.email)
+          ? e.fieldErrors.email[0]
+          : e.fieldErrors.email;
+      }
       setErrors({
-        general: 'Failed to send reset instructions. Please try again.',
+        ...fieldErrs,
+        general: e.message || 'Failed to send reset instructions. Please try again.',
       });
     }
   };

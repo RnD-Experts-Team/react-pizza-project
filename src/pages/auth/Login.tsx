@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// src/pages/auth/Login.tsx
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -12,58 +13,28 @@ import {
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { useReduxAuth } from '../../hooks/useReduxAuth';
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import type { ApiError } from '../../types/apiErrors';
 
-/**
- * Example Login component using Redux instead of useAuth hook
- * This demonstrates how to migrate from the old useAuth to the new Redux-based authentication
- */
-const LoginWithRedux: React.FC = () => {
+const Login: React.FC = () => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
-  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showPassword, setShowPassword] = useState(false);
   
-  // Using Redux auth instead of useAuth
-  const { 
-    login, 
-    isLoading, 
-    error, 
-    isAuthenticated, 
-    clearError 
-  } = useReduxAuth();
-  
+  // Redux auth hook
+  const { login, isLoading, error, clearError } = useReduxAuth();
   const navigate = useNavigate();
-
-  // Clear Redux error when component mounts or when user starts typing
-  useEffect(() => {
-    return () => {
-      clearError();
-    };
-  }, [clearError]);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    // Clear local validation errors
-    if (localErrors[name]) {
-      setLocalErrors((prev) => ({ ...prev, [name]: '' }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
     }
-    
-    // Clear Redux error when user starts typing
-    if (error) {
-      clearError();
-    }
+    if (error) clearError();
   };
 
   const validateForm = (): boolean => {
@@ -77,141 +48,182 @@ const LoginWithRedux: React.FC = () => {
 
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
     }
 
-    setLocalErrors(newErrors);
+    setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    if (!validateForm()) return;
+
+    clearError();
+    setErrors({}); // clear local
 
     try {
-      // Redux action returns a promise
-      const result = await login({
+      await login({
         email: formData.email,
         password: formData.password,
       });
-      
-      // Check if login was successful
-      if (result.type === 'auth/login/fulfilled') {
-        navigate('/dashboard');
-      }
-      // Error handling is done automatically by Redux slice
+
+      // success - redirect to dashboard or home
+      navigate('/dashboard');
     } catch (err) {
-      // Additional error handling if needed
-      console.error('Login error:', err);
+      const e = err as ApiError;
+      // Global message
+      setErrors(prev => ({ 
+        ...prev, 
+        general: e.message || 'Login failed. Please check your credentials and try again.' 
+      }));
+
+      // Field-level messages (e.g., { email: ["Invalid email"] })
+      if (e.fieldErrors) {
+        const fieldErrs: Record<string, string> = {};
+        Object.entries(e.fieldErrors).forEach(([field, msg]) => {
+          fieldErrs[field] = Array.isArray(msg) ? (msg[0] as string) : (msg as string);
+        });
+        setErrors(prev => ({ ...prev, ...fieldErrs }));
+      }
     }
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader className="space-y-1">
-        <CardTitle className="text-2xl font-bold text-center">Sign In</CardTitle>
-        <CardDescription className="text-center">
-          Enter your credentials to access your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Display Redux error */}
-          {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+    <div>
+      <Card className="border shadow-lg">
+        <CardHeader className="space-y-4 pb-8">
+          <div className="text-center space-y-2">
+            <CardTitle className="text-3xl font-bold text-foreground">
+              Welcome Back
+            </CardTitle>
+            <CardDescription className="text-muted-foreground">
+              Enter your credentials to access your account
+            </CardDescription>
+          </div>
+        </CardHeader>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <CardContent className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {(errors.general || error) && (
+              <Alert
+                variant="destructive"
+                className="border-red-500/50 bg-red-500/10"
+              >
+                <AlertDescription className="text-red-600">
+                  {errors.general || error}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <div className="space-y-3">
+              <Label
+                htmlFor="email"
+                className="text-sm font-medium text-foreground flex items-center gap-2"
+              >
+                <Mail className="w-4 h-4 text-primary" />
+                Email
+              </Label>
               <Input
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Enter your email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`pl-10 ${
-                  localErrors.email ? 'border-destructive' : ''
-                }`}
-                disabled={isLoading}
+                placeholder="your@email.com"
+                className={`h-12 ${errors.email ? 'border-destructive' : ''}`}
               />
+              {errors.email && (
+                <p className="text-destructive text-sm">{errors.email}</p>
+              )}
             </div>
-            {localErrors.email && (
-              <p className="text-sm text-destructive">{localErrors.email}</p>
-            )}
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="password"
-                name="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter your password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`pl-10 pr-10 ${
-                  localErrors.password ? 'border-destructive' : ''
-                }`}
-                disabled={isLoading}
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={isLoading}
+            <div className="space-y-3">
+              <Label
+                htmlFor="password"
+                className="text-sm font-medium text-foreground flex items-center gap-2"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
+                <Lock className="w-4 h-4 text-primary" />
+                Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter your password"
+                  className={`h-12 pr-12 ${errors.password ? 'border-destructive' : ''}`}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              {errors.password && (
+                <p className="text-destructive text-sm">{errors.password}</p>
+              )}
             </div>
-            {localErrors.password && (
-              <p className="text-sm text-destructive">{localErrors.password}</p>
-            )}
+
+            <div className="flex items-center justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-sm font-medium text-primary hover:text-primary/80"
+              >
+                Forgot password?
+              </Link>
+            </div>
+
+            <Button type="submit" className="w-full h-12" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  Signing in...
+                </>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-8 space-y-4">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background rounded-sm px-4 text-muted-foreground font-medium tracking-wider">
+                  Options
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col space-y-3 text-center">
+              <div className="text-sm text-muted-foreground">
+                Don't have an account?{' '}
+                <Link
+                  to="/register"
+                  className="font-medium text-primary hover:text-primary/80"
+                >
+                  Create account
+                </Link>
+              </div>
+            </div>
           </div>
-
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Signing in...' : 'Sign In'}
-          </Button>
-        </form>
-
-        <div className="mt-6 text-center text-sm">
-          <Link
-            to="/forgot-password"
-            className="text-primary hover:underline"
-          >
-            Forgot your password?
-          </Link>
-        </div>
-
-        <div className="mt-4 text-center text-sm">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-primary hover:underline">
-            Sign up
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
-export default LoginWithRedux;
+export default Login;

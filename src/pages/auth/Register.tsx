@@ -1,3 +1,4 @@
+// src/pages/auth/Register.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/button';
@@ -12,7 +13,8 @@ import {
 } from '../../components/ui/card';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { useReduxAuth } from '../../hooks/useReduxAuth';
-import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { User as UserIcon, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import type { ApiError } from '../../types/apiErrors';
 
 const Register: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -72,29 +74,35 @@ const Register: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    // if (!validateForm()) return;
 
     clearError();
+    setErrors({}); // clear local
 
     try {
-      const result = await register({
+      await register({
         name: formData.name,
         email: formData.email,
         password: formData.password,
         password_confirmation: formData.password_confirmation,
-      });
+      }); // important
 
-      if (result.type.endsWith('/fulfilled')) {
-        // Set registration email for verification step
-        setRegistrationEmail(formData.email);
-        navigate('/verify-email', { state: { email: formData.email } });
-      } else {
-        setErrors({ 
-          general: error || 'Registration failed. Please try again.' 
-        });
-      }
+      // success
+      setRegistrationEmail(formData.email);
+      navigate('/verify-email', { state: { email: formData.email } });
     } catch (err) {
-      setErrors({ general: 'Registration failed. Please try again.' });
+      const e = err as ApiError;
+      // Global message
+      setErrors(prev => ({ ...prev, general: e.message || 'Registration failed. Please try again.' }));
+
+      // Field-level messages (e.g., { email: ["Already taken"] })
+      if (e.fieldErrors) {
+        const fieldErrs: Record<string, string> = {};
+        Object.entries(e.fieldErrors).forEach(([field, msg]) => {
+          fieldErrs[field] = Array.isArray(msg) ? (msg[0] as string) : (msg as string);
+        });
+        setErrors(prev => ({ ...prev, ...fieldErrs }));
+      }
     }
   };
 
@@ -130,7 +138,7 @@ const Register: React.FC = () => {
                 htmlFor="name"
                 className="text-sm font-medium text-foreground flex items-center gap-2"
               >
-                <User className="w-4 h-4 text-primary" />
+                <UserIcon className="w-4 h-4 text-primary" />
                 Full Name
               </Label>
               <Input
@@ -185,9 +193,7 @@ const Register: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Enter your password"
-                  className={`h-12 pr-12 ${
-                    errors.password ? 'border-destructive' : ''
-                  }`}
+                  className={`h-12 pr-12 ${errors.password ? 'border-destructive' : ''}`}
                 />
                 <Button
                   type="button"
@@ -224,9 +230,7 @@ const Register: React.FC = () => {
                   value={formData.password_confirmation}
                   onChange={handleChange}
                   placeholder="Confirm your password"
-                  className={`h-12 pr-12 ${
-                    errors.password_confirmation ? 'border-destructive' : ''
-                  }`}
+                  className={`h-12 pr-12 ${errors.password_confirmation ? 'border-destructive' : ''}`}
                 />
                 <Button
                   type="button"

@@ -63,51 +63,33 @@ export const useReduxAuth = () => {
   // REMOVED: The problematic cache validity checking effect
 
   // Auth actions
-  const register = async (data: RegisterRequest) => {
-    return dispatch(registerUser(data));
-  };
 
-  const verifyEmail = async (data: VerifyEmailOtpRequest) => {
-    return dispatch(verifyEmailOtp(data));
-  };
+  const register = (data: RegisterRequest) =>
+    dispatch(registerUser(data)).unwrap();
 
-  const resendOtp = async (data: ResendVerificationOtpRequest) => {
-    return dispatch(resendVerificationOtp(data));
-  };
+  const verifyEmail = (data: VerifyEmailOtpRequest) =>
+    dispatch(verifyEmailOtp(data)).unwrap();
 
-  const login = async (data: LoginRequest) => {
-    return dispatch(loginUser(data));
-  };
+  const resendOtp = (data: ResendVerificationOtpRequest) =>
+    dispatch(resendVerificationOtp(data)).unwrap();
 
-  const forgotPass = async (data: ForgotPasswordRequest) => {
-    return dispatch(forgotPassword(data));
-  };
+  const login = (data: LoginRequest) => dispatch(loginUser(data)).unwrap();
 
-  const resetPass = async (data: ResetPasswordRequest) => {
-    return dispatch(resetPassword(data));
-  };
+  const forgotPass = (data: ForgotPasswordRequest) =>
+    dispatch(forgotPassword(data)).unwrap();
 
-  const getProfile = async () => {
-    return dispatch(getUserProfile());
-  };
+  const resetPass = (data: ResetPasswordRequest) =>
+    dispatch(resetPassword(data)).unwrap();
 
-  // FIXED: New action for fetching user profile during initialization
-  const fetchProfile = async () => {
-    return dispatch(fetchUserProfile());
-  };
+  const getProfile = () => dispatch(getUserProfile()).unwrap();
 
-  const logout = async () => {
-    return dispatch(logoutUser());
-  };
+  const fetchProfile = () => dispatch(fetchUserProfile()).unwrap();
 
-  const refresh = async () => {
-    return dispatch(refreshToken());
-  };
+  const logout = () => dispatch(logoutUser()).unwrap();
 
-  // Cache-related actions
-  const refreshCache = async () => {
-    return dispatch(refreshCacheData());
-  };
+  const refresh = () => dispatch(refreshToken()).unwrap();
+
+  const refreshCache = () => dispatch(refreshCacheData()).unwrap();
 
   const extendCache = () => {
     dispatch(extendCacheExpiry());
@@ -168,51 +150,54 @@ export const useReduxAuth = () => {
   };
 
   const getCachedSummary = () => {
-    return userCache?.summary || user?.summary || {
-      total_stores: 0,
-      total_roles: 0,
-      total_permissions: 0,
-      manageable_users_count: 0,
-    };
+    return (
+      userCache?.summary ||
+      user?.summary || {
+        total_stores: 0,
+        total_roles: 0,
+        total_permissions: 0,
+        manageable_users_count: 0,
+      }
+    );
   };
 
   // Permission checking helpers
   const hasPermission = (permission: string): boolean => {
     const allPermissions = getCachedAllPermissions();
-    return allPermissions.some(perm => perm.name === permission);
+    return allPermissions.some((perm) => perm.name === permission);
   };
 
   const hasAnyPermission = (permissions: string[]): boolean => {
     const allPermissions = getCachedAllPermissions();
-    return permissions.some(permission => 
-      allPermissions.some(perm => perm.name === permission)
+    return permissions.some((permission) =>
+      allPermissions.some((perm) => perm.name === permission),
     );
   };
 
   const hasAllPermissions = (permissions: string[]): boolean => {
     const allPermissions = getCachedAllPermissions();
-    return permissions.every(permission => 
-      allPermissions.some(perm => perm.name === permission)
+    return permissions.every((permission) =>
+      allPermissions.some((perm) => perm.name === permission),
     );
   };
 
   // Role checking helpers
   const hasRole = (roleName: string): boolean => {
     const roles = getCachedRoles();
-    return roles.some(role => role.name === roleName);
+    return roles.some((role) => role.name === roleName);
   };
 
   const hasAnyRole = (roleNames: string[]): boolean => {
     const roles = getCachedRoles();
-    return roleNames.some(roleName => 
-      roles.some(role => role.name === roleName)
+    return roleNames.some((roleName) =>
+      roles.some((role) => role.name === roleName),
     );
   };
 
   const hasAllRoles = (roleNames: string[]): boolean => {
     const roles = getCachedRoles();
-    return roleNames.every(roleName => 
-      roles.some(role => role.name === roleName)
+    return roleNames.every((roleName) =>
+      roles.some((role) => role.name === roleName),
     );
   };
 
@@ -226,12 +211,12 @@ export const useReduxAuth = () => {
     registrationStep,
     registrationEmail,
     isInitialized,
-    
+
     // Cache state
     userCache,
     isCacheValid,
     cacheExpiry,
-    
+
     // Actions
     register,
     verifyEmail,
@@ -244,7 +229,7 @@ export const useReduxAuth = () => {
     logout,
     refreshToken: refresh,
     refreshCache,
-    
+
     // Utility actions
     clearError: clearAuthError,
     setRegistrationStep: setRegStep,
@@ -255,7 +240,7 @@ export const useReduxAuth = () => {
     removeToken,
     extendCacheExpiry: extendCache,
     clearCache: clearCacheData,
-    
+
     // Helper functions for cached data
     getCachedRoles,
     getCachedRolesPermissions,
@@ -263,12 +248,12 @@ export const useReduxAuth = () => {
     getCachedAllPermissions,
     getCachedStores,
     getCachedSummary,
-    
+
     // Permission helpers
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
-    
+
     // Role helpers
     hasRole,
     hasAnyRole,

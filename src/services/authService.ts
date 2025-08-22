@@ -9,9 +9,9 @@ import type {
   ResetPasswordRequest,
   AuthResponse,
   User,
-} from '../types/authTypes.ts';
+} from '../types/authTypes';
 
-// Base API URL - updated to localhost:8000
+// Base API URL
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1/auth';
 
 // Track if we're currently refreshing to prevent multiple refresh attempts
@@ -77,24 +77,20 @@ authApi.interceptors.response.use(
     // Don't try to refresh token for login, register, or other auth endpoints
     const authEndpoints = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
     const isAuthEndpoint = authEndpoints.some(endpoint => 
-      originalRequest.url?.includes(endpoint)
+      originalRequest?.url?.includes(endpoint)
     );
 
     // Also don't refresh if this is already a refresh token request
-    const isRefreshTokenRequest = originalRequest.url?.includes('/refresh-token');
+    const isRefreshTokenRequest = originalRequest?.url?.includes('/refresh-token');
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint && !isRefreshTokenRequest) {
       // Check if we've exceeded max refresh attempts
       if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-        console.error('Max refresh attempts exceeded');
         tokenStorage.removeToken();
         delete authApi.defaults.headers.Authorization;
         refreshAttempts = 0;
         isRefreshing = false;
-        
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
+        // Reject and let Redux handle logout/navigation
         return Promise.reject(error);
       }
 
@@ -105,9 +101,7 @@ authApi.interceptors.response.use(
         }).then((token) => {
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return authApi(originalRequest);
-        }).catch((err) => {
-          return Promise.reject(err);
-        });
+        }).catch((err) => Promise.reject(err));
       }
 
       originalRequest._retry = true;
@@ -133,25 +127,11 @@ authApi.interceptors.response.use(
           throw new Error('Invalid refresh response');
         }
       } catch (refreshError: any) {
-        console.error('Token refresh failed:', refreshError);
-        
-        // Check if the refresh token is also invalid (Unauthenticated)
-        if (refreshError.response?.data?.message === 'Unauthenticated.') {
-          console.log('Refresh token is invalid, clearing auth state');
-        }
-        
-        // Refresh failed, clear everything and redirect
+        // Refresh failed, clear token and reject. Redux slice will deauth on 401.
         processQueue(refreshError, null);
         tokenStorage.removeToken();
         delete authApi.defaults.headers.Authorization;
-        
-        // Reset refresh attempts
         refreshAttempts = 0;
-        
-        // Only redirect if we're not already on login page
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -169,11 +149,9 @@ export const authService = {
       const response = await authApi.post('/register', data);
       return response.data;
     } catch (error: any) {
-      // Return the server error response
       if (error.response?.data) {
         return error.response.data;
       }
-      // Return a generic error structure if no response
       return {
         success: false,
         message: 'Registration failed. Please try again.',
@@ -182,9 +160,7 @@ export const authService = {
   },
 
   // Verify email with OTP
-  verifyEmailOtp: async (
-    data: VerifyEmailOtpRequest,
-  ): Promise<AuthResponse> => {
+  verifyEmailOtp: async (data: VerifyEmailOtpRequest): Promise<AuthResponse> => {
     try {
       const response = await authApi.post('/verify-email', data);
       return response.data;
@@ -200,9 +176,7 @@ export const authService = {
   },
 
   // Resend verification OTP
-  resendVerificationOtp: async (
-    data: ResendVerificationOtpRequest,
-  ): Promise<AuthResponse> => {
+  resendVerificationOtp: async (data: ResendVerificationOtpRequest): Promise<AuthResponse> => {
     try {
       const response = await authApi.post('/resend-verification-otp', data);
       return response.data;
@@ -222,12 +196,8 @@ export const authService = {
     try {
       const response = await authApi.post('/login', data);
 
-      // Save token using encrypted storage
-      if (
-        response.data.success &&
-        response.data.data &&
-        response.data.data.token
-      ) {
+      // Save token
+      if (response.data.success && response.data.data?.token) {
         const token = response.data.data.token;
         tokenStorage.setToken(token);
         authApi.defaults.headers.Authorization = `Bearer ${token}`;
@@ -237,7 +207,6 @@ export const authService = {
 
       return response.data;
     } catch (error: any) {
-      console.error('Login API error:', error.response?.data);
       // Return the server error response for invalid credentials
       if (error.response?.data) {
         return error.response.data;
@@ -251,9 +220,7 @@ export const authService = {
   },
 
   // Forgot password
-  forgotPassword: async (
-    data: ForgotPasswordRequest,
-  ): Promise<AuthResponse> => {
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<AuthResponse> => {
     try {
       const response = await authApi.post('/forgot-password', data);
       return response.data;
@@ -284,10 +251,9 @@ export const authService = {
     }
   },
 
-  // Get user profile - updated to match new API response structure
+  // Get user profile
   getUserProfile: async (): Promise<User> => {
     const response = await authApi.get('/me');
-    // Extract user from the new API response structure
     return response.data.data.user;
   },
 
@@ -301,7 +267,6 @@ export const authService = {
       refreshAttempts = 0;
       return response.data;
     } catch (error) {
-      // Even if logout fails on server, clear local storage
       tokenStorage.removeToken();
       delete authApi.defaults.headers.Authorization;
       refreshAttempts = 0;
@@ -313,12 +278,7 @@ export const authService = {
   refreshToken: async (): Promise<AuthResponse> => {
     const response = await authApi.post('/refresh-token');
 
-    // Save new token using encrypted storage
-    if (
-      response.data.success &&
-      response.data.data &&
-      response.data.data.token
-    ) {
+    if (response.data.success && response.data.data?.token) {
       const token = response.data.data.token;
       tokenStorage.setToken(token);
       authApi.defaults.headers.Authorization = `Bearer ${token}`;
