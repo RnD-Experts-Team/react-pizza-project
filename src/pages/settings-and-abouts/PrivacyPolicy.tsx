@@ -4,8 +4,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Separator } from '../components/ui/separator';
+} from '../../components/ui/card';
+import { Separator } from '../../components/ui/separator';
 import { Shield, Eye, Lock, Database, Calendar, Mail } from 'lucide-react';
 
 const PrivacyPolicy: React.FC = () => {

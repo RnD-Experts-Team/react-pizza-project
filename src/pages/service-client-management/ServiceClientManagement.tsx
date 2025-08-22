@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { useServiceClientManagement } from '../hooks/useServiceClientManagement';
-import type { ServiceClient, TokenDisplayData } from '../types/serviceClient';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Textarea } from '../components/ui/textarea';
-import { Switch } from '../components/ui/switch';
-import { Separator } from '../components/ui/separator';
-import { useToast } from '../hooks/use-toast';
+import { useReduxServiceClientManagement } from '../../hooks/useReduxServiceClientManagement';
+import type { ServiceClient, TokenDisplayData } from '../../types/serviceClient';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Badge } from '../../components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../../components/ui/dialog';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Textarea } from '../../components/ui/textarea';
+import { Switch } from '../../components/ui/switch';
+import { Separator } from '../../components/ui/separator';
+import { useToast } from '../../hooks/use-toast';
 import { Plus, Server, RotateCcw, Power, Copy, Eye, EyeOff, Calendar } from 'lucide-react';
 
 const ServiceClientManagement: React.FC = () => {
@@ -25,7 +25,7 @@ const ServiceClientManagement: React.FC = () => {
       toggleServiceStatus,
       clearError
     }
-  } = useServiceClientManagement();
+  } = useReduxServiceClientManagement();
 
   // Dialog states
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

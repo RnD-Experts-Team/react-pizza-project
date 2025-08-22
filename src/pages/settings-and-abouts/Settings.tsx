@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Card,
@@ -6,24 +6,25 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Switch } from '../components/ui/switch';
-import { Separator } from '../components/ui/separator';
+} from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Switch } from '../../components/ui/switch';
+import { Separator } from '../../components/ui/separator';
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '../components/ui/tabs';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { useReduxAuth } from '../hooks/useReduxAuth';
-import { useTheme } from '../hooks/useTheme';
+} from '../../components/ui/tabs';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { useReduxAuth } from '../../hooks/useReduxAuth';
+import { useTheme } from '../../hooks/useTheme';
+import type { User } from '../../types/authTypes';
 import {
   Settings as SettingsIcon,
-  User,
+  User as UserIcon,
   Bell,
   Shield,
   Palette,
@@ -32,12 +33,18 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
+  RefreshCw,
 } from 'lucide-react';
 
 const Settings: React.FC = () => {
-  const { user, logout } = useReduxAuth();
+  const { user, logout, getUserProfile } = useReduxAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+
+  // User profile states
+  const [userProfile, setUserProfile] = useState<User | null>(user);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState('');
 
   // Form states
   const [profileData, setProfileData] = useState({
@@ -82,6 +89,34 @@ const Settings: React.FC = () => {
 
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Update local userProfile when Redux user changes
+  useEffect(() => {
+    setUserProfile(user);
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    setProfileLoading(true);
+    setProfileError('');
+
+    try {
+      const result = await getUserProfile();
+      if (result.type.endsWith('/fulfilled')) {
+        // Profile will be updated automatically via Redux state
+        setProfileError('');
+      } else {
+        setProfileError('Failed to load user profile');
+      }
+    } catch (err) {
+      setProfileError('Failed to load user profile');
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+  const handleRefreshProfile = () => {
+    fetchUserProfile();
+  };
 
   const handleSaveProfile = async () => {
     setIsLoading(true);
@@ -174,7 +209,7 @@ const Settings: React.FC = () => {
       <Tabs defaultValue="profile" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center gap-2">
-            <User className="h-4 w-4" />
+            <UserIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Profile</span>
           </TabsTrigger>
           <TabsTrigger
@@ -261,6 +296,96 @@ const Settings: React.FC = () => {
                 <Save className="h-4 w-4 mr-2" />
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Current Profile Information</CardTitle>
+              <CardDescription>
+                View your current account information and details
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {profileError && (
+                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm mb-4">
+                  {profileError}
+                </div>
+              )}
+
+              {profileLoading ? (
+                <div className="text-center py-4">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-gray-600">Loading profile...</p>
+                </div>
+              ) : userProfile ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Name
+                    </label>
+                    <p className="mt-1 text-gray-900">{userProfile.name}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Email
+                    </label>
+                    <p className="mt-1 text-gray-900">{userProfile.email}</p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Email Verified
+                    </label>
+                    <p className="mt-1">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          userProfile.email_verified_at
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {userProfile.email_verified_at
+                          ? 'Verified'
+                          : 'Not Verified'}
+                      </span>
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Member Since
+                    </label>
+                    <p className="mt-1 text-gray-900">
+                      {new Date(userProfile.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">
+                      Last Updated
+                    </label>
+                    <p className="mt-1 text-gray-900">
+                      {new Date(userProfile.updated_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-gray-600">No profile data available</p>
+              )}
+
+              <div className="mt-6">
+                <Button
+                  onClick={handleRefreshProfile}
+                  variant="outline"
+                  disabled={profileLoading}
+                  className="w-full"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  {profileLoading ? 'Refreshing...' : 'Refresh Profile'}
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

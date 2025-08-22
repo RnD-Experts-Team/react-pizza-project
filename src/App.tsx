@@ -25,22 +25,21 @@ import ResetPassword from './pages/auth/ResetPassword';
 
 // Main Pages
 import Dashboard from './pages/Dashboard';
-import Pizza from './pages/Pizza';
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Settings from './pages/Settings';
-import AuthRulesManagement from './pages/AuthRulesManagement';
+import TermsOfService from './pages/settings-and-abouts/TermsOfService';
+import PrivacyPolicy from './pages/settings-and-abouts/PrivacyPolicy';
+import Settings from './pages/settings-and-abouts/Settings';
+import AuthRulesManagement from './pages/auth-rules-management/AuthRulesManagement';
 
 // User Management Pages
-import UserManagement from './pages/UserManagement';
-import CreateUser from './pages/CreateUser';
-import EditUser from './pages/EditUser';
-import UserDetail from './pages/UserDetail';
-import CreateRole from './pages/CreateRole';
-import CreatePermission from './pages/CreatePermission';
+import UserManagement from './pages/user-management/UserManagement';
+import CreateUser from './pages/user-management/CreateUser';
+import EditUser from './pages/user-management/EditUser';
+import UserDetail from './pages/settings-and-abouts/UserDetail';
+import CreateRole from './pages/user-management/CreateRole';
+import CreatePermission from './pages/user-management/CreatePermission';
 
 // Service Client Management Pages
-import ServiceClientManagement from './pages/ServiceClientManagement';
+import ServiceClientManagement from './pages/service-client-management/ServiceClientManagement';
 
 // Unauthorized component
 const UnauthorizedPage = () => (
@@ -130,16 +129,6 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <Dashboard />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/pizza"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Pizza />
                     </MainLayout>
                   </ProtectedRoute>
                 }

@@ -4,8 +4,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Separator } from '../components/ui/separator';
+} from '../../components/ui/card';
+import { Separator } from '../../components/ui/separator';
 import { ScrollText, Calendar, Shield, AlertTriangle } from 'lucide-react';
 
 const TermsOfService: React.FC = () => {
