@@ -46,6 +46,9 @@ import StoreManagement from './pages/store-management/StoreManagement';
 import CreateStore from './pages/store-management/CreateStore';
 import EditStore from './pages/store-management/EditStore';
 
+// User Role Assignment Pages
+import { UserRoleAssignmentManagement } from './pages/user-role-assignment';
+
 // Unauthorized component
 const UnauthorizedPage = () => (
   <MainLayout>
@@ -315,6 +318,21 @@ function App() {
                   >
                     <MainLayout>
                       <EditStore />
+                    </MainLayout>
+                  </PermissionBasedRoute>
+                }
+              />
+
+              {/* User Role Assignment Routes */}
+              <Route
+                path="/user-role-assignment"
+                element={
+                  <PermissionBasedRoute 
+                    permissions="manage user role assignments" 
+                    redirectTo="/unauthorized"
+                  >
+                    <MainLayout>
+                      <UserRoleAssignmentManagement />
                     </MainLayout>
                   </PermissionBasedRoute>
                 }

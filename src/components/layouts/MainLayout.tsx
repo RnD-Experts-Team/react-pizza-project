@@ -55,6 +55,7 @@ import {
   Shield,
   Users,
   ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -110,6 +111,12 @@ function AppSidebar() {
       url: '/store-management',
       icon: Store,
       show: hasPermission('manage stores'),
+    },
+    {
+      title: 'User Role Assignment',
+      url: '/user-role-assignment',
+      icon: UserCheck,
+      show: hasPermission('manage user role assignments'),
     },
     {
       title: 'Service Client Management',
