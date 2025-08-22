@@ -98,17 +98,18 @@ function AppSidebar() {
       icon: Home,
       show: true, // Always shown if authenticated
     },
-    {
-      title: 'Pizzas',
-      url: '/pizza',
-      icon: Pizza,
-      show: true,
-    },
+    
     {
       title: 'User Management',
       url: '/user-management',
       icon: Users,
       show: hasPermission('manage users'),
+    },
+    {
+      title: 'Store Management',
+      url: '/store-management',
+      icon: Store,
+      show: hasPermission('manage stores'),
     },
     {
       title: 'Service Client Management',

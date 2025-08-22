@@ -34,12 +34,17 @@ import AuthRulesManagement from './pages/auth-rules-management/AuthRulesManageme
 import UserManagement from './pages/user-management/UserManagement';
 import CreateUser from './pages/user-management/CreateUser';
 import EditUser from './pages/user-management/EditUser';
-import UserDetail from './pages/settings-and-abouts/UserDetail';
+import UserDetail from './pages/user-management/UserDetail';
 import CreateRole from './pages/user-management/CreateRole';
 import CreatePermission from './pages/user-management/CreatePermission';
 
 // Service Client Management Pages
 import ServiceClientManagement from './pages/service-client-management/ServiceClientManagement';
+
+// Store Management Pages
+import StoreManagement from './pages/store-management/StoreManagement';
+import CreateStore from './pages/store-management/CreateStore';
+import EditStore from './pages/store-management/EditStore';
 
 // Unauthorized component
 const UnauthorizedPage = () => (
@@ -269,6 +274,47 @@ function App() {
                   >
                     <MainLayout>
                       <ServiceClientManagement />
+                    </MainLayout>
+                  </PermissionBasedRoute>
+                }
+              />
+
+              {/* Store Management Routes */}
+              <Route
+                path="/store-management"
+                element={
+                  <PermissionBasedRoute 
+                    permissions="manage stores" 
+                    redirectTo="/unauthorized"
+                  >
+                    <MainLayout>
+                      <StoreManagement />
+                    </MainLayout>
+                  </PermissionBasedRoute>
+                }
+              />
+              <Route
+                path="/store-management/create-store"
+                element={
+                  <PermissionBasedRoute 
+                    permissions="manage stores" 
+                    redirectTo="/unauthorized"
+                  >
+                    <MainLayout>
+                      <CreateStore />
+                    </MainLayout>
+                  </PermissionBasedRoute>
+                }
+              />
+              <Route
+                path="/store-management/edit-store/:storeId"
+                element={
+                  <PermissionBasedRoute 
+                    permissions="manage stores" 
+                    redirectTo="/unauthorized"
+                  >
+                    <MainLayout>
+                      <EditStore />
                     </MainLayout>
                   </PermissionBasedRoute>
                 }

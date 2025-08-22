@@ -161,7 +161,7 @@ const CreateRole: React.FC = () => {
   const selectionStatus = getSelectionStatus();
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto p-2 md:p-4 max-w-7xl">
       <div className="flex items-center gap-4 mb-6">
         <Link to="/user-management">
           <Button variant="ghost" size="sm">

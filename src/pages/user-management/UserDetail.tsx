@@ -100,7 +100,7 @@ const UserDetail: React.FC = () => {
 
   if (error || !user) {
     return (
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-2 md:p-4 max-w-7xl">
         <div className="text-center py-12">
           <UserIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h2 className="text-2xl font-semibold mb-2">User Not Found</h2>

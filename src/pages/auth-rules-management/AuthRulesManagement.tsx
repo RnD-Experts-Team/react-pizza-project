@@ -149,7 +149,7 @@ const AuthRulesManagement: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-2 md:p-4 max-w-7xl">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Authorization Rules Management</h1>
