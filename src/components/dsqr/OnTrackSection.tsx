@@ -11,7 +11,7 @@ export const OnTrackSection: React.FC<OnTrackSectionProps> = ({
   <div className={cn('flex items-center', isMobile ? 'py-1' : 'py-2')}>
     <span
       className={cn(
-        'font-bold text-yellow-600',
+        'font-bold text-dsqr-warning',
         isMobile ? 'text-sm' : 'text-base',
       )}
     >

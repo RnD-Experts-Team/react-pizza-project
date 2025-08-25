@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import type { PlatformCardProps } from '@/types/dsqr';
-import { TruckIcon } from '@heroicons/react/24/outline';
 
 const defaultPlatforms: PlatformCardProps[] = [
   {
-    icon: TruckIcon,
+    iconSrc: '/doordash-svgrepo-com.svg',
     title: 'Doordash',
     data: [
       { label: 'Most Loved Restaurant', value: '0' },
@@ -54,7 +53,7 @@ const defaultPlatforms: PlatformCardProps[] = [
     onTrackPosition: 'middle',
   },
   {
-    icon: TruckIcon,
+    iconSrc: '/ubereats-svgrepo-com.svg',
     title: 'UberEats',
     data: [
       { label: 'Top Inaccurate item', value: '0' },
@@ -91,7 +90,7 @@ const defaultPlatforms: PlatformCardProps[] = [
     onTrackPosition: 'middle',
   },
   {
-    icon: TruckIcon,
+    iconSrc: '/grubhub-svgrepo-com.svg',
     title: 'GrubHub',
     data: null,
     metrics: [

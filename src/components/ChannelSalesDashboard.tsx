@@ -72,21 +72,21 @@ export const ChannelSalesDashboard: React.FC<ChannelSalesDashboardProps> = ({
 
   return (
     <div className={cn(
-      'w-full flex gap-6',
-      isMobile ? 'flex-col' : 'flex-row'
+      'w-full grid grid-cols-1 gap-8 p-2 overflow-hidden',
+      isMobile ? 'grid-cols-1' : 'grid-cols-2'
     )}>
       {/* Channel Sales Card */}
       <Card
         className={cn(
-          'shadow-lg flex-shrink-0',
+          'shadow-realistic-lg flex-shrink-0 overflow-hidden',
           // Responsive sizing
-          isMobile ? 'w-full' : 'w-1/2 max-w-md',
+          isMobile ? 'w-full' : 'w-full',
           className,
         )}
       >
         <CardHeader
           className={cn(
-            'bg-[#7f675b] text-white rounded-t-lg',
+            'bg-channel-header text-channel-header-foreground rounded-t-lg',
             // Responsive padding
             isMobile ? 'p-3' : 'p-6',
           )}
@@ -114,11 +114,11 @@ export const ChannelSalesDashboard: React.FC<ChannelSalesDashboardProps> = ({
 
       {/* Pie Chart Card */}
       <Card className={cn(
-        'shadow-lg flex-1',
-        isMobile ? 'w-full' : 'min-w-0'
+        'shadow-realistic-lg flex-1 overflow-hidden',
+        isMobile ? 'w-full' : 'w-full'
       )}>
         <CardHeader className={cn(
-          'bg-[#7f675b] text-white rounded-t-lg',
+          'bg-channel-header text-channel-header-foreground rounded-t-lg',
           isMobile ? 'p-3' : 'p-6'
         )}>
           <CardTitle className={cn(
@@ -130,7 +130,7 @@ export const ChannelSalesDashboard: React.FC<ChannelSalesDashboardProps> = ({
         </CardHeader>
         
         <CardContent className={cn(
-          'p-4',
+          'p-4 overflow-hidden',
           isMobile ? 'h-64' : 'h-80'
         )}>
           <ResponsiveContainer width="100%" height="100%">

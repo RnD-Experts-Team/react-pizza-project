@@ -1,10 +1,11 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { InfoCardsGrid } from '@/components/infoCards/InfoCardsGrid';
+import { PerformanceGrid } from '@/components/performance/PerformanceGrid';
 import { useInfoCardsData } from '@/hooks/useInfoCardsData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { CardDataProps } from '@/types/infoCards';
+import type { PerformanceItemProps } from '@/types/performance';
 import { Button } from '@/components/ui/button';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import {
@@ -39,6 +40,15 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
   const isMobile = useIsMobile();
   const data = externalData || hookData;
 
+  // Transform CardDataProps to PerformanceItemProps
+  const transformedData: PerformanceItemProps[] = data.map((card) => ({
+    title: card.title,
+    daily: card.daily,
+    weekly: card.weekly,
+    bgColor: card.bgColor || '#f3f4f6',
+    icon: 'FlowbiteChartLineDownOutline' as const, // Default icon
+  }));
+
   // Random data for the bar chart
   const chartData = [
     { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
@@ -55,7 +65,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
       className={cn(
         'w-full',
         // Responsive padding and spacing
-        isMobile ? 'p-2 space-y-3' : 'p-4 md:p-6 lg:p-8 space-y-6',
+        isMobile ? 'p-2 space-y-2' : 'p-2 space-y-6',
         className,
       )}
     >
@@ -83,25 +93,24 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
         }
       />
 
-      {/* Main content area with cards on left and chart on right */}
-      <div className={cn('flex gap-6', isMobile ? 'flex-col' : 'flex-row')}>
-        {/* Left side - Cards */}
-        <div className={cn('flex-shrink-0', isMobile ? 'w-full' : 'w-1/2')}>
-          <InfoCardsGrid
-            data={data}
-            showIcons={showIcons}
+      {/* Main content area with cards on top and chart below */}
+      <div className="flex flex-col gap-6">
+        {/* Top - Cards */}
+        <div className="w-full">
+          <PerformanceGrid
+            data={transformedData}
             isLoading={isLoading}
           />
         </div>
 
-        {/* Right side - Bar Chart */}
+        {/* Bottom - Bar Chart */}
         <div
           className={cn(
-            'flex-1 bg-white rounded-lg border p-4',
-            isMobile ? 'h-64' : 'h-96',
+            'w-full bg-card rounded-lg border border-border p-4 shadow-realistic overflow-hidden',
+            isMobile ? 'h-48' : 'h-72',
           )}
         >
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">
+          <h3 className="text-lg font-semibold mb-4 text-card-foreground truncate">
             Performance Chart
           </h3>
           <ResponsiveContainer width="100%" height="100%">
@@ -114,13 +123,20 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
                 bottom: 5,
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis dataKey="name" stroke="var(--muted-foreground)" />
+              <YAxis stroke="var(--muted-foreground)" />
+              <Tooltip 
+                contentStyle={{
+                  backgroundColor: 'var(--popover)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  color: 'var(--popover-foreground)'
+                }}
+              />
               <Legend />
-              <Bar dataKey="pv" fill="#8884d8" />
-              <Bar dataKey="uv" fill="#82ca9d" />
+              <Bar dataKey="pv" fill="var(--chart-1)" />
+              <Bar dataKey="uv" fill="var(--chart-2)" />
             </BarChart>
           </ResponsiveContainer>
         </div>

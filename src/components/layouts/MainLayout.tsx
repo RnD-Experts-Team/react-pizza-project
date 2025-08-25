@@ -451,9 +451,9 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className='overflow-hidden w-full max-w-full'>
         <AppHeader />
-        <main className="flex flex-1 flex-col gap-2 sm:gap-4 p-2 sm:p-4 pt-0 min-h-[100vh] rounded-lg bg-muted/50 md:min-h-min">
+        <main className="flex flex-1 flex-col gap-2 sm:gap-4 p-2 sm:p-4 pt-0 min-h-[100vh] rounded-lg bg-muted/50 md:min-h-min overflow-hidden w-full max-w-full">
           {children}
         </main>
       </SidebarInset>

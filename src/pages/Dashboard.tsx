@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReduxAuth } from '../hooks/useReduxAuth';
 import { InfoSection } from '@/components/InfoSection';
+import { CustomerServiceOverview } from '@/components/CustomerServiceOverview';
 import { InfoCards } from '../components/InfoCards';
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
 import { DSQRDashboard } from '../components/DSQRDashboard';
@@ -34,9 +35,10 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
+    <div className="container mx-auto space-y-4 md:space-y-6 p-2 md:p-4 max-w-7xl">
       <InfoCards></InfoCards>
       <InfoSection></InfoSection>
+      <CustomerServiceOverview></CustomerServiceOverview>
       <ChannelSalesDashboard></ChannelSalesDashboard>
       <DSQRDashboard></DSQRDashboard>
     </div>

@@ -1,5 +1,4 @@
 import {
-  TruckIcon,
   ChartBarIcon,
   // StarIcon,
   // ClockIcon,
@@ -27,7 +26,7 @@ export interface MetricWithStatusProps {
 }
 
 export interface PlatformCardProps {
-  icon?: React.ComponentType<any>;
+  iconSrc?: string;
   title: string;
   data?: MetricDataProps[] | null;
   metrics?: MetricWithStatusProps[] | null;
@@ -45,10 +44,36 @@ export interface DSQRDashboardProps {
 
 // Icon mapping for different platform types
 export const iconMap = {
-  doordash: TruckIcon,
-  ubereats: TruckIcon,
-  grubhub: TruckIcon,
-  default: ChartBarIcon,
+  doordash: {
+    light: '/doordash-svgrepo-com.svg',
+    dark: '/doordash-svgrepo-com-dark.svg',
+  },
+  ubereats: {
+    light: '/ubereats-svgrepo-com.svg',
+    dark: '/ubereats-svgrepo-com-dark.svg',
+  },
+  grubhub: {
+    light: '/grubhub-svgrepo-com.svg',
+    dark: '/grubhub-svgrepo-com-dark.svg',
+  },
+  default: {
+    light: '/vite.svg',
+    dark: '/vite.svg',
+  },
+};
+
+// Helper function to get the appropriate icon based on theme
+export const getThemeIcon = (platform: keyof typeof iconMap, isDark: boolean): string => {
+  const platformIcons = iconMap[platform] || iconMap.default;
+  return isDark ? platformIcons.dark : platformIcons.light;
+};
+
+// Helper function to detect if current theme is dark
+export const isDarkTheme = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  const root = window.document.documentElement;
+  return root.classList.contains('dark');
 };
 
 // Status icon mapping

@@ -82,7 +82,7 @@ export const ChannelItem: React.FC<ChannelItemProps> = ({
         )}
       </div>
 
-      {!isLast && <Separator className={cn(isMobile ? 'mx-2' : 'mx-2.5')} />}
+      {!isLast && <Separator className={cn(isMobile ? 'w-[96%] mx-auto' : 'w-[96%] mx-auto')} />}
     </div>
   );
 };
@@ -138,7 +138,7 @@ const ChannelInfo: React.FC<ChannelInfoProps> = ({
       variant={channel.variant === 'positive' ? 'default' : 'destructive'}
       className={cn(
         'font-normal',
-        getPercentageColor(channel.variant || 'neutral'),
+        channel.variant === 'positive' && 'bg-[var(--chart-3)] text-foreground', 
         isMobile ? 'text-xs px-1 py-0' : 'text-xs',
       )}
     >
