@@ -40,36 +40,36 @@ const Register: React.FC = () => {
     if (error) clearError();
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  // const validateForm = (): boolean => {
+  //   const newErrors: Record<string, string> = {};
 
-    if (!formData.name) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
-    }
+  //   if (!formData.name) {
+  //     newErrors.name = 'Name is required';
+  //   } else if (formData.name.length < 2) {
+  //     newErrors.name = 'Name must be at least 2 characters';
+  //   }
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
+  //   if (!formData.email) {
+  //     newErrors.email = 'Email is required';
+  //   } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+  //     newErrors.email = 'Email is invalid';
+  //   }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
+  //   if (!formData.password) {
+  //     newErrors.password = 'Password is required';
+  //   } else if (formData.password.length < 6) {
+  //     newErrors.password = 'Password must be at least 6 characters';
+  //   }
 
-    if (!formData.password_confirmation) {
-      newErrors.password_confirmation = 'Password confirmation is required';
-    } else if (formData.password !== formData.password_confirmation) {
-      newErrors.password_confirmation = 'Passwords do not match';
-    }
+  //   if (!formData.password_confirmation) {
+  //     newErrors.password_confirmation = 'Password confirmation is required';
+  //   } else if (formData.password !== formData.password_confirmation) {
+  //     newErrors.password_confirmation = 'Passwords do not match';
+  //   }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

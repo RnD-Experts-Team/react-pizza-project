@@ -7,29 +7,22 @@ import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { useToast } from '../../hooks/use-toast';
 import { useReduxRoleHierarchy } from '../../hooks/useReduxRoleHierarchy';
 import { useUserManagement } from '../../hooks/useReduxUserManagement';
 import { useStoreManagement } from '../../hooks/useReduxStoreManagement';
-import type { RoleHierarchy, RoleHierarchyFilters, CreateRoleHierarchyRequest } from '../../types/roleHierarchy';
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, ToggleLeft, ToggleRight, GitBranch, Store, TreePine } from 'lucide-react';
+import type {  RoleHierarchyFilters } from '../../types/roleHierarchy';
+import { Plus, Search, Filter, MoreHorizontal, Edit, GitBranch, Store, TreePine } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../components/ui/dropdown-menu';
-import CreateHierarchyForm from './components/CreateHierarchyForm';
-import HierarchyTreeView from './components/HierarchyTreeView';
-import HierarchyDetailsModal from './components/HierarchyDetailsModal';
+
 
 const RoleHierarchyManagement: React.FC = () => {
   const { toast } = useToast();
   const {
     hierarchies,
-    hierarchyTree,
     loading,
     error,
-    createLoading,
-    treeLoading,
-    createRoleHierarchy,
     fetchStoreHierarchy,
     fetchStoreHierarchyTree,
     filterHierarchies,
@@ -43,9 +36,9 @@ const RoleHierarchyManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState('hierarchies');
   const [filters, setFilters] = useState<RoleHierarchyFilters>({});
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedHierarchy, setSelectedHierarchy] = useState<RoleHierarchy | null>(null);
+  // const [ setSelectedHierarchy] = useState<RoleHierarchy | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  // const [ setShowDetailsDialog] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState<string>('');
 
   useEffect(() => {
@@ -80,33 +73,33 @@ const RoleHierarchyManagement: React.FC = () => {
     }
   };
 
-  const handleCreateHierarchy = async (data: CreateRoleHierarchyRequest) => {
-    const result = await createRoleHierarchy(data);
-    if (result.success) {
-      toast({
-        title: 'Success',
-        description: 'Role hierarchy created successfully',
-      });
-      setShowCreateForm(false);
-      if (selectedStoreId) {
-        fetchStoreHierarchy(selectedStoreId);
-        if (activeTab === 'tree') {
-          fetchStoreHierarchyTree(selectedStoreId);
-        }
-      }
-    } else {
-      toast({
-        title: 'Error',
-        description: result.error,
-        variant: 'destructive',
-      });
-    }
-  };
+  // const handleCreateHierarchy = async (data: CreateRoleHierarchyRequest) => {
+  //   const result = await createRoleHierarchy(data);
+  //   if (result.success) {
+  //     toast({
+  //       title: 'Success',
+  //       description: 'Role hierarchy created successfully',
+  //     });
+  //     setShowCreateForm(false);
+  //     if (selectedStoreId) {
+  //       fetchStoreHierarchy(selectedStoreId);
+  //       if (activeTab === 'tree') {
+  //         fetchStoreHierarchyTree(selectedStoreId);
+  //       }
+  //     }
+  //   } else {
+  //     toast({
+  //       title: 'Error',
+  //       description: result.error,
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // };
 
-  const handleViewDetails = (hierarchy: RoleHierarchy) => {
-    setSelectedHierarchy(hierarchy);
-    setShowDetailsDialog(true);
-  };
+  // const handleViewDetails = (hierarchy: RoleHierarchy) => {
+  //   setSelectedHierarchy(hierarchy);
+  //   setShowDetailsDialog(true);
+  // };
 
   const filteredHierarchies = React.useMemo(() => {
     let filtered = selectedStoreId ? getHierarchiesByStore(selectedStoreId) : hierarchies;
@@ -329,7 +322,7 @@ const RoleHierarchyManagement: React.FC = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewDetails(hierarchy)}>
+                                <DropdownMenuItem >
                                   <Edit className="mr-2 h-4 w-4" />
                                   View Details
                                 </DropdownMenuItem>
@@ -353,11 +346,11 @@ const RoleHierarchyManagement: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="tree" className="space-y-4">
-            <HierarchyTreeView
-              tree={hierarchyTree}
+            {/* <HierarchyTreeView
+              treeData={hierarchyTree}
               loading={treeLoading}
               onRefresh={() => selectedStoreId && fetchStoreHierarchyTree(selectedStoreId)}
-            />
+            /> */}
           </TabsContent>
         </Tabs>
       )}
@@ -371,22 +364,22 @@ const RoleHierarchyManagement: React.FC = () => {
               Define a new role hierarchy relationship for {getStoreName(selectedStoreId)}
             </DialogDescription>
           </DialogHeader>
-          <CreateHierarchyForm
+          {/* <CreateHierarchyForm
             storeId={selectedStoreId}
             roles={roles}
             onSubmit={handleCreateHierarchy}
             onCancel={() => setShowCreateForm(false)}
             loading={createLoading}
-          />
+          /> */}
         </DialogContent>
       </Dialog>
 
       {/* Hierarchy Details Dialog */}
-      <HierarchyDetailsModal
+      {/* <HierarchyDetailsModal
         hierarchy={selectedHierarchy}
-        open={showDetailsDialog}
+        isOpen={showDetailsDialog}
         onOpenChange={setShowDetailsDialog}
-      />
+      /> */}
     </div>
   );
 };

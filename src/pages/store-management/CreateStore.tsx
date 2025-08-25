@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStoreManagement } from '@/hooks/useReduxStoreManagement';
-import type { CreateStoreForm } from '@/types/storeManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,105 +21,105 @@ const CreateStore: React.FC = () => {
   const navigate = useNavigate();
   const {
     state: { loading, error },
-    actions: { createStore }
+    actions: { }
   } = useStoreManagement();
 
-  const [formData, setFormData] = useState<CreateStoreForm>({
-    name: '',
-    is_active: true,
-    metadata: {
-      address: '',
-      phone: '',
-      email: '',
-      description: ''
-    }
-  });
+  // const [formData, setFormData] = useState<CreateStoreForm>({
+  //   name: '',
+  //   is_active: true,
+  //   metadata: {
+  //     address: '',
+  //     phone: '',
+  //     email: '',
+  //     description: ''
+  //   }
+  // });
 
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formErrors] = useState<FormErrors>({});
+  const [isSubmitting] = useState(false);
 
-  const validateForm = (): boolean => {
-    const errors: FormErrors = {};
+  // const validateForm = (): boolean => {
+  //   const errors: FormErrors = {};
 
-    // Name validation
-    if (!formData.name.trim()) {
-      errors.name = 'Store name is required';
-    } else if (formData.name.trim().length < 2) {
-      errors.name = 'Store name must be at least 2 characters long';
-    }
+  //   // Name validation
+  //   if (!formData.name.trim()) {
+  //     errors.name = 'Store name is required';
+  //   } else if (formData.name.trim().length < 2) {
+  //     errors.name = 'Store name must be at least 2 characters long';
+  //   }
 
-    // Address validation (optional but if provided, should be valid)
-    if (formData.metadata?.address && formData.metadata.address.trim().length < 5) {
-      errors.address = 'Address must be at least 5 characters long';
-    }
+  //   // Address validation (optional but if provided, should be valid)
+  //   if (formData.metadata?.address && formData.metadata.address.trim().length < 5) {
+  //     errors.address = 'Address must be at least 5 characters long';
+  //   }
 
-    // Phone validation (optional but if provided, should be valid)
-    if (formData.metadata?.phone && !/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(formData.metadata.phone)) {
-      errors.phone = 'Please enter a valid phone number';
-    }
+  //   // Phone validation (optional but if provided, should be valid)
+  //   if (formData.metadata?.phone && !/^[\+]?[1-9][\d\s\-\(\)]{7,}$/.test(formData.metadata.phone)) {
+  //     errors.phone = 'Please enter a valid phone number';
+  //   }
 
-    // Email validation (optional but if provided, should be valid)
-    if (formData.metadata?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.metadata.email)) {
-      errors.email = 'Please enter a valid email address';
-    }
+  //   // Email validation (optional but if provided, should be valid)
+  //   if (formData.metadata?.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.metadata.email)) {
+  //     errors.email = 'Please enter a valid email address';
+  //   }
 
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+  //   setFormErrors(errors);
+  //   return Object.keys(errors).length === 0;
+  // };
 
-  const handleInputChange = (field: keyof CreateStoreForm, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  // const handleInputChange = (field: keyof CreateStoreForm, value: any) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     [field]: value
+  //   }));
     
-    // Clear error for this field
-    if (formErrors[field as keyof FormErrors]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  };
+  //   // Clear error for this field
+  //   if (formErrors[field as keyof FormErrors]) {
+  //     setFormErrors(prev => ({
+  //       ...prev,
+  //       [field]: undefined
+  //     }));
+  //   }
+  // };
 
-  const handleMetadataChange = (field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      metadata: {
-        ...prev.metadata,
-        [field]: value
-      }
-    }));
+  // const handleMetadataChange = (field: string, value: string) => {
+  //   setFormData(prev => ({
+  //     ...prev,
+  //     metadata: {
+  //       ...prev.metadata,
+  //       [field]: value
+  //     }
+  //   }));
     
-    // Clear error for this field
-    if (formErrors[field as keyof FormErrors]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  };
+  //   // Clear error for this field
+  //   if (formErrors[field as keyof FormErrors]) {
+  //     setFormErrors(prev => ({
+  //       ...prev,
+  //       [field]: undefined
+  //     }));
+  //   }
+  // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
+  //   if (!validateForm()) {
+  //     return;
+  //   }
 
-    setIsSubmitting(true);
+  //   setIsSubmitting(true);
     
-    try {
-      const result = await createStore(formData);
-      if (result.meta.requestStatus === 'fulfilled') {
-        navigate('/store-management');
-      }
-    } catch (err) {
-      console.error('Failed to create store:', err);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  //   try {
+  //     // const result = await createStore(formData);
+  //     // if (result.meta.requestStatus === 'fulfilled') {
+  //       navigate('/store-management');
+  //     // }
+  //   } catch (err) {
+  //     console.error('Failed to create store:', err);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   return (
     <div className="container mx-auto py-6">
@@ -142,7 +141,7 @@ const CreateStore: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form className="space-y-6">
             {/* Error Display */}
             {error && (
               <div className="p-4 border border-destructive/20 bg-destructive/10 rounded-lg">
@@ -159,8 +158,7 @@ const CreateStore: React.FC = () => {
                 <Input
                   id="name"
                   type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  
                   placeholder="Enter store name"
                   className={formErrors.name ? 'border-destructive' : ''}
                 />
@@ -172,8 +170,8 @@ const CreateStore: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <Switch
                   id="is_active"
-                  checked={formData.is_active}
-                  onCheckedChange={(checked) => handleInputChange('is_active', checked)}
+                  // checked={formData.is_active}
+                  // onCheckedChange={(checked) => handleInputChange('is_active', checked)}
                 />
                 <Label htmlFor="is_active">Active Store</Label>
               </div>
@@ -190,8 +188,8 @@ const CreateStore: React.FC = () => {
                 </Label>
                 <Textarea
                   id="address"
-                  value={formData.metadata?.address || ''}
-                  onChange={(e) => handleMetadataChange('address', e.target.value)}
+                  // value={formData.metadata?.address || ''}
+                  // onChange={(e) => handleMetadataChange('address', e.target.value)}
                   placeholder="Enter store address"
                   className={formErrors.address ? 'border-destructive' : ''}
                   rows={3}
@@ -210,8 +208,8 @@ const CreateStore: React.FC = () => {
                   <Input
                     id="phone"
                     type="tel"
-                    value={formData.metadata?.phone || ''}
-                    onChange={(e) => handleMetadataChange('phone', e.target.value)}
+                    // value={formData.metadata?.phone || ''}
+                    // onChange={(e) => handleMetadataChange('phone', e.target.value)}
                     placeholder="Enter phone number"
                     className={formErrors.phone ? 'border-destructive' : ''}
                   />
@@ -228,8 +226,8 @@ const CreateStore: React.FC = () => {
                   <Input
                     id="email"
                     type="email"
-                    value={formData.metadata?.email || ''}
-                    onChange={(e) => handleMetadataChange('email', e.target.value)}
+                    // value={formData.metadata?.email || ''}
+                    // onChange={(e) => handleMetadataChange('email', e.target.value)}
                     placeholder="Enter email address"
                     className={formErrors.email ? 'border-destructive' : ''}
                   />
@@ -243,8 +241,8 @@ const CreateStore: React.FC = () => {
                 <Label htmlFor="description">Description</Label>
                 <Textarea
                   id="description"
-                  value={formData.metadata?.description || ''}
-                  onChange={(e) => handleMetadataChange('description', e.target.value)}
+                  // value={formData.metadata?.description || ''}
+                  // onChange={(e) => handleMetadataChange('description', e.target.value)}
                   placeholder="Enter store description (optional)"
                   rows={3}
                 />

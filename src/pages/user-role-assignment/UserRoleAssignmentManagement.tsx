@@ -2,19 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
 import { Badge } from '../../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../components/ui/table';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger } from '../../components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../../components/ui/alert-dialog';
 import { useToast } from '../../hooks/use-toast';
 import { useReduxUserRoleStoreAssignment } from '../../hooks/useReduxUserRoleStoreAssignment';
 import { useUserManagement } from '../../hooks/useReduxUserManagement';
 import { useStoreManagement } from '../../hooks/useReduxStoreManagement';
 import type { UserRoleStoreAssignment, UserRoleStoreAssignmentFilters } from '../../types/userRoleStoreAssignment';
-import { Plus, Search, Filter, MoreHorizontal, Edit, Trash2, ToggleLeft, ToggleRight, Users, Store, UserCheck } from 'lucide-react';
+import { Plus, Search, MoreHorizontal, Edit, Trash2, ToggleLeft, ToggleRight, Users, Store, UserCheck } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '../../components/ui/dropdown-menu';
 import AssignUserRoleForm from './components/AssignUserRoleForm';
 import BulkAssignmentForm from './components/BulkAssignmentForm';
@@ -38,7 +37,7 @@ const UserRoleAssignmentManagement: React.FC = () => {
     clearError,
   } = useReduxUserRoleStoreAssignment();
 
-  const { state: { users, roles }, actions: { fetchUsers, fetchRoles } } = useUserManagement();
+  const { state: { users }, actions: { fetchUsers } } = useUserManagement();
   const { state: { stores }, actions: { fetchStores } } = useStoreManagement();
 
   const [activeTab, setActiveTab] = useState('all');

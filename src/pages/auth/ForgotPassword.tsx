@@ -33,18 +33,18 @@ const ForgotPassword: React.FC = () => {
     if (error) clearError();
   };
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  // const validateForm = (): boolean => {
+  //   const newErrors: Record<string, string> = {};
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
+  //   if (!formData.email) {
+  //     newErrors.email = 'Email is required';
+  //   } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+  //     newErrors.email = 'Email is invalid';
+  //   }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

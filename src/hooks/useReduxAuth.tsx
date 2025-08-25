@@ -22,7 +22,6 @@ import {
   clearToken,
   extendCacheExpiry,
   clearCache,
-  updateCacheValidity,
 } from '../store/slices/authSlice';
 import type {
   RegisterRequest,

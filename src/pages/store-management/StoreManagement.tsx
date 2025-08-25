@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useStoreManagement } from '@/hooks/useReduxStoreManagement';
-import type { Store } from '@/types/storeManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Store as StoreIcon, Users, Shield, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import StoresTab from './components/StoresTab';
-import StoreUsersTab from './components/StoreUsersTab';
-import StoreRolesTab from './components/StoreRolesTab';
+
 
 const StoreManagement: React.FC = () => {
   const {
@@ -16,9 +12,8 @@ const StoreManagement: React.FC = () => {
       stores,
       storeUsers,
       storeRoles,
-      pagination,
-      storeUsersPagination,
-      storeRolesPagination,
+      // storeUsersPagination,
+      // storeRolesPagination,
       loading,
       error
     },
@@ -33,39 +28,39 @@ const StoreManagement: React.FC = () => {
   const [selectedStoreId, setSelectedStoreId] = useState<string | null>(null);
 
   // Helper functions
-  const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
-  };
+  // const getStatusColor = (isActive: boolean) => {
+  //   return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+  // };
 
-  const getStatusText = (isActive: boolean) => {
-    return isActive ? 'Active' : 'Inactive';
-  };
+  // const getStatusText = (isActive: boolean) => {
+  //   return isActive ? 'Active' : 'Inactive';
+  // };
 
-  const getUserInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  // const getUserInitials = (name: string) => {
+  //   return name
+  //     .split(' ')
+  //     .map(word => word.charAt(0))
+  //     .join('')
+  //     .toUpperCase()
+  //     .slice(0, 2);
+  // };
 
-  const getRoleColor = (roleName: string) => {
-    const colors: { [key: string]: string } = {
-      'admin': 'bg-red-100 text-red-800',
-      'manager': 'bg-blue-100 text-blue-800',
-      'employee': 'bg-green-100 text-green-800',
-      'viewer': 'bg-gray-100 text-gray-800'
-    };
-    return colors[roleName.toLowerCase()] || 'bg-gray-100 text-gray-800';
-  };
+  // const getRoleColor = (roleName: string) => {
+  //   const colors: { [key: string]: string } = {
+  //     'admin': 'bg-red-100 text-red-800',
+  //     'manager': 'bg-blue-100 text-blue-800',
+  //     'employee': 'bg-green-100 text-green-800',
+  //     'viewer': 'bg-gray-100 text-gray-800'
+  //   };
+  //   return colors[roleName.toLowerCase()] || 'bg-gray-100 text-gray-800';
+  // };
 
-  const handleStoreSelect = (storeId: string) => {
-    setSelectedStoreId(storeId);
-    if (activeTab === 'stores') {
-      setActiveTab('store-users');
-    }
-  };
+  // const handleStoreSelect = (storeId: string) => {
+  //   setSelectedStoreId(storeId);
+  //   if (activeTab === 'stores') {
+  //     setActiveTab('store-users');
+  //   }
+  // };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -133,9 +128,9 @@ const StoreManagement: React.FC = () => {
         </TabsList>
 
         <TabsContent value="stores" className="space-y-4">
-          <StoresTab
+          {/* <StoresTab
             stores={stores}
-            pagination={pagination}
+            // pagination={pagination}
             onStoreSelect={handleStoreSelect}
             onFetchStores={fetchStores}
             getStatusColor={getStatusColor}
@@ -145,7 +140,7 @@ const StoreManagement: React.FC = () => {
         <TabsContent value="store-users" className="space-y-4">
           <StoreUsersTab
             storeUsers={storeUsers}
-            pagination={storeUsersPagination}
+            // pagination={storeUsersPagination}
             selectedStoreId={selectedStoreId}
             onFetchStoreUsers={fetchStoreUsers}
             getUserInitials={getUserInitials}
@@ -155,11 +150,11 @@ const StoreManagement: React.FC = () => {
         <TabsContent value="store-roles" className="space-y-4">
           <StoreRolesTab
             storeRoles={storeRoles}
-            pagination={storeRolesPagination}
+            // pagination={storeRolesPagination}
             selectedStoreId={selectedStoreId}
             onFetchStoreRoles={fetchStoreRoles}
             getRoleColor={getRoleColor}
-          />
+          /> */}
         </TabsContent>
       </Tabs>
 

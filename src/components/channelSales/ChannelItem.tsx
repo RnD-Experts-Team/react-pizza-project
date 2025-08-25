@@ -117,7 +117,6 @@ interface ChannelInfoProps {
 
 const ChannelInfo: React.FC<ChannelInfoProps> = ({
   channel,
-  getPercentageColor,
   isMobile,
 }) => (
   <div

@@ -37,7 +37,7 @@ import {
 } from 'lucide-react';
 
 const Settings: React.FC = () => {
-  const { user, logout, getUserProfile } = useReduxAuth();
+  const { user, logout } = useReduxAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 
@@ -100,13 +100,13 @@ const Settings: React.FC = () => {
     setProfileError('');
 
     try {
-      const result = await getUserProfile();
-      if (result.type.endsWith('/fulfilled')) {
+      // const result = await getUserProfile();
+      // if (result.type.endsWith('/fulfilled')) {
         // Profile will be updated automatically via Redux state
         setProfileError('');
-      } else {
-        setProfileError('Failed to load user profile');
-      }
+      // } else {
+      //   setProfileError('Failed to load user profile');
+      // }
     } catch (err) {
       setProfileError('Failed to load user profile');
     } finally {

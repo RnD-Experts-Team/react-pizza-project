@@ -67,7 +67,6 @@ export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
   label,
   value,
   status,
-  statusColor,
   multiline = false,
   isLast = false,
   isMobile = false,

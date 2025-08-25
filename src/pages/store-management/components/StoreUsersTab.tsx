@@ -2,10 +2,7 @@ import React from 'react';
 import type { StoreUser, PaginationMeta } from '@/types/storeManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Users, Eye, Mail, Calendar, UserCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Users, UserCheck } from 'lucide-react';
 
 interface StoreUsersTabProps {
   storeUsers: StoreUser[];
@@ -17,20 +14,17 @@ interface StoreUsersTabProps {
 }
 
 const StoreUsersTab: React.FC<StoreUsersTabProps> = ({
-  storeUsers,
   pagination,
   selectedStoreId,
   onFetchStoreUsers,
-  getUserInitials,
-  getRoleColor
 }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString('en-US', {
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric'
+  //   });
+  // };
 
   if (!selectedStoreId) {
     return (
@@ -64,7 +58,7 @@ const StoreUsersTab: React.FC<StoreUsersTabProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {storeUsers.length === 0 ? (
+          {/* {storeUsers.length === 0 ? ( */}
             <div className="text-center py-8">
               <UserCheck className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold text-muted-foreground">No users found</h3>
@@ -72,7 +66,7 @@ const StoreUsersTab: React.FC<StoreUsersTabProps> = ({
                 This store doesn't have any users assigned yet.
               </p>
             </div>
-          ) : (
+          {/* ) : (
             storeUsers.map((storeUser) => (
               <Card key={`${storeUser.store_id}-${storeUser.user_id}`} className="p-4">
                 <div className="flex items-center justify-between">
@@ -120,7 +114,7 @@ const StoreUsersTab: React.FC<StoreUsersTabProps> = ({
                 </div>
               </Card>
             ))
-          )}
+          )} */}
         </div>
         
         {/* Pagination */}

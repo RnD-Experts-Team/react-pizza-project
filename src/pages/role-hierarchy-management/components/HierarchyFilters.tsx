@@ -41,7 +41,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
     if (filters.lower_role_id) count++;
     if (filters.store_id) count++;
     if (filters.is_active !== undefined) count++;
-    if (filters.created_by?.trim()) count++;
+    // if (filters.created_by?.trim()) count++;
     return count;
   };
 
@@ -52,10 +52,10 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
     return role ? role.name : `Role ${roleId}`;
   };
 
-  const getStoreName = (storeId: string): string => {
-    const store = stores.find(s => s.id === storeId);
-    return store ? store.name : `Store ${storeId}`;
-  };
+  // const getStoreName = (storeId: number): string => {
+  //   const store = stores.find(s => s.id === storeId);
+  //   return store ? store.name : `Store ${storeId}`;
+  // };
 
   return (
     <Card className={className}>
@@ -153,7 +153,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
             <Select
               value={filters.store_id || 'all'}
               onValueChange={(value) => 
-                handleFilterChange('store_id', value === 'all' ? undefined : value)
+                handleFilterChange('store_id',value === 'all' ? undefined : Number(value))
               }
             >
               <SelectTrigger>
@@ -162,7 +162,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
               <SelectContent>
                 <SelectItem value="all">All stores</SelectItem>
                 {stores.map((store) => (
-                  <SelectItem key={store.id} value={store.id}>
+                  <SelectItem key={store.id} value={store.id.toString()}>
                     {store.name}
                   </SelectItem>
                 ))}
@@ -190,7 +190,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
           </div>
         </div>
 
-        {/* Created By Filter */}
+        {/* Created By Filter
         <div className="space-y-2">
           <Label htmlFor="created-by-filter">Created By</Label>
           <Input
@@ -199,7 +199,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
             value={filters.created_by || ''}
             onChange={(e) => handleFilterChange('created_by', e.target.value)}
           />
-        </div>
+        </div> */}
 
         {/* Active Filters Summary */}
         {activeFiltersCount > 0 && (
@@ -239,7 +239,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
                   </button>
                 </Badge>
               )}
-              {filters.store_id && (
+              {/* {filters.store_id && (
                 <Badge variant="outline" className="text-xs">
                   Store: {getStoreName(filters.store_id)}
                   <button
@@ -249,7 +249,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
-              )}
+              )} */}
               {filters.is_active !== undefined && (
                 <Badge variant="outline" className="text-xs">
                   Status: {filters.is_active ? 'Active' : 'Inactive'}
@@ -261,7 +261,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
                   </button>
                 </Badge>
               )}
-              {filters.created_by && (
+              {/* {filters.created_by && (
                 <Badge variant="outline" className="text-xs">
                   Creator: "{filters.created_by}"
                   <button
@@ -271,7 +271,7 @@ const HierarchyFilters: React.FC<HierarchyFiltersProps> = ({
                     <X className="h-3 w-3" />
                   </button>
                 </Badge>
-              )}
+              )} */}
             </div>
           </div>
         )}

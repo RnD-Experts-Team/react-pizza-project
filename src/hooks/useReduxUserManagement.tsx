@@ -155,7 +155,7 @@ export const useUserManagement = (): UseUserManagementReturn => {
     dispatch(clearError());
   }, [dispatch]);
 
-  const setLoadingCb = useCallback((loading: boolean) => {
+  const setLoadingCb = useCallback(() => {
     // For consistency with the original hook, we provide this but it's not needed
     // since Redux manages loading state automatically through async thunks
     console.warn('setLoading is not needed with Redux - loading state is managed automatically');

@@ -23,7 +23,7 @@ const EditStore: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const {
     state: { stores, loading, error },
-    actions: { fetchStores, updateStore }
+    actions: { fetchStores }
   } = useStoreManagement();
 
   const [formData, setFormData] = useState<UpdateStoreForm>({
@@ -156,10 +156,10 @@ const EditStore: React.FC = () => {
     setIsSubmitting(true);
     
     try {
-      const result = await updateStore(storeId, formData);
-      if (result.meta.requestStatus === 'fulfilled') {
+      // const result = await updateStore(storeId, formData);
+      // if (result.meta.requestStatus === 'fulfilled') {
         navigate('/store-management');
-      }
+      // }
     } catch (err) {
       console.error('Failed to update store:', err);
     } finally {

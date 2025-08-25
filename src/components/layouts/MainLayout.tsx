@@ -55,7 +55,6 @@ import {
   Users,
   ShieldCheck,
   UserCheck,
-  GitBranch,
 } from 'lucide-react';
 
 interface MainLayoutProps {
@@ -72,15 +71,15 @@ const stores = [
 ];
 
 // --- Permission/role definitions for menu items ---
-const MENU_PERMISSION_MAP: {
-  [key: string]: { permission?: string; role?: string }
-} = {
-  'User Management': { permission: 'manage users' },
-  'Service Client Management': { permission: 'manage service clients' },
-  'Auth Rules': { permission: 'manage auth rules' },
-  'Role Hierarchy': { permission: 'manage role hierarchy' },
-  'Settings': {}, // Shown to all authenticated users; restrict if you wish
-};
+// const MENU_PERMISSION_MAP: {
+//   [key: string]: { permission?: string; role?: string }
+// } = {
+//   'User Management': { permission: 'manage users' },
+//   'Service Client Management': { permission: 'manage service clients' },
+//   'Auth Rules': { permission: 'manage auth rules' },
+//   'Role Hierarchy': { permission: 'manage role hierarchy' },
+//   'Settings': {}, // Shown to all authenticated users; restrict if you wish
+// };
 
 function AppSidebar() {
   const location = useLocation();
@@ -88,7 +87,6 @@ function AppSidebar() {
   const [open, setOpen] = useState(false);
   const {
     hasPermission,
-    hasRole,
     isAuthenticated
   } = useReduxAuth();
 

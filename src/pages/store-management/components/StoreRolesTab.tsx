@@ -2,9 +2,7 @@ import React from 'react';
 import type { StoreRole, PaginationMeta } from '@/types/storeManagement';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Eye, Calendar, Users, ShieldCheck } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Shield, ShieldCheck } from 'lucide-react';
 
 interface StoreRolesTabProps {
   storeRoles: StoreRole[];
@@ -15,19 +13,17 @@ interface StoreRolesTabProps {
 }
 
 const StoreRolesTab: React.FC<StoreRolesTabProps> = ({
-  storeRoles,
   pagination,
   selectedStoreId,
   onFetchStoreRoles,
-  getRoleColor
 }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  // const formatDate = (dateString: string) => {
+  //   return new Date(dateString).toLocaleDateString('en-US', {
+  //     year: 'numeric',
+  //     month: 'short',
+  //     day: 'numeric'
+  //   });
+  // };
 
   if (!selectedStoreId) {
     return (
@@ -61,7 +57,7 @@ const StoreRolesTab: React.FC<StoreRolesTabProps> = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {storeRoles.length === 0 ? (
+          {/* {storeRoles.length === 0 ? ( */}
             <div className="text-center py-8">
               <ShieldCheck className="mx-auto h-12 w-12 text-muted-foreground" />
               <h3 className="mt-2 text-sm font-semibold text-muted-foreground">No roles found</h3>
@@ -69,7 +65,7 @@ const StoreRolesTab: React.FC<StoreRolesTabProps> = ({
                 This store doesn't have any roles assigned yet.
               </p>
             </div>
-          ) : (
+          {/* ) : (
             storeRoles.map((storeRole) => (
               <Card key={`${storeRole.store_id}-${storeRole.role_id}`} className="p-4">
                 <div className="flex items-center justify-between">
@@ -114,7 +110,7 @@ const StoreRolesTab: React.FC<StoreRolesTabProps> = ({
                 </div>
               </Card>
             ))
-          )}
+          )} */}
         </div>
         
         {/* Pagination */}

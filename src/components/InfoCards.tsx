@@ -33,7 +33,6 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
   subtitle,
   data: externalData,
   className,
-  showIcons = true,
   showRefresh = true,
 }) => {
   const { data: hookData, isLoading, refreshData } = useInfoCardsData();

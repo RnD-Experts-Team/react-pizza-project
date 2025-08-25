@@ -83,7 +83,7 @@ const initialState: AuthState = {
 // FIXED: Simplified initialization that doesn't cause loops
 export const initializeAuth = createAsyncThunk(
   'auth/initialize',
-  async (_, { rejectWithValue }) => {
+  async (_,) => {
     try {
       const token = tokenStorage.getToken();
       if (!token) {

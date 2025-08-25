@@ -80,7 +80,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                     <span className="text-sm font-medium text-gray-600">Higher Role</span>
                   </div>
                   <div className="pl-6">
-                    <div className="font-semibold">{hierarchy.higher_role_name}</div>
+                    <div className="font-semibold">{hierarchy.higherRoleName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.higher_role_id}</div>
                   </div>
                 </div>
@@ -91,7 +91,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                     <span className="text-sm font-medium text-gray-600">Lower Role</span>
                   </div>
                   <div className="pl-6">
-                    <div className="font-semibold">{hierarchy.lower_role_name}</div>
+                    <div className="font-semibold">{hierarchy.lowerRoleName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.lower_role_id}</div>
                   </div>
                 </div>
@@ -106,7 +106,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                     <span className="text-sm font-medium text-gray-600">Store</span>
                   </div>
                   <div className="pl-6">
-                    <div className="font-semibold">{hierarchy.store_name}</div>
+                    <div className="font-semibold">{hierarchy.storeName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.store_id}</div>
                   </div>
                 </div>
@@ -141,7 +141,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                     <span className="text-sm font-medium text-gray-600">Created By</span>
                   </div>
                   <div className="pl-6">
-                    <div className="font-semibold">{hierarchy.created_by}</div>
+                    <div className="font-semibold">{hierarchy.created_at}</div>
                   </div>
                 </div>
 
@@ -156,7 +156,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                 </div>
               </div>
 
-              {hierarchy.reason && (
+               
                 <>
                   <Separator />
                   <div className="space-y-2">
@@ -164,14 +164,14 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                       <FileText className="h-4 w-4 text-gray-500" />
                       <span className="text-sm font-medium text-gray-600">Reason</span>
                     </div>
-                    <div className="pl-6">
+                    {/* <div className="pl-6">
                       <div className="text-sm bg-gray-50 p-3 rounded-md border">
                         {hierarchy.reason}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </>
-              )}
+              
             </CardContent>
           </Card>
 
@@ -189,7 +189,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-2">
                     <Shield className="h-8 w-8 text-green-600" />
                   </div>
-                  <div className="font-semibold text-sm">{hierarchy.higher_role_name}</div>
+                  <div className="font-semibold text-sm">{hierarchy.higherRoleName}</div>
                   <div className="text-xs text-gray-500">Higher Role</div>
                 </div>
                 
@@ -202,7 +202,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
                   <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
                     <Shield className="h-8 w-8 text-blue-600" />
                   </div>
-                  <div className="font-semibold text-sm">{hierarchy.lower_role_name}</div>
+                  <div className="font-semibold text-sm">{hierarchy.lowerRoleName}</div>
                   <div className="text-xs text-gray-500">Lower Role</div>
                 </div>
               </div>
@@ -210,7 +210,7 @@ const HierarchyDetailsModal: React.FC<HierarchyDetailsModalProps> = ({
               <div className="mt-4 text-center">
                 <div className="inline-flex items-center space-x-2 text-sm text-gray-600">
                   <Building className="h-4 w-4" />
-                  <span>Within {hierarchy.store_name}</span>
+                  <span>Within {hierarchy.storeName}</span>
                 </div>
               </div>
             </CardContent>

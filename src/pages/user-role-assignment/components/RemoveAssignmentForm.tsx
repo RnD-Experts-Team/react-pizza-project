@@ -4,14 +4,10 @@ import { Label } from '../../../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../components/ui/select';
 import { DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../../components/ui/dialog';
 import { Card, CardContent } from '../../../components/ui/card';
-import { Badge } from '../../../components/ui/badge';
-import { Checkbox } from '../../../components/ui/checkbox';
-import { useToast } from '../../../hooks/use-toast';
 import { useReduxUserRoleStoreAssignment } from '../../../hooks/useReduxUserRoleStoreAssignment';
 import { useUserManagement } from '../../../hooks/useReduxUserManagement';
 import { useStoreManagement } from '../../../hooks/useReduxStoreManagement';
-import type { UserRoleStoreAssignment } from '../../../types/userRoleStoreAssignment';
-import { Loader2, AlertTriangle, UserX, Store, Trash2 } from 'lucide-react';
+import { Loader2, AlertTriangle, UserX, Trash2 } from 'lucide-react';
 
 interface RemoveAssignmentFormProps {
   onClose: () => void;
@@ -24,21 +20,20 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
   initialUserId, 
   initialAssignmentId 
 }) => {
-  const { toast } = useToast();
   const { 
-    removeUserRoleAssignment, 
-    fetchAssignmentsByUser,
-    assignmentsByUser,
+    // removeUserRoleAssignment, 
+    // fetchAssignmentsByUser,
+    // assignmentsByUser,
     removeLoading
   } = useReduxUserRoleStoreAssignment();
-  const { state: { users, roles }, actions: { fetchUsers, fetchRoles } } = useUserManagement();
-  const { state: { stores }, actions: { fetchStores } } = useStoreManagement();
+  const { state: { users }, actions: { fetchUsers, fetchRoles } } = useUserManagement();
+  const { state: {}, actions: { fetchStores } } = useStoreManagement();
 
   const [selectedUserId, setSelectedUserId] = useState<number>(initialUserId || 0);
   const [selectedAssignments, setSelectedAssignments] = useState<number[]>(
     initialAssignmentId ? [initialAssignmentId] : []
   );
-  const [isBulkMode, setIsBulkMode] = useState<boolean>(!initialAssignmentId);
+  // const [isBulkMode, setIsBulkMode] = useState<boolean>(!initialAssignmentId);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -47,99 +42,99 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
     fetchStores();
   }, []);
 
-  useEffect(() => {
-    if (selectedUserId) {
-      fetchAssignmentsByUser(selectedUserId);
-    }
-  }, [selectedUserId, fetchAssignmentsByUser]);
+  // useEffect(() => {
+  //   if (selectedUserId) {
+  //     fetchAssignmentsByUser(selectedUserId);
+  //   }
+  // }, [selectedUserId, fetchAssignmentsByUser]);
 
-  const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+  // const validateForm = (): boolean => {
+  //   const newErrors: Record<string, string> = {};
 
-    if (!selectedUserId) {
-      newErrors.user_id = 'Please select a user';
-    }
+  //   if (!selectedUserId) {
+  //     newErrors.user_id = 'Please select a user';
+  //   }
 
-    if (selectedAssignments.length === 0) {
-      newErrors.assignments = 'Please select at least one assignment to remove';
-    }
+  //   if (selectedAssignments.length === 0) {
+  //     newErrors.assignments = 'Please select at least one assignment to remove';
+  //   }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  //   setErrors(newErrors);
+  //   return Object.keys(newErrors).length === 0;
+  // };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+  //   if (!validateForm()) {
+  //     return;
+  //   }
 
-    // Remove assignments one by one
-    const results = [];
-    for (const assignmentId of selectedAssignments) {
-      const result = await removeUserRoleAssignment(assignmentId);
-      results.push(result);
-      if (!result.success) {
-        break; // Stop on first failure
-      }
-    }
+  //   // // Remove assignments one by one
+  //   // const results = [];
+  //   // for (const assignmentId of selectedAssignments) {
+  //   //   const result = await removeUserRoleAssignment(assignmentId);
+  //   //   results.push(result);
+  //   //   if (!result.success) {
+  //   //     break; // Stop on first failure
+  //   //   }
+  //   // }
     
-    const allSuccessful = results.every(r => r.success);
-    const result = {
-      success: allSuccessful,
-      error: allSuccessful ? null : results.find(r => !r.success)?.error
-    };
+  //   // const allSuccessful = results.every(r => r.success);
+  //   // const result = {
+  //   //   success: allSuccessful,
+  //   //   error: allSuccessful ? null : results.find(r => !r.success)?.error
+  //   // };
 
-    if (result.success) {
-      toast({
-        title: 'Success',
-        description: `Successfully removed ${selectedAssignments.length} assignment(s)`,
-      });
-      onClose();
-    } else {
-      toast({
-        title: 'Error',
-        description: result.error || 'Failed to remove user role assignment(s)',
-        variant: 'destructive',
-      });
-    }
-  };
+  //   if (result.success) {
+  //     toast({
+  //       title: 'Success',
+  //       description: `Successfully removed ${selectedAssignments.length} assignment(s)`,
+  //     });
+  //     onClose();
+  //   } else {
+  //     toast({
+  //       title: 'Error',
+  //       description: result.error || 'Failed to remove user role assignment(s)',
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // };
 
-  const handleAssignmentToggle = (assignmentId: number, checked: boolean) => {
-    if (checked) {
-      setSelectedAssignments(prev => [...prev, assignmentId]);
-    } else {
-      setSelectedAssignments(prev => prev.filter(id => id !== assignmentId));
-    }
+  // const handleAssignmentToggle = (assignmentId: number, checked: boolean) => {
+  //   if (checked) {
+  //     setSelectedAssignments(prev => [...prev, assignmentId]);
+  //   } else {
+  //     setSelectedAssignments(prev => prev.filter(id => id !== assignmentId));
+  //   }
 
-    // Clear assignment error if any assignment is selected
-    if (errors.assignments && checked) {
-      setErrors(prev => ({ ...prev, assignments: '' }));
-    }
-  };
+  //   // Clear assignment error if any assignment is selected
+  //   if (errors.assignments && checked) {
+  //     setErrors(prev => ({ ...prev, assignments: '' }));
+  //   }
+  // };
 
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const allIds = userAssignments.map(assignment => assignment.id);
-      setSelectedAssignments(allIds);
-    } else {
-      setSelectedAssignments([]);
-    }
-  };
+  // const handleSelectAll = (checked: boolean) => {
+  //   if (checked) {
+  //     const allIds = userAssignments.map(assignment => assignment.id);
+  //     setSelectedAssignments(allIds);
+  //   } else {
+  //     setSelectedAssignments([]);
+  //   }
+  // };
 
   const selectedUser = users.find(user => user.id === selectedUserId);
-  const userAssignments = assignmentsByUser[selectedUserId] || [];
-  const activeAssignments = userAssignments.filter(assignment => assignment.is_active);
+  // const userAssignments = assignmentsByUser[selectedUserId] || [];
+  // const activeAssignments = userAssignments.filter(assignment => assignment.is_active);
 
-  const getAssignmentDetails = (assignment: UserRoleStoreAssignment) => {
-    const role = roles.find(r => r.id === assignment.role_id);
-    const store = stores.find(s => s.id === assignment.store_id);
-    return { role, store };
-  };
+  // const getAssignmentDetails = (assignment: UserRoleStoreAssignment) => {
+  //   const role = roles.find(r => r.id === assignment.role_id);
+  //   const store = stores.find(s => s.id === assignment.store_id);
+  //   return { role, store };
+  // };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form  className="space-y-6">
       <DialogHeader>
         <DialogTitle className="flex items-center gap-2">
           <Trash2 className="h-5 w-5 text-red-500" />
@@ -186,7 +181,7 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label>Active Role Assignments *</Label>
-            {activeAssignments.length > 1 && (
+            {/* {activeAssignments.length > 1 && (
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="select-all"
@@ -197,14 +192,14 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
                   Select All
                 </Label>
               </div>
-            )}
+            )} */}
           </div>
 
           {errors.assignments && (
             <p className="text-sm text-red-500">{errors.assignments}</p>
           )}
 
-          {activeAssignments.length === 0 ? (
+          {/* {activeAssignments.length === 0 ? ( */}
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-8 text-center">
                 <UserX className="h-12 w-12 text-muted-foreground mb-4" />
@@ -213,9 +208,9 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
                 </p>
               </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {activeAssignments.map((assignment) => {
+          {/* ) : (
+            <div className="space-y-3 max-h-96 overflow-y-auto"> */}
+              {/* {activeAssignments.map((assignment) => {
                 const { role, store } = getAssignmentDetails(assignment);
                 const isSelected = selectedAssignments.includes(assignment.id);
                 
@@ -273,9 +268,9 @@ const RemoveAssignmentForm: React.FC<RemoveAssignmentFormProps> = ({
                     </CardContent>
                   </Card>
                 );
-              })}
-            </div>
-          )}
+              })} */}
+            {/* </div>
+          )} */}
         </div>
       )}
 

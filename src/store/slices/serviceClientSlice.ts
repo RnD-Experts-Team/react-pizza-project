@@ -1,13 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type {  PayloadAction } from '@reduxjs/toolkit';
 import type {
-  ServiceClient,
   ServiceClientManagementState,
   ServiceClientsQueryParams,
   CreateServiceClientForm,
-  RotateTokenForm,
-  PaginationMeta,
-  TokenDisplayData,
+  RotateTokenForm
 } from '../../types/serviceClient';
 import { serviceClientService } from '../../services/serviceClientService';
 

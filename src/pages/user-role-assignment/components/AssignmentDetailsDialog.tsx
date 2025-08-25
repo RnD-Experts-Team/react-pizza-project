@@ -1,9 +1,9 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 import { Badge } from '../../../components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../../../components/ui/card';
 import type { UserRoleStoreAssignment } from '../../../types/userRoleStoreAssignment';
-import { Calendar, User, Store, Shield, Clock, FileText } from 'lucide-react';
+import { User, Store, Shield, Clock, FileText } from 'lucide-react';
 
 interface AssignmentDetailsDialogProps {
   assignment: UserRoleStoreAssignment;
@@ -77,12 +77,12 @@ const AssignmentDetailsDialog: React.FC<AssignmentDetailsDialogProps> = ({
                   <p className="text-sm font-mono">{assignment.role_id}</p>
                 </div>
               </div>
-              {assignment.role?.description && (
+              {/* {assignment.role?.description && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Description</p>
                   <p className="text-sm">{assignment.role.description}</p>
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
 
@@ -105,12 +105,12 @@ const AssignmentDetailsDialog: React.FC<AssignmentDetailsDialogProps> = ({
                   <p className="text-sm font-mono">{assignment.store_id}</p>
                 </div>
               </div>
-              {assignment.store?.address && (
+              {/* {assignment.store?.address && (
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Address</p>
                   <p className="text-sm">{assignment.store.address}</p>
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
 

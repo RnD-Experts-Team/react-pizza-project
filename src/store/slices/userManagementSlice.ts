@@ -6,15 +6,11 @@ import type {
   UserResponse,
   UsersResponse,
   RolesResponse,
-  RoleResponse,
   PermissionsResponse,
-  PermissionResponse,
   CreateUserForm,
   UpdateUserForm,
   CreateRoleForm,
   CreatePermissionForm,
-  AssignRolesForm,
-  AssignPermissionsForm
 } from '../../types/userManagement';
 import userManagementService from '../../services/userManagementService';
 

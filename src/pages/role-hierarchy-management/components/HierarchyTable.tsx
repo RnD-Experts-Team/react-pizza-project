@@ -33,12 +33,18 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
   loading = false,
 }) => {
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      onSelectionChange(hierarchies.map(h => h.id.toString()));
-    } else {
-      onSelectionChange([]);
-    }
-  };
+  if (checked) {
+    onSelectionChange(
+      hierarchies
+        .map(h => h.id)
+        .filter((id): id is number => id != null) // remove nulls
+        .map(id => id.toString())
+    );
+  } else {
+    onSelectionChange([]);
+  }
+};
+
 
   const handleSelectHierarchy = (hierarchyId: string, checked: boolean) => {
     if (checked) {
@@ -49,7 +55,7 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
   };
 
   const isAllSelected = hierarchies.length > 0 && selectedHierarchies.length === hierarchies.length;
-  const isIndeterminate = selectedHierarchies.length > 0 && selectedHierarchies.length < hierarchies.length;
+  // const isIndeterminate = selectedHierarchies.length > 0 && selectedHierarchies.length < hierarchies.length;
 
   if (loading) {
     return (
@@ -76,7 +82,7 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
             <TableHead className="w-12">
               <Checkbox
                 checked={isAllSelected}
-                indeterminate={isIndeterminate}
+                // indeterminate={isIndeterminate}
                 onCheckedChange={handleSelectAll}
                 aria-label="Select all hierarchies"
               />
@@ -92,7 +98,9 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
         </TableHeader>
         <TableBody>
           {hierarchies.map((hierarchy) => {
-            const isSelected = selectedHierarchies.includes(hierarchy.id.toString());
+  if (hierarchy.id == null) return null; // skip rendering if id is null
+
+  const isSelected = selectedHierarchies.includes(hierarchy.id.toString());
             
             return (
               <TableRow key={hierarchy.id} className={isSelected ? 'bg-muted/50' : ''}>
@@ -100,26 +108,26 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
                   <Checkbox
                     checked={isSelected}
                     onCheckedChange={(checked) => 
-                      handleSelectHierarchy(hierarchy.id.toString(), checked as boolean)
+                      handleSelectHierarchy(hierarchy.id!.toString(), checked as boolean)
                     }
                     aria-label={`Select hierarchy ${hierarchy.id}`}
                   />
                 </TableCell>
                 <TableCell className="font-medium">
                   <div>
-                    <div className="font-semibold">{hierarchy.higher_role_name}</div>
+                    <div className="font-semibold">{hierarchy.higherRoleName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.higher_role_id}</div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-semibold">{hierarchy.lower_role_name}</div>
+                    <div className="font-semibold">{hierarchy.lowerRoleName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.lower_role_id}</div>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div>
-                    <div className="font-semibold">{hierarchy.store_name}</div>
+                    <div className="font-semibold">{hierarchy.storeName}</div>
                     <div className="text-sm text-gray-500">ID: {hierarchy.store_id}</div>
                   </div>
                 </TableCell>
@@ -128,7 +136,7 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
                     {hierarchy.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   <div>
                     <div className="font-medium">{hierarchy.created_by}</div>
                     {hierarchy.reason && (
@@ -137,7 +145,7 @@ const HierarchyTable: React.FC<HierarchyTableProps> = ({
                       </div>
                     )}
                   </div>
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
                   <div className="text-sm">
                     {formatDate(hierarchy.created_at)}
