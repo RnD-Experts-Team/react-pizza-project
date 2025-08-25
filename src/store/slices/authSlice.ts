@@ -1,254 +1,417 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { authService } from '../../services/authService';
+import { authService, isUnauthorizedError } from '../../services/authService';
 import type {
+  AuthState,
   RegisterRequest,
-  VerifyEmailOtpRequest,
-  ResendVerificationOtpRequest,
+  VerifyEmailRequest,
+  ResendVerificationOTPRequest,
   LoginRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
-  AuthResponse,
   User,
+  LoginResponse,
 } from '../../types/authTypes';
+import { parseApiError } from '../../utils/errorUtils';
+import {
+  saveToken,
+  loadToken,
+  clearToken,
+} from '../../utils/tokenStorage';
+import {
+  savePermissionsAndRoles,
+  clearPermissionsAndRoles,
+} from '../../utils/permissionAndRolesStorage';
 
-// Define the auth state interface
-interface AuthState {
-  user: User | null;
-  token: string | null;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-  error: string | null;
-  registrationStep: 'register' | 'verify' | 'completed';
-  registrationEmail: string | null;
+// Type for thunk API configuration
+interface ThunkApiConfig {
+  rejectValue: string;
 }
+
+// Retry constants
+const RETRY_MAX = 2;
+const RETRY_COUNT_KEY = 'authRetryCount';
 
 // Initial state
 const initialState: AuthState = {
   user: null,
-  token: localStorage.getItem('auth_token'),
+  token: null,
+  permissions: [],
+  roles: [],
   isLoading: false,
-  isAuthenticated: !!localStorage.getItem('auth_token'),
   error: null,
-  registrationStep: 'register',
-  registrationEmail: null,
+  isAuthenticated: false,
 };
 
-// Async thunks for auth operations
-export const registerUser = createAsyncThunk(
-  'auth/register',
-  async (data: RegisterRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.register(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Registration failed');
-      }
-      return { response, email: data.email };
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Registration failed');
-    }
-  }
-);
+// Helper function to extract permissions and roles from user object
+const extractPermissionsAndRoles = (user: User) => {
+  const permissions = user.all_permissions?.map((p) => p.name) || [];
+  const roles = user.global_roles?.map((r) => r.name) || [];
+  return { permissions, roles };
+};
 
-export const verifyEmailOtp = createAsyncThunk(
-  'auth/verifyEmailOtp',
-  async (data: VerifyEmailOtpRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.verifyEmailOtp(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Email verification failed');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Email verification failed');
-    }
-  }
-);
+// Helper function to store user data with tokens and permissions
+const storeUserData = (user: User, token: string) => {
+  // Save encrypted token
+  saveToken(token);
+  
+  // Save unencrypted permissions and roles
+  const permissionsData = {
+    cached_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutes
+    all_permissions: user.all_permissions || [],
+    global_roles: user.global_roles || [],
+    global_permissions: user.global_permissions || [],
+    roles_permissions: user.all_permissions || [],
+    stores: user.stores || [],
+    summary: user.summary,
+  };
+  
+  savePermissionsAndRoles(permissionsData);
+};
 
-export const resendVerificationOtp = createAsyncThunk(
-  'auth/resendVerificationOtp',
-  async (data: ResendVerificationOtpRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.resendVerificationOtp(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Failed to resend verification code');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to resend verification code');
+// Refresh token thunk
+export const refreshToken = createAsyncThunk<
+  string,
+  void,
+  ThunkApiConfig
+>('auth/refreshToken', async (_, thunkAPI) => {
+  try {
+    const response = await authService.refreshToken();
+    
+    if (response.data.success && response.data.data?.token) {
+      const newToken = response.data.data.token;
+      
+      // Update stored token
+      saveToken(newToken);
+      
+      // Reset retry count
+      localStorage.removeItem(RETRY_COUNT_KEY);
+      
+      return newToken;
     }
+    
+    return thunkAPI.rejectWithValue('Failed to refresh token');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
   }
-);
+});
 
-export const loginUser = createAsyncThunk(
-  'auth/login',
-  async (data: LoginRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.login(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Login failed');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Login failed');
-    }
-  }
-);
-
-export const forgotPassword = createAsyncThunk(
-  'auth/forgotPassword',
-  async (data: ForgotPasswordRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.forgotPassword(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Failed to send password reset email');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to send password reset email');
-    }
-  }
-);
-
-export const resetPassword = createAsyncThunk(
-  'auth/resetPassword',
-  async (data: ResetPasswordRequest, { rejectWithValue }) => {
-    try {
-      const response = await authService.resetPassword(data);
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Password reset failed');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Password reset failed');
-    }
-  }
-);
-
-export const getUserProfile = createAsyncThunk(
-  'auth/getUserProfile',
-  async (_, { rejectWithValue }) => {
-    try {
-      const user = await authService.getUserProfile();
+// Register thunk - FIXED: Return the full User object
+export const register = createAsyncThunk<
+  User,
+  RegisterRequest,
+  ThunkApiConfig
+>('auth/register', async (data, thunkAPI) => {
+  try {
+    const response = await authService.register(data);
+    
+    if (response.data.success && response.data.data?.user) {
+      // Create a full User object with required fields
+      const user: User = {
+        ...response.data.data.user,
+        global_roles: [],
+        global_permissions: [],
+        all_permissions: [],
+        stores: [],
+        summary: {
+          total_stores: 0,
+          total_roles: 0,
+          total_permissions: 0,
+          manageable_users_count: 0,
+        },
+      };
       return user;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Failed to get user profile');
     }
+    
+    return thunkAPI.rejectWithValue(response.data.message || 'Registration failed');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
   }
-);
+});
 
-export const logoutUser = createAsyncThunk(
+// Verify email OTP thunk with retry logic
+export const verifyEmailOTP = createAsyncThunk<
+  void,
+  VerifyEmailRequest,
+  ThunkApiConfig
+>('auth/verifyEmailOTP', async (data, thunkAPI) => {
+  let retryCount = parseInt(localStorage.getItem(RETRY_COUNT_KEY) || '0');
+  
+  const executeRequest = async (): Promise<void> => {
+    try {
+      const response = await authService.verifyEmail(data);
+      
+      if (response.data.success) {
+        localStorage.removeItem(RETRY_COUNT_KEY);
+        return;
+      }
+      
+      throw new Error(response.data.message || 'Verification failed');
+    } catch (error) {
+      if (isUnauthorizedError(error) && retryCount < RETRY_MAX) {
+        retryCount++;
+        localStorage.setItem(RETRY_COUNT_KEY, retryCount.toString());
+        
+        const refreshResult = await thunkAPI.dispatch(refreshToken());
+        
+        if (refreshResult.meta.requestStatus === 'fulfilled') {
+          return executeRequest();
+        } else {
+          thunkAPI.dispatch(logout());
+          throw new Error('Session expired. Please login again.');
+        }
+      }
+      
+      if (retryCount >= RETRY_MAX && isUnauthorizedError(error)) {
+        thunkAPI.dispatch(logout());
+        throw new Error('Session expired. Please login again.');
+      }
+      
+      throw error;
+    }
+  };
+  
+  try {
+    return await executeRequest();
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Resend verification OTP thunk
+export const resendVerificationOTP = createAsyncThunk<
+  void,
+  ResendVerificationOTPRequest,
+  ThunkApiConfig
+>('auth/resendVerificationOTP', async (data, thunkAPI) => {
+  try {
+    const response = await authService.resendVerificationOTP(data);
+    
+    if (response.data.success) {
+      return;
+    }
+    
+    return thunkAPI.rejectWithValue(response.data.message || 'Resend OTP failed');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Login thunk
+export const login = createAsyncThunk<
+  LoginResponse,
+  LoginRequest,
+  ThunkApiConfig
+>('auth/login', async (data, thunkAPI) => {
+  try {
+    const response = await authService.login(data);
+    
+    if (response.data.success && response.data.data?.user && response.data.data?.token) {
+      const loginData = response.data.data;
+      
+      // Store user data with token
+      storeUserData(loginData.user, loginData.token);
+      
+      return loginData;
+    }
+    
+    return thunkAPI.rejectWithValue(response.data.message || 'Login failed');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Forgot password thunk
+export const forgotPassword = createAsyncThunk<
+  void,
+  ForgotPasswordRequest,
+  ThunkApiConfig
+>('auth/forgotPassword', async (data, thunkAPI) => {
+  try {
+    const response = await authService.forgotPassword(data);
+    
+    if (response.data.success) {
+      return;
+    }
+    
+    return thunkAPI.rejectWithValue(response.data.message || 'Forgot password failed');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Reset password thunk
+export const resetPassword = createAsyncThunk<
+  void,
+  ResetPasswordRequest,
+  ThunkApiConfig
+>('auth/resetPassword', async (data, thunkAPI) => {
+  try {
+    const response = await authService.resetPassword(data);
+    
+    if (response.data.success) {
+      return;
+    }
+    
+    return thunkAPI.rejectWithValue(response.data.message || 'Reset password failed');
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Get user profile thunk with retry logic
+export const getUserProfile = createAsyncThunk<
+  User,
+  void,
+  ThunkApiConfig
+>('auth/getUserProfile', async (_, thunkAPI) => {
+  let retryCount = parseInt(localStorage.getItem(RETRY_COUNT_KEY) || '0');
+  
+  const executeRequest = async (): Promise<User> => {
+    try {
+      const response = await authService.getUserProfile();
+      
+      if (response.data.success && response.data.data?.user) {
+        localStorage.removeItem(RETRY_COUNT_KEY);
+        return response.data.data.user;
+      }
+      
+      throw new Error('Failed to load profile');
+    } catch (error) {
+      if (isUnauthorizedError(error) && retryCount < RETRY_MAX) {
+        retryCount++;
+        localStorage.setItem(RETRY_COUNT_KEY, retryCount.toString());
+        
+        const refreshResult = await thunkAPI.dispatch(refreshToken());
+        
+        if (refreshResult.meta.requestStatus === 'fulfilled') {
+          return executeRequest();
+        } else {
+          thunkAPI.dispatch(logout());
+          throw new Error('Session expired. Please login again.');
+        }
+      }
+      
+      if (retryCount >= RETRY_MAX && isUnauthorizedError(error)) {
+        thunkAPI.dispatch(logout());
+        throw new Error('Session expired. Please login again.');
+      }
+      
+      throw error;
+    }
+  };
+  
+  try {
+    return await executeRequest();
+  } catch (error) {
+    return thunkAPI.rejectWithValue(parseApiError(error));
+  }
+});
+
+// Logout thunk - FIXED: Removed unused thunkAPI parameter
+export const logout = createAsyncThunk<void, void, ThunkApiConfig>(
   'auth/logout',
-  async (_, { rejectWithValue }) => {
+  async () => {
     try {
       await authService.logout();
-      return null;
-    } catch (error: any) {
-      // Even if logout fails on server, we still want to clear local state
-      return null;
+    } catch (error) {
+      // Ignore logout API errors - we still want to clear local data
     }
+    
+    // Clear all stored data
+    clearToken();
+    clearPermissionsAndRoles();
+    localStorage.removeItem(RETRY_COUNT_KEY);
+    
+    return;
   }
 );
 
-export const refreshToken = createAsyncThunk(
-  'auth/refreshToken',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await authService.refreshToken();
-      if (!response.success) {
-        return rejectWithValue(response.message || 'Token refresh failed');
-      }
-      return response;
-    } catch (error: any) {
-      return rejectWithValue(error.message || 'Token refresh failed');
-    }
-  }
-);
-
-// Auth slice
+// Create the auth slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    // Action to initialize auth state from localStorage on app start
+    initializeAuth: (state) => {
+      const token = loadToken();
+      if (token) {
+        state.token = token;
+        state.isAuthenticated = true;
+      }
+    },
+    
+    // Clear error action
     clearError: (state) => {
       state.error = null;
-    },
-    setRegistrationStep: (state, action: PayloadAction<'register' | 'verify' | 'completed'>) => {
-      state.registrationStep = action.payload;
-    },
-    setRegistrationEmail: (state, action: PayloadAction<string | null>) => {
-      state.registrationEmail = action.payload;
-    },
-    resetRegistration: (state) => {
-      state.registrationStep = 'register';
-      state.registrationEmail = null;
-    },
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      state.error = null;
-      localStorage.removeItem('auth_token');
     },
   },
   extraReducers: (builder) => {
     builder
       // Register
-      .addCase(registerUser.pending, (state) => {
+      .addCase(register.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(registerUser.fulfilled, (state, action) => {
+      .addCase(register.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.registrationStep = 'verify';
-        state.registrationEmail = action.payload.email;
+        state.error = null;
+        // User is registered but not yet authenticated
+        state.user = action.payload;
       })
-      .addCase(registerUser.rejected, (state, action) => {
+      .addCase(register.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Registration failed'; // FIXED: Use nullish coalescing
       })
       
       // Verify Email OTP
-      .addCase(verifyEmailOtp.pending, (state) => {
+      .addCase(verifyEmailOTP.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(verifyEmailOtp.fulfilled, (state) => {
+      .addCase(verifyEmailOTP.fulfilled, (state) => {
         state.isLoading = false;
-        state.registrationStep = 'completed';
+        state.error = null;
       })
-      .addCase(verifyEmailOtp.rejected, (state, action) => {
+      .addCase(verifyEmailOTP.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Email verification failed';
       })
       
       // Resend Verification OTP
-      .addCase(resendVerificationOtp.pending, (state) => {
+      .addCase(resendVerificationOTP.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(resendVerificationOtp.fulfilled, (state) => {
+      .addCase(resendVerificationOTP.fulfilled, (state) => {
         state.isLoading = false;
+        state.error = null;
       })
-      .addCase(resendVerificationOtp.rejected, (state, action) => {
+      .addCase(resendVerificationOTP.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Resend OTP failed';
       })
       
       // Login
-      .addCase(loginUser.pending, (state) => {
+      .addCase(login.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(loginUser.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.error = null;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
         state.isAuthenticated = true;
-        state.user = action.payload.data?.user || null;
-        state.token = action.payload.data?.token || null;
+        
+        // Extract and set permissions and roles
+        const { permissions, roles } = extractPermissionsAndRoles(action.payload.user);
+        state.permissions = permissions;
+        state.roles = roles;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+      .addCase(login.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Login failed';
         state.isAuthenticated = false;
       })
       
@@ -259,10 +422,11 @@ const authSlice = createSlice({
       })
       .addCase(forgotPassword.fulfilled, (state) => {
         state.isLoading = false;
+        state.error = null;
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Forgot password failed';
       })
       
       // Reset Password
@@ -272,10 +436,11 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.fulfilled, (state) => {
         state.isLoading = false;
+        state.error = null;
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
+        state.error = action.payload ?? 'Reset password failed';
       })
       
       // Get User Profile
@@ -285,66 +450,63 @@ const authSlice = createSlice({
       })
       .addCase(getUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.error = null;
         state.user = action.payload;
         state.isAuthenticated = true;
+        
+        // Extract and set permissions and roles
+        const { permissions, roles } = extractPermissionsAndRoles(action.payload);
+        state.permissions = permissions;
+        state.roles = roles;
+        
+        // Update stored permissions data
+        const permissionsData = {
+          cached_at: new Date().toISOString(),
+          expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          all_permissions: action.payload.all_permissions || [],
+          global_roles: action.payload.global_roles || [],
+          global_permissions: action.payload.global_permissions || [],
+          roles_permissions: action.payload.all_permissions || [],
+          stores: action.payload.stores || [],
+          summary: action.payload.summary,
+        };
+        savePermissionsAndRoles(permissionsData);
       })
       .addCase(getUserProfile.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
-        // If getting profile fails, user might not be authenticated
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        localStorage.removeItem('auth_token');
+        state.error = action.payload ?? 'Failed to load profile';
+      })
+      
+      // Refresh Token - FIXED: Added underscore to unused parameter
+      .addCase(refreshToken.pending, (_state) => {
+        // Don't set loading for refresh token as it should be transparent
+      })
+      .addCase(refreshToken.fulfilled, (state, action) => {
+        state.token = action.payload;
+        state.error = null;
+      })
+      .addCase(refreshToken.rejected, (state) => {
+        // Clear auth state on refresh token failure
+        Object.assign(state, initialState);
       })
       
       // Logout
-      .addCase(logoutUser.pending, (state) => {
+      .addCase(logout.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(logoutUser.fulfilled, (state) => {
-        state.isLoading = false;
-        state.user = null;
-        state.token = null;
-        state.isAuthenticated = false;
-        state.error = null;
+      .addCase(logout.fulfilled, (state) => {
+        // Reset to initial state
+        Object.assign(state, initialState);
       })
-      .addCase(logoutUser.rejected, (state) => {
-        // Even if logout fails, clear local state
-        state.isLoading = false;
-        state.user = null;
-        state.token = null;
-        state.isAuthenticated = false;
-        state.error = null;
-      })
-      
-      // Refresh Token
-      .addCase(refreshToken.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.token = action.payload.data?.token || null;
-        state.isAuthenticated = true;
-      })
-      .addCase(refreshToken.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-        state.isAuthenticated = false;
-        state.user = null;
-        state.token = null;
-        localStorage.removeItem('auth_token');
+      .addCase(logout.rejected, (state) => {
+        // Even if logout API fails, clear local state
+        Object.assign(state, initialState);
       });
   },
 });
 
-export const {
-  clearError,
-  setRegistrationStep,
-  setRegistrationEmail,
-  resetRegistration,
-  logout,
-} = authSlice.actions;
+// Export actions
+export const { initializeAuth, clearError } = authSlice.actions;
 
+// Export reducer
 export default authSlice.reducer;

@@ -42,8 +42,8 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '../ui/sidebar';
-// Update to useReduxAuth
-import { useReduxAuth } from '../../hooks/useReduxAuth';
+// Update to useAuth
+import { useAuth } from '../../hooks/useAuth';
 import {
   Home,
   Pizza,
@@ -262,7 +262,7 @@ function generateBreadcrumbs(pathname: string) {
 
 // App Header Component
 function AppHeader() {
-  const { user, logout, isAuthenticated } = useReduxAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 

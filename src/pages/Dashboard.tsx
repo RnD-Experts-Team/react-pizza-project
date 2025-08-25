@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
-import { useReduxAuth } from '../hooks/useReduxAuth';
+import { useAuth } from '../hooks/useAuth';
 import type { User } from '../types/authTypes';
 import { InfoSection } from '@/components/InfoSection';
 import { InfoCards } from '../components/InfoCards';
@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
     isAuthenticated, 
     isLoading, 
     getUserProfile 
-  } = useReduxAuth();
+  } = useAuth();
   
   const [userProfile, setUserProfile] = useState<User | null>(user);
   const [profileLoading, setProfileLoading] = useState(false);

@@ -19,7 +19,7 @@ import {
   TabsTrigger,
 } from '../components/ui/tabs';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { useReduxAuth } from '../hooks/useReduxAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import {
   Settings as SettingsIcon,
@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 
 const Settings: React.FC = () => {
-  const { user, logout } = useReduxAuth();
+  const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
 

@@ -1,317 +1,135 @@
 import axios from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import { store } from '../store'; // Adjust import path as needed
+import { loadToken } from '../utils/tokenStorage';
 import type {
   RegisterRequest,
-  VerifyEmailOtpRequest,
-  ResendVerificationOtpRequest,
+  VerifyEmailRequest,
+  ResendVerificationOTPRequest,
   LoginRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
-  AuthResponse,
-  User,
-} from '../types/authTypes.ts';
+  ApiResponse,
+  RegisterResponse,
+  LoginResponse,
+  RefreshTokenResponse,
+  UserProfileResponse,
+} from '../types/authTypes';
 
-// Base API URL - update to your actual domain
-const API_BASE_URL = 'https://auth.pnepizza.com/api/v1/auth';
+// Base API configuration
+const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';
 
-// Track if we're currently refreshing to prevent multiple refresh attempts
-let isRefreshing = false;
-let refreshAttempts = 0;
-const MAX_REFRESH_ATTEMPTS = 3;
+// Create axios instance
+const apiClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000,
+  headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  },
+});
 
-let failedQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (error: any) => void;
-}> = [];
-
-const processQueue = (error: any, token: string | null = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) {
-      reject(error);
-    } else {
-      resolve(token!);
-    }
-  });
+// Helper function to get token from Redux store or localStorage fallback
+const getAuthToken = (): string | null => {
+  const state = store.getState();
+  const reduxToken = state.auth?.token;
   
-  failedQueue = [];
+  if (reduxToken) {
+    return reduxToken;
+  }
+  
+  // Fallback to decrypt token from localStorage
+  return loadToken();
 };
 
-// Create axios instance with default config
-const authApi = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-});
-
-// Add token to requests if available
-authApi.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Handle token refresh on 401 responses
-authApi.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const originalRequest = error.config;
-
-    // Don't try to refresh token for login, register, or other auth endpoints
-    const authEndpoints = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
-    const isAuthEndpoint = authEndpoints.some(endpoint => 
-      originalRequest.url?.includes(endpoint)
-    );
-
-    // Also don't refresh if this is already a refresh token request
-    const isRefreshTokenRequest = originalRequest.url?.includes('/refresh-token');
-
-    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint && !isRefreshTokenRequest) {
-      // Check if we've exceeded max refresh attempts
-      if (refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
-        console.error('Max refresh attempts exceeded');
-        localStorage.removeItem('auth_token');
-        delete authApi.defaults.headers.Authorization;
-        refreshAttempts = 0;
-        isRefreshing = false;
-        
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-        return Promise.reject(error);
-      }
-
-      if (isRefreshing) {
-        // If we're already refreshing, queue this request
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return authApi(originalRequest);
-        }).catch((err) => {
-          return Promise.reject(err);
-        });
-      }
-
-      originalRequest._retry = true;
-      isRefreshing = true;
-      refreshAttempts++;
-
-      try {
-        const refreshResponse = await authApi.post('/refresh-token');
-        
-        if (refreshResponse.data.success && refreshResponse.data.data?.token) {
-          const newToken = refreshResponse.data.data.token;
-          localStorage.setItem('auth_token', newToken);
-          authApi.defaults.headers.Authorization = `Bearer ${newToken}`;
-          processQueue(null, newToken);
-          
-          // Reset refresh attempts on successful refresh
-          refreshAttempts = 0;
-          
-          // Retry the original request with new token
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          return authApi(originalRequest);
-        } else {
-          throw new Error('Invalid refresh response');
-        }
-      } catch (refreshError: any) {
-        console.error('Token refresh failed:', refreshError);
-        
-        // Check if the refresh token is also invalid (Unauthenticated)
-        if (refreshError.response?.data?.message === 'Unauthenticated.') {
-          console.log('Refresh token is invalid, clearing auth state');
-        }
-        
-        // Refresh failed, clear everything and redirect
-        processQueue(refreshError, null);
-        localStorage.removeItem('auth_token');
-        delete authApi.defaults.headers.Authorization;
-        
-        // Reset refresh attempts
-        refreshAttempts = 0;
-        
-        // Only redirect if we're not already on login page
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
-      }
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = getAuthToken();
+    if (token && config.headers) {
+      config.headers['Authorization'] = `Bearer ${token}`;
     }
-
-    return Promise.reject(error);
+    return config;
   },
+  (error) => {
+    return Promise.reject(error);
+  }
 );
 
+// Auth service functions - pure API calls without Redux logic
 export const authService = {
-  // Register new user
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/register', data);
-      return response.data;
-    } catch (error: any) {
-      // Return the server error response
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      // Return a generic error structure if no response
-      return {
-        success: false,
-        message: 'Registration failed. Please try again.',
-      };
-    }
+  // Register user
+  register: async (
+    data: RegisterRequest
+  ): Promise<AxiosResponse<ApiResponse<RegisterResponse>>> => {
+    return await apiClient.post('/auth/register', data);
   },
 
-  // Verify email with OTP
-  verifyEmailOtp: async (
-    data: VerifyEmailOtpRequest,
-  ): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/verify-email', data);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      return {
-        success: false,
-        message: 'Email verification failed. Please try again.',
-      };
-    }
+  // Verify email OTP
+  verifyEmail: async (
+    data: VerifyEmailRequest
+  ): Promise<AxiosResponse<ApiResponse>> => {
+    return await apiClient.post('/auth/verify-email', data);
   },
 
   // Resend verification OTP
-  resendVerificationOtp: async (
-    data: ResendVerificationOtpRequest,
-  ): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/resend-verification-otp', data);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      return {
-        success: false,
-        message: 'Failed to resend verification code. Please try again.',
-      };
-    }
+  resendVerificationOTP: async (
+    data: ResendVerificationOTPRequest
+  ): Promise<AxiosResponse<ApiResponse>> => {
+    return await apiClient.post('/auth/resend-verification-otp', data);
   },
 
   // Login user
-  login: async (data: LoginRequest): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/login', data);
-
-      // Save token from nested data structure
-      if (
-        response.data.success &&
-        response.data.data &&
-        response.data.data.token
-      ) {
-        const token = response.data.data.token;
-        localStorage.setItem('auth_token', token);
-        authApi.defaults.headers.Authorization = `Bearer ${token}`;
-        // Reset refresh attempts on successful login
-        refreshAttempts = 0;
-      }
-
-      return response.data;
-    } catch (error: any) {
-      console.error('Login API error:', error.response?.data);
-      // Return the server error response for invalid credentials
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      // Return a generic error structure if no response
-      return {
-        success: false,
-        message: 'Login failed. Please try again.',
-      };
-    }
+  login: async (
+    data: LoginRequest
+  ): Promise<AxiosResponse<ApiResponse<LoginResponse>>> => {
+    return await apiClient.post('/auth/login', data);
   },
 
   // Forgot password
   forgotPassword: async (
-    data: ForgotPasswordRequest,
-  ): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/forgot-password', data);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      return {
-        success: false,
-        message: 'Failed to send password reset email. Please try again.',
-      };
-    }
+    data: ForgotPasswordRequest
+  ): Promise<AxiosResponse<ApiResponse>> => {
+    return await apiClient.post('/auth/forgot-password', data);
   },
 
   // Reset password
-  resetPassword: async (data: ResetPasswordRequest): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/reset-password', data);
-      return response.data;
-    } catch (error: any) {
-      if (error.response?.data) {
-        return error.response.data;
-      }
-      return {
-        success: false,
-        message: 'Password reset failed. Please try again.',
-      };
-    }
+  resetPassword: async (
+    data: ResetPasswordRequest
+  ): Promise<AxiosResponse<ApiResponse>> => {
+    return await apiClient.post('/auth/reset-password', data);
   },
 
   // Get user profile
-  getUserProfile: async (): Promise<User> => {
-    const response = await authApi.get('/me');
-    // Extract user from nested data structure
-    return response.data.data.user;
-  },
-
-  // Logout user
-  logout: async (): Promise<AuthResponse> => {
-    try {
-      const response = await authApi.post('/logout');
-      localStorage.removeItem('auth_token');
-      delete authApi.defaults.headers.Authorization;
-      // Reset refresh attempts on logout
-      refreshAttempts = 0;
-      return response.data;
-    } catch (error) {
-      // Even if logout fails on server, clear local storage
-      localStorage.removeItem('auth_token');
-      delete authApi.defaults.headers.Authorization;
-      refreshAttempts = 0;
-      throw error;
-    }
+  getUserProfile: async (): Promise<AxiosResponse<ApiResponse<UserProfileResponse>>> => {
+    return await apiClient.get('/auth/me');
   },
 
   // Refresh token
-  refreshToken: async (): Promise<AuthResponse> => {
-    const response = await authApi.post('/refresh-token');
+  refreshToken: async (): Promise<AxiosResponse<ApiResponse<RefreshTokenResponse>>> => {
+    return await apiClient.post('/auth/refresh-token');
+  },
 
-    // Save new token from nested data structure
-    if (
-      response.data.success &&
-      response.data.data &&
-      response.data.data.token
-    ) {
-      const token = response.data.data.token;
-      localStorage.setItem('auth_token', token);
-      authApi.defaults.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return response.data;
+  // Logout user
+  logout: async (): Promise<AxiosResponse<ApiResponse>> => {
+    return await apiClient.post('/auth/logout');
   },
 };
 
-// Export the refresh function for use in interceptor
-export const refreshToken = authService.refreshToken;
+// Export the configured axios instance for use in other parts of the app if needed
+export { apiClient };
+
+// Helper function to check if error is unauthorized
+export const isUnauthorizedError = (error: any): boolean => {
+  return error?.response?.status === 401;
+};
+
+// Helper function to check if error is validation error
+export const isValidationError = (error: any): boolean => {
+  return error?.response?.status === 422;
+};
+
+// Helper function to check if error is bad request
+export const isBadRequestError = (error: any): boolean => {
+  return error?.response?.status === 400;
+};

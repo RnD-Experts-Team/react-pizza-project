@@ -1,185 +1,211 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Mail, CheckCircle } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Mail, ArrowLeft, Send } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
 
-// Redux auth hook import
-import { useReduxAuth } from '../../hooks/useReduxAuth';
+interface ForgotPasswordFormData {
+  email: string;
+}
 
-const ForgotPassword: React.FC = () => {
-  const [formData, setFormData] = useState({ email: '' });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [successMessage, setSuccessMessage] = useState('');
+interface FormErrors {
+  email?: string;
+}
+
+const ForgotPasswordPage: React.FC = () => {
   const navigate = useNavigate();
+  const { 
+    forgotPassword, 
+    isLoading, 
+    error, 
+    isAuthenticated, 
+    clearError 
+  } = useAuth();
 
-  // Redux actions and state
-  const { forgotPassword, isLoading, error, clearError } = useReduxAuth();
+  // Form state
+  const [formData, setFormData] = useState<ForgotPasswordFormData>({
+    email: '',
+  });
 
+  const [localErrors, setLocalErrors] = useState<FormErrors>({});
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear local error when user starts typing
+    if (localErrors[name as keyof FormErrors]) {
+      setLocalErrors(prev => ({
+        ...prev,
+        [name]: undefined,
+      }));
     }
-    if (error) clearError();
+
+    // Clear global error when user starts typing
+    if (error) {
+      clearError();
+    }
   };
 
+  // Validate form
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const errors: FormErrors = {};
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setLocalErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
-    setSuccessMessage('');
+    // Clear previous errors
+    setLocalErrors({});
     clearError();
 
-    try {
-      const result = await forgotPassword({ email: formData.email });
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
 
-      if (result.type.endsWith('/fulfilled')) {
-        setSuccessMessage('Password reset instructions sent to your email!');
-        setTimeout(() => {
-          navigate('/reset-password', { state: { email: formData.email } });
-        }, 3000);
-      } else {
-        setErrors({
-          general:
-            error ||
-            'Failed to send reset instructions. Please try again.',
+    try {
+      const result = await forgotPassword({
+        email: formData.email.trim(),
+      });
+
+      // ✅ FIXED: Redirect to reset password page on success
+      if (result.meta.requestStatus === 'fulfilled') {
+        navigate('/reset-password', {
+          state: {
+            email: formData.email.trim(),
+            message: 'Password reset OTP sent to your email. Please check your inbox.',
+          }
         });
       }
     } catch (err) {
-      setErrors({
-        general: 'Failed to send reset instructions. Please try again.',
-      });
+      console.error('Forgot password error:', err);
     }
   };
 
+  // Handle navigation link clicks
+  const handleLinkClick = () => {
+    clearError();
+  };
+
   return (
-    <div>
-      <Card className="border shadow-lg">
-        <CardHeader className="space-y-4 pb-8">
-          <div className="text-center space-y-2">
-            <CardTitle className="text-3xl font-bold text-foreground">
-              Forgot Password
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Enter your email address and we'll send you instructions to reset
-              your password
-            </CardDescription>
-          </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Forgot Password</CardTitle>
+          <CardDescription className="text-center">
+            Enter your email address and we'll send you an OTP to reset your password
+          </CardDescription>
         </CardHeader>
-
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {(errors.general || error) && (
-              <Alert
-                variant="destructive"
-                className="border-red-500/50 bg-red-500/10"
-              >
-                <AlertDescription className="text-red-600">
-                  {errors.general || error}
-                </AlertDescription>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Display Redux error */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            {successMessage && (
-              <Alert className="border-green-500/50 bg-green-500/10">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <AlertDescription className="text-green-600">
-                  {successMessage}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <div className="space-y-3">
-              <Label
-                htmlFor="email"
-                className="text-sm font-medium text-foreground flex items-center gap-2"
-              >
-                <Mail className="w-4 h-4 text-primary" />
-                Email Address
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="your@email.com"
-                className={`h-12 ${errors.email ? 'border-destructive' : ''}`}
-              />
-              {errors.email && (
-                <p className="text-destructive text-sm">{errors.email}</p>
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email Address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`pl-10 ${
+                    localErrors.email ? 'border-destructive' : ''
+                  }`}
+                  disabled={isLoading}
+                  autoComplete="email"
+                  autoFocus
+                />
+              </div>
+              {localErrors.email && (
+                <p className="text-sm text-destructive">{localErrors.email}</p>
               )}
+              <p className="text-xs text-muted-foreground">
+                We'll send a 6-digit OTP to this email address
+              </p>
             </div>
 
-            <Button type="submit" className="w-full h-12" disabled={isLoading}>
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
               {isLoading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Sending...
+                  <Send className="mr-2 h-4 w-4 animate-pulse" />
+                  Sending OTP...
                 </>
               ) : (
-                'Send Reset Instructions'
+                <>
+                  <Send className="mr-2 h-4 w-4" />
+                  Send Reset OTP
+                </>
               )}
             </Button>
           </form>
 
-          <div className="mt-8 space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background rounded-sm px-4 text-muted-foreground font-medium tracking-wider">
-                  Options
-                </span>
-              </div>
-            </div>
+          {/* Help Text */}
+          <div className="mt-6 text-center text-sm text-muted-foreground">
+            <p className="mb-4">
+              You'll receive a 6-digit OTP code to reset your password. 
+              The code will expire in 15 minutes for security reasons.
+            </p>
+          </div>
 
-            <div className="flex flex-col space-y-3 text-center">
-              <div className="text-sm text-muted-foreground">
-                Remember your password?{' '}
-                <Link
-                  to="/login"
-                  className="font-medium text-primary hover:text-primary/80"
-                >
-                  Sign in
-                </Link>
-              </div>
-
-              <div className="text-sm text-muted-foreground">
-                Don't have an account?{' '}
-                <Link
-                  to="/register"
-                  className="font-medium text-primary hover:text-primary/80"
-                >
-                  Sign up
-                </Link>
-              </div>
+          {/* Navigation Links */}
+          <div className="flex flex-col space-y-2 text-center text-sm">
+            <Link
+              to="/login"
+              className="text-primary hover:underline flex items-center justify-center"
+              onClick={handleLinkClick}
+            >
+              <ArrowLeft className="mr-1 h-3 w-3" />
+              Back to Login
+            </Link>
+            <div>
+              Don't have an account?{' '}
+              <Link
+                to="/register"
+                className="text-primary hover:underline"
+                onClick={handleLinkClick}
+              >
+                Sign up
+              </Link>
             </div>
           </div>
         </CardContent>
@@ -188,4 +214,4 @@ const ForgotPassword: React.FC = () => {
   );
 };
 
-export default ForgotPassword;
+export default ForgotPasswordPage;

@@ -1,289 +1,366 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '../../components/ui/card';
-import { Alert, AlertDescription } from '../../components/ui/alert';
-import { useReduxAuth } from '../../hooks/useReduxAuth';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { parseValidationErrors } from '@/utils/errorUtils';
 
-const Register: React.FC = () => {
-  const [formData, setFormData] = useState({
+interface RegisterFormData {
+  name: string;
+  email: string;
+  password: string;
+  password_confirmation: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  password?: string;
+  password_confirmation?: string;
+}
+
+const RegisterPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { register, isLoading, error, isAuthenticated, clearError } = useAuth();
+
+  // Form state
+  const [formData, setFormData] = useState<RegisterFormData>({
     name: '',
     email: '',
     password: '',
     password_confirmation: '',
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  // Redux auth hook
-  const { register, isLoading, error, clearError, setRegistrationEmail } = useReduxAuth();
-  const navigate = useNavigate();
 
+  const [localErrors, setLocalErrors] = useState<FormErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
+
+
+  // In LoginPage.tsx and RegisterPage.tsx
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    // Clear local error when user starts typing
+    if (localErrors[name as keyof FormErrors]) {
+      setLocalErrors(prev => ({
+        ...prev,
+        [name]: undefined,
+      }));
     }
-    if (error) clearError();
+
+    // Clear global error when user starts typing
+    if (error) {
+      clearError();
+    }
+  };
+  const handleLinkClick = () => {
+    clearError();
   };
 
+  // Validate form
   const validateForm = (): boolean => {
-    const newErrors: Record<string, string> = {};
+    const errors: FormErrors = {};
 
-    if (!formData.name) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
+    // Name validation
+    if (!formData.name.trim()) {
+      errors.name = 'Full name is required';
+    } else if (formData.name.trim().length < 2) {
+      errors.name = 'Name must be at least 2 characters';
     }
 
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+    // Email validation
+    if (!formData.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'Please enter a valid email address';
     }
 
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    // Password validation
+    if (!formData.password.trim()) {
+      errors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      errors.password = 'Password must be at least 8 characters';
     }
 
-    if (!formData.password_confirmation) {
-      newErrors.password_confirmation = 'Password confirmation is required';
+    // Password confirmation validation
+    if (!formData.password_confirmation.trim()) {
+      errors.password_confirmation = 'Please confirm your password';
     } else if (formData.password !== formData.password_confirmation) {
-      newErrors.password_confirmation = 'Passwords do not match';
+      errors.password_confirmation = 'Passwords do not match';
     }
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    setLocalErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
-
+    // Clear previous errors
+    setLocalErrors({});
     clearError();
+
+    // Validate form
+    if (!validateForm()) {
+      return;
+    }
+    
 
     try {
       const result = await register({
-        name: formData.name,
-        email: formData.email,
+        name: formData.name.trim(),
+        email: formData.email.trim(),
         password: formData.password,
         password_confirmation: formData.password_confirmation,
       });
 
-      if (result.type.endsWith('/fulfilled')) {
-        // Set registration email for verification step
-        setRegistrationEmail(formData.email);
-        navigate('/verify-email', { state: { email: formData.email } });
-      } else {
-        setErrors({ 
-          general: error || 'Registration failed. Please try again.' 
+      console.log('Registration result:', result); // Debug log
+
+      // ✅ FIXED: Check for successful registration
+      if (result.meta.requestStatus === 'fulfilled') {
+        console.log('Registration successful, navigating...'); // Debug log
+        // Navigate to email verification page
+        navigate('/verify-email', { 
+          state: { 
+            email: formData.email.trim(),
+            message: 'Registration successful! Please check your email for verification code.' 
+          },
+          replace: true // Use replace to prevent going back to registration
         });
       }
+      // ✅ FIXED: Handle rejection properly
+      else if (result.meta.requestStatus === 'rejected') {
+        console.log('Registration failed:', result.payload); // Debug log
+        
+        // Try to parse validation errors
+        if (result.payload) {
+          // If it's a validation error object, extract field errors
+          try {
+            const validationErrors = parseValidationErrors({ 
+              response: { 
+                status: 422, 
+                data: { errors: result.payload } 
+              } 
+            });
+            if (Object.keys(validationErrors).length > 0) {
+              setLocalErrors(validationErrors);
+              return;
+            }
+          } catch (e) {
+            // If parsing fails, the error will be shown in the global error alert
+          }
+        }
+      }
     } catch (err) {
-      setErrors({ general: 'Registration failed. Please try again.' });
+      console.error('Registration error:', err);
     }
   };
 
-  return (
-    <div>
-      <Card className="border shadow-lg">
-        <CardHeader className="space-y-4 pb-8">
-          <div className="text-center space-y-2">
-            <CardTitle className="text-3xl font-bold text-foreground">
-              Create Account
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              Enter your information to create your account
-            </CardDescription>
-          </div>
-        </CardHeader>
+  // Handle password visibility toggle
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
-        <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {(errors.general || error) && (
-              <Alert
-                variant="destructive"
-                className="border-red-500/50 bg-red-500/10"
-              >
-                <AlertDescription className="text-red-600">
-                  {errors.general || error}
-                </AlertDescription>
+  const togglePasswordConfirmationVisibility = () => {
+    setShowPasswordConfirmation(!showPasswordConfirmation);
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
+          <CardDescription className="text-center">
+            Enter your details to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Display Redux error */}
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
-            <div className="space-y-3">
-              <Label
-                htmlFor="name"
-                className="text-sm font-medium text-foreground flex items-center gap-2"
-              >
-                <User className="w-4 h-4 text-primary" />
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="John Doe"
-                className={`h-12 ${errors.name ? 'border-destructive' : ''}`}
-              />
-              {errors.name && (
-                <p className="text-destructive text-sm">{errors.name}</p>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <Label
-                htmlFor="email"
-                className="text-sm font-medium text-foreground flex items-center gap-2"
-              >
-                <Mail className="w-4 h-4 text-primary" />
-                Email
-              </Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="your@email.com"
-                className={`h-12 ${errors.email ? 'border-destructive' : ''}`}
-              />
-              {errors.email && (
-                <p className="text-destructive text-sm">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-3">
-              <Label
-                htmlFor="password"
-                className="text-sm font-medium text-foreground flex items-center gap-2"
-              >
-                <Lock className="w-4 h-4 text-primary" />
-                Password
-              </Label>
+            {/* Name Field */}
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
               <div className="relative">
+                <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="name"
+                  name="name"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className={`pl-10 ${
+                    localErrors.name ? 'border-destructive' : ''
+                  }`}
+                  disabled={isLoading}
+                  autoComplete="name"
+                />
+              </div>
+              {localErrors.name && (
+                <p className="text-sm text-destructive">{localErrors.name}</p>
+              )}
+            </div>
+
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className={`pl-10 ${
+                    localErrors.email ? 'border-destructive' : ''
+                  }`}
+                  disabled={isLoading}
+                  autoComplete="email"
+                />
+              </div>
+              {localErrors.email && (
+                <p className="text-sm text-destructive">{localErrors.email}</p>
+              )}
+            </div>
+
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
+                  placeholder="Create a password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Enter your password"
-                  className={`h-12 pr-12 ${
-                    errors.password ? 'border-destructive' : ''
+                  className={`pl-10 pr-10 ${
+                    localErrors.password ? 'border-destructive' : ''
                   }`}
+                  disabled={isLoading}
+                  autoComplete="new-password"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={togglePasswordVisibility}
+                  disabled={isLoading}
+                  tabIndex={-1}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-              {errors.password && (
-                <p className="text-destructive text-sm">{errors.password}</p>
+              {localErrors.password && (
+                <p className="text-sm text-destructive">{localErrors.password}</p>
               )}
             </div>
 
-            <div className="space-y-3">
-              <Label
-                htmlFor="password_confirmation"
-                className="text-sm font-medium text-foreground flex items-center gap-2"
-              >
-                <Lock className="w-4 h-4 text-primary" />
-                Confirm Password
-              </Label>
+            {/* Password Confirmation Field */}
+            <div className="space-y-2">
+              <Label htmlFor="password_confirmation">Confirm Password</Label>
               <div className="relative">
+                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password_confirmation"
                   name="password_confirmation"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type={showPasswordConfirmation ? 'text' : 'password'}
+                  placeholder="Confirm your password"
                   value={formData.password_confirmation}
                   onChange={handleChange}
-                  placeholder="Confirm your password"
-                  className={`h-12 pr-12 ${
-                    errors.password_confirmation ? 'border-destructive' : ''
+                  className={`pl-10 pr-10 ${
+                    localErrors.password_confirmation ? 'border-destructive' : ''
                   }`}
+                  disabled={isLoading}
+                  autoComplete="new-password"
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={togglePasswordConfirmationVisibility}
+                  disabled={isLoading}
+                  tabIndex={-1}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  {showPasswordConfirmation ? (
+                    <EyeOff className="h-4 w-4" />
                   ) : (
-                    <Eye className="h-4 w-4 text-muted-foreground" />
+                    <Eye className="h-4 w-4" />
                   )}
                 </Button>
               </div>
-              {errors.password_confirmation && (
-                <p className="text-destructive text-sm">
-                  {errors.password_confirmation}
-                </p>
+              {localErrors.password_confirmation && (
+                <p className="text-sm text-destructive">{localErrors.password_confirmation}</p>
               )}
             </div>
 
-            <Button type="submit" className="w-full h-12" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  Creating account...
-                </>
-              ) : (
-                'Create Account'
-              )}
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Creating account...' : 'Create Account'}
             </Button>
           </form>
 
-          <div className="mt-8 space-y-4">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background rounded-sm px-4 text-muted-foreground font-medium tracking-wider">
-                  Options
-                </span>
-              </div>
-            </div>
+          {/* Terms and Privacy */}
+          <div className="mt-6 text-center text-xs text-muted-foreground">
+            By creating an account, you agree to our{' '}
+            <Link
+              to="/terms"
+              className="text-primary hover:underline"
+            >
+              Terms of Service
+            </Link>{' '}
+            and{' '}
+            <Link
+              to="/privacy"
+              className="text-primary hover:underline"
+            >
+              Privacy Policy
+            </Link>
+          </div>
 
-            <div className="flex flex-col space-y-3 text-center">
-              <div className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link
-                  to="/login"
-                  className="font-medium text-primary hover:text-primary/80"
-                >
-                  Sign in
-                </Link>
-              </div>
-            </div>
+          {/* Sign In Link */}
+          <div className="mt-4 text-center text-sm">
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary hover:underline" onClick={handleLinkClick}>
+              Sign in
+            </Link>
           </div>
         </CardContent>
       </Card>
@@ -291,4 +368,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default RegisterPage;
