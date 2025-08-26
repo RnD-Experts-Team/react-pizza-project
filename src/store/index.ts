@@ -1,9 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from './slices/authSlice';
+import permissionsReducer from '../features/permissions/store/permissionsSlice';
+import rolesReducer from '../features/roles/store/rolesSlice'; // Add this import
+import usersReducer from '../features/users/store/usersSlice'; // Add this import
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    permissions: permissionsReducer,
+    roles: rolesReducer, // Add this line
+    users: usersReducer, // Add this line
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

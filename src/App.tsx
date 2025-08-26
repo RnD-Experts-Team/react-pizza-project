@@ -6,6 +6,7 @@ import {
 } from 'react-router-dom';
 // import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from './hooks/useTheme';
+import AuthInitializer from './components/AuthInitializer';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,6 +37,7 @@ import CreateUser from './pages/CreateUser';
 import EditUser from './pages/EditUser';
 import UserDetail from './pages/UserDetail';
 import CreateRole from './pages/CreateRole';
+import AssignPermissionsPage from './pages/AssignPermissions';
 import CreatePermission from './pages/CreatePermission';
 
 // Service Client Management Pages
@@ -45,8 +47,9 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
       {/* <AuthProvider> */}
-        <Router>
-          <div className="min-h-screen bg-background text-foreground transition-colors">
+        <AuthInitializer>
+          <Router>
+            <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>
               {/* Public Routes (Auth Pages) */}
               <Route
@@ -214,6 +217,17 @@ function App() {
                 }
               />
               <Route
+                path="/user-management/assign-permissions"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AssignPermissionsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
                 path="/user-management/create-permission"
                 element={
                   <ProtectedRoute>
@@ -242,8 +256,9 @@ function App() {
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-          </div>
-        </Router>
+            </div>
+          </Router>
+        </AuthInitializer>
       {/* </AuthProvider> */}
     </ThemeProvider>
   );

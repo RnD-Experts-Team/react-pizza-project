@@ -20,6 +20,7 @@ import {
 import {
   savePermissionsAndRoles,
   clearPermissionsAndRoles,
+  loadPermissionsAndRoles,
 } from '../../utils/permissionAndRolesStorage';
 
 // Type for thunk API configuration
@@ -40,6 +41,7 @@ const initialState: AuthState = {
   isLoading: false,
   error: null,
   isAuthenticated: false,
+  isInitialized: false,
 };
 
 // Helper function to extract permissions and roles from user object
@@ -335,10 +337,42 @@ const authSlice = createSlice({
     // Action to initialize auth state from localStorage on app start
     initializeAuth: (state) => {
       const token = loadToken();
-      if (token) {
+      const permissionsData = loadPermissionsAndRoles();
+      
+      if (token && permissionsData) {
         state.token = token;
         state.isAuthenticated = true;
+        
+        // Reconstruct user object from stored permissions data
+        if (permissionsData.all_permissions || permissionsData.global_roles) {
+          state.user = {
+            id: 0, // Will be updated when getUserProfile is called
+            name: '',
+            email: '',
+            email_verified_at: null,
+            created_at: '',
+            updated_at: '',
+            global_roles: permissionsData.global_roles || [],
+            global_permissions: permissionsData.global_permissions || [],
+            all_permissions: permissionsData.all_permissions || [],
+            stores: permissionsData.stores || [],
+            summary: permissionsData.summary || {
+              total_stores: 0,
+              total_roles: 0,
+              total_permissions: 0,
+              manageable_users_count: 0,
+            },
+          };
+          
+          // Extract and set permissions and roles
+          const { permissions, roles } = extractPermissionsAndRoles(state.user);
+          state.permissions = permissions;
+          state.roles = roles;
+        }
       }
+      
+      // Mark auth as initialized regardless of whether we found stored data
+      state.isInitialized = true;
     },
     
     // Clear error action

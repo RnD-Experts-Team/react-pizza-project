@@ -34,6 +34,7 @@ export const useAuth = () => {
     isLoading,
     error,
     isAuthenticated,
+    isInitialized,
   } = useAppSelector((state) => state.auth);
 
   // Auth operation dispatchers with proper typing
@@ -181,6 +182,7 @@ export const useAuth = () => {
     isLoading,
     error,
     isAuthenticated,
+    isInitialized,
     
     // Auth operations
     register: registerUser,
