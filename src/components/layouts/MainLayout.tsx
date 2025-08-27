@@ -104,6 +104,11 @@ function AppSidebar() {
       icon: ShieldCheck,
     },
     {
+      title: 'Stores',
+      url: '/stores',
+      icon: Store,
+    },
+    {
       title: 'Settings',
       url: '/settings',
       icon: Settings,
