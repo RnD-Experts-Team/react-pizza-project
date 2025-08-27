@@ -29,8 +29,8 @@ import Pizza from './pages/Pizza';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Settings from './pages/Settings';
-import AuthRulesManagement from './pages/authRules/AuthRulesManagement';
-import CreateAuthRule from './pages/authRules/CreateAuthRule';
+import AuthRulesManagement from './pages/authorizationRules/AuthRulesManagement';
+import CreateAuthRule from './pages/authorizationRules/CreateAuthRule';
 
 // User Management Pages
 import UserManagement from './pages/users/UserManagement';
@@ -42,7 +42,7 @@ import AssignPermissionsPage from './pages/roles/AssignPermissions';
 import CreatePermission from './pages/permissions/CreatePermission';
 
 // Service Client Management Pages
-import ServiceClientManagement from './pages/ServiceClientManagement';
+import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
 
 function App() {
   return (
@@ -255,7 +255,7 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <ServiceClientManagement />
+                      <ServiceClientsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

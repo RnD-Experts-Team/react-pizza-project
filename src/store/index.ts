@@ -4,7 +4,7 @@ import permissionsReducer from '../features/permissions/store/permissionsSlice';
 import rolesReducer from '../features/roles/store/rolesSlice'; // Add this import
 import usersReducer from '../features/users/store/usersSlice'; // Add this import
 import authRulesReducer from '../features/authorizationRules/store/authRulesSlice'; // Add this import
-
+import serviceClientsReducer from '../features/serviceClients/store/serviceClientsSlice'; // Add this import
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -12,6 +12,7 @@ export const store = configureStore({
     roles: rolesReducer, // Add this line
     users: usersReducer, // Add this line
     authRules: authRulesReducer, // Add this line
+    serviceClients: serviceClientsReducer, // Add this line
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
