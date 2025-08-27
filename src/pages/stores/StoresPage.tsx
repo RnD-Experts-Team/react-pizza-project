@@ -5,19 +5,16 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import {  useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from 'sonner'; // or your toast system
 
 // Store management imports
 import { StoresList } from '../../components/stores/StoresList';
-import { CreateStoreDialog } from '../../components/stores/CreateStoreDialog';
-import { EditStoreDialog } from '../../components/stores/EditStoreDialog';
 import { StoreDetailsView } from '../../components/stores/StoreDetailsView';
 import { useStores } from '../../features/stores/hooks/useStores';
 import type { Store } from '../../features/stores/types';
@@ -28,7 +25,6 @@ import type { Store } from '../../features/stores/types';
 interface SearchParams {
   view?: 'list' | 'details';
   storeId?: string;
-  tab?: string;
 }
 
 /**
@@ -36,24 +32,15 @@ interface SearchParams {
  */
 export const StoresPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Get URL parameters
   const view = (searchParams.get('view') as 'list' | 'details') || 'list';
   const selectedStoreId = searchParams.get('storeId');
-  const activeTab = searchParams.get('tab') || 'list';
-
-  // Local state for dialogs
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [storeToEdit, setStoreToEdit] = useState<Store | null>(null);
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-
-  // Get stores data for ID validation and auto-generation
-  const { stores } = useStores();
-  const existingStoreIds = stores.map(store => store.id);
 
   // Update URL parameters
   const updateSearchParams = useCallback((updates: Partial<SearchParams>) => {
@@ -70,50 +57,25 @@ export const StoresPage: React.FC = () => {
     setSearchParams(newParams);
   }, [searchParams, setSearchParams]);
 
-  // Handle create store success
-  const handleCreateSuccess = useCallback((store: Store) => {
-    toast.success('Store created successfully', {
-      description: `${store.name} (${store.id}) has been created.`,
-    });
-    
-    setNotification({
-      type: 'success',
-      message: `Store "${store.name}" has been created successfully.`,
-    });
-    
-    // Auto-dismiss notification after 5 seconds
-    setTimeout(() => setNotification(null), 5000);
-  }, []);
+
+
+  // Handle create store
+  const handleCreateStore = useCallback(() => {
+    navigate('/stores/create');
+  }, [navigate]);
 
   // Handle edit store
   const handleEditStore = useCallback((store: Store) => {
-    setStoreToEdit(store);
-    setEditDialogOpen(true);
-  }, []);
+    navigate(`/stores/edit/${store.id}`);
+  }, [navigate]);
 
-  // Handle edit store success
-  const handleEditSuccess = useCallback((store: Store) => {
-    toast.success('Store updated successfully', {
-      description: `${store.name} (${store.id}) has been updated.`,
-    });
-    
-    setNotification({
-      type: 'success',
-      message: `Store "${store.name}" has been updated successfully.`,
-    });
-    
-    setStoreToEdit(null);
-    
-    // Auto-dismiss notification after 5 seconds
-    setTimeout(() => setNotification(null), 5000);
-  }, []);
+
 
   // Handle view store details
   const handleViewStore = useCallback((store: Store) => {
     updateSearchParams({
       view: 'details',
       storeId: store.id,
-      tab: 'overview',
     });
   }, [updateSearchParams]);
 
@@ -122,9 +84,47 @@ export const StoresPage: React.FC = () => {
     updateSearchParams({
       view: 'list',
       storeId: undefined,
-      tab: undefined,
     });
   }, [updateSearchParams]);
+
+  // Handle delete store
+  const handleDeleteStore = useCallback(async (store: Store) => {
+    try {
+      // TODO: Implement actual delete API call
+      console.log('Deleting store:', store);
+      
+      toast.success('Store deleted successfully', {
+        description: `${store.name} (${store.id}) has been deleted.`,
+      });
+      
+      setNotification({
+        type: 'success',
+        message: `Store "${store.name}" has been deleted successfully.`,
+      });
+      
+      // Auto-dismiss notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
+      
+      // If we're viewing the deleted store, go back to list
+      if (selectedStoreId === store.id) {
+        handleBackToList();
+      }
+    } catch (error) {
+      console.error('Failed to delete store:', error);
+      
+      toast.error('Failed to delete store', {
+        description: 'An error occurred while deleting the store. Please try again.',
+      });
+      
+      setNotification({
+        type: 'error',
+        message: 'Failed to delete store. Please try again.',
+      });
+      
+      // Auto-dismiss notification after 5 seconds
+      setTimeout(() => setNotification(null), 5000);
+    }
+  }, [selectedStoreId, handleBackToList]);
 
  
 
@@ -145,7 +145,7 @@ export const StoresPage: React.FC = () => {
         </div>
         
         {view === 'list' && (
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={handleCreateStore}>
             <Plus className="h-4 w-4 mr-2" />
             Create Store
           </Button>
@@ -174,40 +174,13 @@ export const StoresPage: React.FC = () => {
       <div className="space-y-6">
         {view === 'list' ? (
           /* List View */
-          <Tabs value={activeTab} onValueChange={(value) => updateSearchParams({ tab: value })}>
-            <TabsList>
-              <TabsTrigger value="list">All Stores</TabsTrigger>
-              <TabsTrigger value="active">Active Only</TabsTrigger>
-              <TabsTrigger value="inactive">Inactive Only</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="list" className="space-y-6">
-              <StoresList
-                onCreateStore={() => setCreateDialogOpen(true)}
-                onEditStore={handleEditStore}
-                onViewStore={handleViewStore}
-                className="mt-6"
-              />
-            </TabsContent>
-
-            <TabsContent value="active" className="space-y-6">
-              <StoresList
-                onCreateStore={() => setCreateDialogOpen(true)}
-                onEditStore={handleEditStore}
-                onViewStore={handleViewStore}
-                className="mt-6"
-              />
-            </TabsContent>
-
-            <TabsContent value="inactive" className="space-y-6">
-              <StoresList
-                onCreateStore={() => setCreateDialogOpen(true)}
-                onEditStore={handleEditStore}
-                onViewStore={handleViewStore}
-                className="mt-6"
-              />
-            </TabsContent>
-          </Tabs>
+          <StoresList
+            onCreateStore={handleCreateStore}
+            onEditStore={handleEditStore}
+            onViewStore={handleViewStore}
+            onDeleteStore={handleDeleteStore}
+            className="mt-6"
+          />
         ) : (
           /* Details View */
           <StoreDetailsView
@@ -226,26 +199,7 @@ export const StoresPage: React.FC = () => {
         )}
       </div>
 
-      {/* Create Store Dialog */}
-      <CreateStoreDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={handleCreateSuccess}
-        existingStoreIds={existingStoreIds}
-      />
 
-      {/* Edit Store Dialog */}
-      <EditStoreDialog
-        store={storeToEdit}
-        open={editDialogOpen}
-        onOpenChange={(open) => {
-          setEditDialogOpen(open);
-          if (!open) {
-            setStoreToEdit(null);
-          }
-        }}
-        onSuccess={handleEditSuccess}
-      />
     </div>
   );
 };

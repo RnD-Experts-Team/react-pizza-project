@@ -4,13 +4,12 @@
  * with shadcn/ui components, TailwindCSS, and proper error handling
  */
 
-import React, { useState, useCallback } from 'react';
-import { Plus, Search, MoreHorizontal, Edit, Eye, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Search, Edit, Eye, Trash2, Loader2 } from 'lucide-react';
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
   Table, 
@@ -21,13 +20,15 @@ import {
   TableRow 
 } from '@/components/ui/table';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -41,7 +42,7 @@ import {
 } from '@/components/ui/pagination';
 
 // Store management imports
-import { useStores, useStoreSearch } from '../../features/stores/hooks/useStores';
+import { useStores } from '../../features/stores/hooks/useStores';
 import type { Store } from '../../features/stores/types';
 
 /**
@@ -65,9 +66,10 @@ export const StoresList: React.FC<StoresListProps> = ({
   onDeleteStore,
   className = '',
 }) => {
-  // Local state for search
-  const [searchTerm, setSearchTerm] = useState('');
-  
+  // State for delete confirmation dialog
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [storeToDelete, setStoreToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
   // Use our custom hooks
   const {
     stores,
@@ -81,20 +83,30 @@ export const StoresList: React.FC<StoresListProps> = ({
     currentPageData,
   } = useStores(true); // autoFetch = true
 
-  const {
-    searchStores: debouncedSearch,
-    clearSearch,
-  } = useStoreSearch(500); // 500ms debounce
+  const handleDeleteClick = (store: Store) => {
+    setStoreToDelete({ id: store.id, name: store.name });
+    setDeleteDialogOpen(true);
+  };
 
-  // Handle search input change
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-    if (value.trim()) {
-      debouncedSearch(value);
-    } else {
-      clearSearch();
+  const handleDeleteConfirm = async () => {
+    if (!storeToDelete || !onDeleteStore) return;
+    
+    setDeleteLoading(true);
+    try {
+      const store = stores.find(s => s.id === storeToDelete.id);
+      if (store) {
+        await onDeleteStore(store);
+      }
+      setDeleteDialogOpen(false);
+      setStoreToDelete(null);
+      // Success feedback could be added here (toast notification)
+    } catch (error) {
+      console.error('Failed to delete store:', error);
+      // Error feedback could be added here (toast notification)
+    } finally {
+      setDeleteLoading(false);
     }
-  }, [debouncedSearch, clearSearch]);
+  };
 
   // Format phone number for display
   const formatPhone = (phone: string) => {
@@ -155,12 +167,9 @@ export const StoresList: React.FC<StoresListProps> = ({
           </div>
           <h3 className="text-lg font-semibold text-gray-900">No stores found</h3>
           <p className="text-gray-500 max-w-sm">
-            {searchTerm 
-              ? `No stores match "${searchTerm}". Try adjusting your search.`
-              : 'Get started by creating your first store.'
-            }
+            Get started by creating your first store.
           </p>
-          {!searchTerm && onCreateStore && (
+          {onCreateStore && (
             <Button onClick={onCreateStore} className="mt-4">
               <Plus className="h-4 w-4 mr-2" />
               Create Store
@@ -171,44 +180,41 @@ export const StoresList: React.FC<StoresListProps> = ({
     </Card>
   );
 
-  // Render store actions dropdown
+  // Render store actions buttons
   const renderStoreActions = (store: Store) => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 p-0">
-          <span className="sr-only">Open menu</span>
-          <MoreHorizontal className="h-4 w-4" />
+    <div className="flex items-center justify-end gap-2">
+      {onViewStore && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onViewStore(store)}
+          className="h-8 w-8 p-0"
+        >
+          <Eye className="h-4 w-4" />
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {onViewStore && (
-          <DropdownMenuItem onClick={() => onViewStore(store)}>
-            <Eye className="h-4 w-4 mr-2" />
-            View Details
-          </DropdownMenuItem>
-        )}
-        {onEditStore && (
-          <DropdownMenuItem onClick={() => onEditStore(store)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Store
-          </DropdownMenuItem>
-        )}
-        {onDeleteStore && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={() => onDeleteStore(store)}
-              className="text-red-600"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete Store
-            </DropdownMenuItem>
-          </>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      )}
+      {onEditStore && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => onEditStore(store)}
+          className="h-8 w-8 p-0"
+        >
+          <Edit className="h-4 w-4" />
+        </Button>
+      )}
+      {onDeleteStore && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => handleDeleteClick(store)}
+          className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
+          disabled={deleteLoading}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      )}
+    </div>
   );
 
   // Render pagination
@@ -274,55 +280,6 @@ export const StoresList: React.FC<StoresListProps> = ({
 
   return (
     <div className={`space-y-6 ${className}`}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Stores</h2>
-          <p className="text-muted-foreground">
-            Manage your store locations and information
-          </p>
-        </div>
-        {onCreateStore && (
-          <Button onClick={onCreateStore}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Store
-          </Button>
-        )}
-      </div>
-
-      {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Search & Filter</CardTitle>
-          <CardDescription>
-            Find stores by name, ID, address, or phone number
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center space-x-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-              <Input
-                placeholder="Search stores..."
-                value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            {searchTerm && (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearchTerm('');
-                  clearSearch();
-                }}
-              >
-                Clear
-              </Button>
-            )}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Results Summary */}
       {!loading && !error && (
@@ -333,11 +290,6 @@ export const StoresList: React.FC<StoresListProps> = ({
               : 'No stores found'
             }
           </div>
-          {searchTerm && (
-            <div>
-              Search results for "{searchTerm}"
-            </div>
-          )}
         </div>
       )}
 
@@ -395,6 +347,30 @@ export const StoresList: React.FC<StoresListProps> = ({
 
       {/* Pagination */}
       {!loading && !error && hasStores && renderPagination()}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the store{' '}
+              <span className="font-semibold">{storeToDelete?.name}</span> and remove all its data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className="bg-red-600 hover:bg-red-700"
+              disabled={deleteLoading}
+            >
+              {deleteLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Delete Store
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -42,6 +42,8 @@ import AssignPermissionsPage from './pages/roles/AssignPermissions';
 import CreatePermission from './pages/permissions/CreatePermission';
 
 import StoresPage from './pages/stores/StoresPage';
+import CreateStorePage from './pages/stores/CreateStorePage';
+import EditStorePage from './pages/stores/EditStorePage';
 
 // Service Client Management Pages
 import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
@@ -270,6 +272,26 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <StoresPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores/create"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreateStorePage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores/edit/:storeId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <EditStorePage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
