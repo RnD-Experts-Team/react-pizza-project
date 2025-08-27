@@ -10,9 +10,9 @@
  */
 
 import React from 'react';
-import { UsersTable } from '../components/users/UsersTable';
-import { RolesTable } from '../components/roles/RolesTable';
-import { PermissionsTable } from '../components/permissions/PermissionsTable';
+import { UsersTable } from '../../components/users/UsersTable';
+import { RolesTable } from '../../components/roles/RolesTable';
+import { PermissionsTable } from '../../components/permissions/PermissionsTable';
 
 const UserManagementPage: React.FC = () => {
   return (

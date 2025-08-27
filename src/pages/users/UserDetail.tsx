@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser } from '../features/users/hooks/useUsers';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Badge } from '../components/ui/badge';
-import { Separator } from '../components/ui/separator';
+import { useUser } from '../../features/users/hooks/useUsers';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Badge } from '../../components/ui/badge';
+import { Separator } from '../../components/ui/separator';
 import { ArrowLeft, Edit, Mail, Calendar, Shield, Store, User, Loader2 } from 'lucide-react';
 
 const ViewUserPage: React.FC = () => {

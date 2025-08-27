@@ -32,13 +32,13 @@ import Settings from './pages/Settings';
 import AuthRulesManagement from './pages/AuthRulesManagement';
 
 // User Management Pages
-import UserManagement from './pages/UserManagement';
-import CreateUser from './pages/CreateUser';
-import EditUser from './pages/EditUser';
-import UserDetail from './pages/UserDetail';
-import CreateRole from './pages/CreateRole';
-import AssignPermissionsPage from './pages/AssignPermissions';
-import CreatePermission from './pages/CreatePermission';
+import UserManagement from './pages/users/UserManagement';
+import CreateUser from './pages/users/CreateUser';
+import EditUser from './pages/users/EditUser';
+import UserDetail from './pages/users/UserDetail';
+import CreateRole from './pages/roles/CreateRole';
+import AssignPermissionsPage from './pages/roles/AssignPermissions';
+import CreatePermission from './pages/permissions/CreatePermission';
 
 // Service Client Management Pages
 import ServiceClientManagement from './pages/ServiceClientManagement';

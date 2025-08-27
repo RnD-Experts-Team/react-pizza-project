@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import { store } from '../store'; // Adjust import path as needed
+import { store } from '../../../store'; // Adjust import path as needed
 import { loadToken } from '../utils/tokenStorage';
 import type {
   RegisterRequest,
@@ -14,7 +14,7 @@ import type {
   LoginResponse,
   RefreshTokenResponse,
   UserProfileResponse,
-} from '../types/authTypes';
+} from '../types';
 
 // Base API configuration
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';

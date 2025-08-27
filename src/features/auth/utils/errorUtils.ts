@@ -1,5 +1,5 @@
 import { AxiosError } from 'axios';
-import type { ErrorResponse, ValidationError } from '../types/authTypes';
+import type { ErrorResponse, ValidationError } from '../types';
 
 /**
  * Parse API errors into user-friendly messages

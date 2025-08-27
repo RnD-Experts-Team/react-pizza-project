@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../features/auth/hooks/useAuth';
 
 // Props interface for AuthInitializer
 interface AuthInitializerProps {

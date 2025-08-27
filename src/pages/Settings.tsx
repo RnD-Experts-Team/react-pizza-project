@@ -19,7 +19,7 @@ import {
   TabsTrigger,
 } from '../components/ui/tabs';
 import { Alert, AlertDescription } from '../components/ui/alert';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../features/auth/hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import {
   Settings as SettingsIcon,

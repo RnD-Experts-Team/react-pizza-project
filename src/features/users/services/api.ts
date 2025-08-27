@@ -28,7 +28,7 @@ import type {
 } from '../types';
 import {USERS_API_ENDPOINTS} from '../types'
 import { store } from '../../../store';
-import { loadToken } from '../../../utils/tokenStorage';
+import { loadToken } from '../../auth/utils/tokenStorage';
 
 // Base API configuration
 const API_BASE_URL = 'https://auth.pnepizza.com/api/v1';

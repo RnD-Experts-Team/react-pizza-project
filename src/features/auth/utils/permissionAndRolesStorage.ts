@@ -1,4 +1,4 @@
-import type { PermissionsAndRolesData } from '../types/authTypes';
+import type { PermissionsAndRolesData } from '../types';
 
 // Storage key for permissions and roles data
 const STORAGE_KEY = 'auth_permissions_and_roles';

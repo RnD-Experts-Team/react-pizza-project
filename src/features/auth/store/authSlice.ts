@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { authService, isUnauthorizedError } from '../../services/authService';
+import { authService, isUnauthorizedError } from '../services/api';
 import type {
   AuthState,
   RegisterRequest,
@@ -10,18 +10,18 @@ import type {
   ResetPasswordRequest,
   User,
   LoginResponse,
-} from '../../types/authTypes';
-import { parseApiError } from '../../utils/errorUtils';
+} from '../types';
+import { parseApiError } from '../utils/errorUtils';
 import {
   saveToken,
   loadToken,
   clearToken,
-} from '../../utils/tokenStorage';
+} from '../utils/tokenStorage';
 import {
   savePermissionsAndRoles,
   clearPermissionsAndRoles,
   loadPermissionsAndRoles,
-} from '../../utils/permissionAndRolesStorage';
+} from '../utils/permissionAndRolesStorage';
 
 // Type for thunk API configuration
 interface ThunkApiConfig {

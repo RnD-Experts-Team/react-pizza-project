@@ -6,17 +6,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useCreateRole } from '../features/roles/hooks/useRoles';
-import { usePermissions } from '../features/permissions/hooks/usePermissions';
-import {  GUARD_NAMES } from '../features/roles/types';
-import type { CreateRoleRequest } from '../features/roles/types';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Checkbox } from '../components/ui/checkbox';
-import { Alert, AlertDescription } from '../components/ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { useCreateRole } from '../../features/roles/hooks/useRoles';
+import { usePermissions } from '../../features/permissions/hooks/usePermissions';
+import {  GUARD_NAMES } from '../../features/roles/types';
+import type { CreateRoleRequest } from '../../features/roles/types';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
 
 const CreateRolePage: React.FC = () => {

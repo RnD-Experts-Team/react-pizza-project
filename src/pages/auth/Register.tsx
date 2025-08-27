@@ -6,8 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { parseValidationErrors } from '@/utils/errorUtils';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { parseValidationErrors } from '@/features/auth/utils/errorUtils';
 
 interface RegisterFormData {
   name: string;

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks'; // Adjust import path as needed
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'; // Adjust import path as needed
 import {
   register,
   verifyEmailOTP,
@@ -11,7 +11,7 @@ import {
   logout,
   initializeAuth,
   clearError,
-} from '../store/slices/authSlice';
+} from '../store/authSlice';
 import type {
   RegisterRequest,
   VerifyEmailRequest,
@@ -19,7 +19,7 @@ import type {
   LoginRequest,
   ForgotPasswordRequest,
   ResetPasswordRequest,
-} from '../types/authTypes';
+} from '../types';
 
 // Custom hook for authentication - UPDATED
 export const useAuth = () => {

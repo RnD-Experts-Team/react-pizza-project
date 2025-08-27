@@ -43,7 +43,7 @@ import {
   SidebarTrigger,
 } from '../ui/sidebar';
 // Update to useAuth
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../features/auth/hooks/useAuth';
 import {
   Home,
   Pizza,

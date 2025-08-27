@@ -7,21 +7,22 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useRoles, useAssignPermissions } from '../features/roles/hooks/useRoles';
-import { usePermissions } from '../features/permissions/hooks/usePermissions';
-import type { AssignPermissionsForm } from '../types/userManagement';
-import { Button } from '../components/ui/button';
-import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Checkbox } from '../components/ui/checkbox';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { useRoles, useAssignPermissions } from '../../features/roles/hooks/useRoles';
+import { usePermissions } from '../../features/permissions/hooks/usePermissions';
+// ADDED: Import useAuth hook for manual profile refresh
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { Button } from '../../components/ui/button';
+import { Label } from '../../components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../components/ui/select';
+} from '../../components/ui/select';
 import { ArrowLeft, Loader2, AlertCircle, Shield, Lock } from 'lucide-react';
 
 interface FormErrors {
@@ -34,6 +35,8 @@ const AssignPermissionsPage: React.FC = () => {
   const { roles, loading: rolesLoading } = useRoles();
   const { permissions, loading: permissionsLoading } = usePermissions();
   const { assignPermissions, loading: assignLoading, error: assignError, reset } = useAssignPermissions();
+  // ADDED: Get getUserProfile function for manual profile refresh
+  const { getUserProfile } = useAuth();
   
   // Form state
   const [selectedRoleId, setSelectedRoleId] = useState<string>('');
@@ -135,6 +138,9 @@ const AssignPermissionsPage: React.FC = () => {
       // Success
       setSuccessMessage(`Successfully assigned ${selectedPermissions.size} permission(s) to ${selectedRole?.name}`);
       setSelectedPermissions(new Set());
+      
+      // ADDED: Manual refresh of user profile to update permissions in real-time
+      getUserProfile();
       
       // Optionally navigate back after a delay
       setTimeout(() => {

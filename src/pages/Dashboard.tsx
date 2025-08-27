@@ -8,8 +8,8 @@ import {
   CardHeader,
   CardTitle,
 } from '../components/ui/card';
-import { useAuth } from '../hooks/useAuth';
-import type { User } from '../types/authTypes';
+import { useAuth } from '../features/auth/hooks/useAuth';
+import type { User } from '../features/auth/types';
 import { InfoSection } from '@/components/InfoSection';
 import { InfoCards } from '../components/InfoCards';
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';

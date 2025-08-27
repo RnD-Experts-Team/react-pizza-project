@@ -6,16 +6,18 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser, useUpdateUser } from '../features/users/hooks/useUsers';
-import { useRoles } from '../features/roles/hooks/useRoles';
-import { usePermissions } from '../features/permissions/hooks/usePermissions';
-import type { UserFormData } from '../features/users/types';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Checkbox } from '../components/ui/checkbox';
-import { Alert, AlertDescription } from '../components/ui/alert';
+import { useUser, useUpdateUser } from '../../features/users/hooks/useUsers';
+import { useRoles } from '../../features/roles/hooks/useRoles';
+import { usePermissions } from '../../features/permissions/hooks/usePermissions';
+// ADDED: Import useAuth hook for manual profile refresh
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import type { UserFormData } from '../../features/users/types';
+import { Button } from '../../components/ui/button';
+import { Input } from '../../components/ui/input';
+import { Label } from '../../components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import { Checkbox } from '../../components/ui/checkbox';
+import { Alert, AlertDescription } from '../../components/ui/alert';
 import { ArrowLeft, Loader2, AlertCircle, Eye, EyeOff, Lock } from 'lucide-react';
 
 const EditUserPage: React.FC = () => {
@@ -27,6 +29,8 @@ const EditUserPage: React.FC = () => {
   const { updateUser, loading, error, validateForm } = useUpdateUser();
   const { roles, loading: rolesLoading } = useRoles();
   const { permissions, loading: permissionsLoading } = usePermissions();
+  // ADDED: Get getUserProfile function and current user for manual profile refresh
+  const { getUserProfile, user: currentUser } = useAuth();
   
   // Form state
   const [formData, setFormData] = useState<UserFormData>({
@@ -216,6 +220,12 @@ const EditUserPage: React.FC = () => {
       }
 
       await updateUser(userId, updateData);
+      
+      // ADDED: Manual refresh of user profile to update permissions in real-time
+      // Only refresh if the updated user is the current user
+      if (currentUser && currentUser.id === userId) {
+        getUserProfile();
+      }
       
       // Success - navigate back to users list
       navigate('/user-management');
