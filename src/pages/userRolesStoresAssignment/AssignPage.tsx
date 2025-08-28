@@ -14,7 +14,6 @@ import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
 import { Badge } from '../../components/ui/badge';
 import { Checkbox } from '../../components/ui/checkbox';
-import { Separator } from '../../components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Avatar } from '../../components/ui/avatar';
@@ -41,7 +40,6 @@ import {
   Users,
   Shield,
   Store,
-  Plus,
   X,
   CheckCircle,
   AlertCircle,
@@ -94,26 +92,18 @@ export const AssignPage: React.FC = () => {
     users,
     loading: usersLoading,
     error: usersError,
-    filteredUsers,
-    searchTerm: userSearchTerm,
-    setSearchTerm: setUserSearchTerm,
   } = useUsers();
 
   const {
     roles,
     loading: rolesLoading,
     error: rolesError,
-    filteredRoles,
-    searchTerm: roleSearchTerm,
-    setSearchTerm: setRoleSearchTerm,
   } = useRoles();
 
   const {
     stores,
     loading: storesLoading,
     error: storesError,
-    searchTerm: storeSearchTerm,
-    setSearchTerm: setStoreSearchTerm,
   } = useStores();
 
   // Filter users based on local filters

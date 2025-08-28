@@ -7,6 +7,7 @@ import authRulesReducer from '../features/authorizationRules/store/authRulesSlic
 import serviceClientsReducer from '../features/serviceClients/store/serviceClientsSlice'; // Add this import
 import storesReducer from '../features/stores/store/storesSlice'; // Add this import
 import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignment/store/userRolesStoresAssignmentSlice'; // Add this import
+import roleHierarchyReducer from '../features/roleHierarchy/store/roleHierarchySlice'; // Add this import
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     serviceClients: serviceClientsReducer, // Add this line
     stores: storesReducer, // Add this line
     userRolesStoresAssignment: userRolesStoresAssignmentReducer, // Add this line
+    roleHierarchy: roleHierarchyReducer, // Add this line
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
