@@ -49,6 +49,12 @@ import StoreDetailsPage from './pages/stores/StoreDetailsPage';
 // Service Client Management Pages
 import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
 
+// User Role Store Assignment Pages
+import UserRoleStoreAssignmentPage from './pages/userRolesStoresAssignment/UserRoleStoreAssignmentPage';
+import UserAssignmentsPage from './pages/userRolesStoresAssignment/UserAssignmentsPage';
+import StoreAssignmentsPage from './pages/userRolesStoresAssignment/StoreAssignmentsPage';
+import AssignPage from './pages/userRolesStoresAssignment/AssignPage';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
@@ -261,6 +267,48 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <ServiceClientsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* User Role Store Assignment Routes */}
+              <Route
+                path="/user-role-store-assignment"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserRoleStoreAssignmentPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assign"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AssignPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-assignments/:userId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserAssignmentsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/store-role-assignments/:storeId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <StoreAssignmentsPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

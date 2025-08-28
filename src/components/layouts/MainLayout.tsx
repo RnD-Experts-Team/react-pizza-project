@@ -109,6 +109,11 @@ function AppSidebar() {
       icon: Store,
     },
     {
+      title: 'User Role Store Assignment',
+      url: '/user-role-store-assignment',
+      icon: Users,
+    },
+    {
       title: 'Settings',
       url: '/settings',
       icon: Settings,
