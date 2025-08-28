@@ -1,499 +1,206 @@
 /**
  * EditStorePage Component
- * Standalone page for editing existing stores with form validation
- * and proper error handling using shadcn/ui components
+ * Page for editing existing stores using the StoreForm component
  */
 
-import React, { useState, useEffect } from 'react';
-import { Loader2, ArrowLeft, Save, RotateCcw } from 'lucide-react';
+import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchStoreById, updateStore } from '../../features/stores/store/storesSlice';
+import { StoreForm } from '../../components/stores/StoreForm';
+import { Button } from '../../components/ui/button';
+import { Card, CardContent } from '../../components/ui/card';
+import { Skeleton } from '../../components/ui/skeleton';
+import { Alert, AlertDescription } from '../../components/ui/alert';
+import { ArrowLeft, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
+import type { UpdateStorePayload } from '../../features/stores/types';
+import type { AppDispatch, RootState } from '../../store';
 
-// shadcn/ui imports
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-
-// Store management imports
-import { useStoreOperations } from '../../features/stores/hooks/useStores';
-import type { Store, UpdateStorePayload } from '../../features/stores/types';
-
-/**
- * Form data interface
- */
-interface FormData {
-  name: string;
-  address: string;
-  phone: string;
-  is_active: boolean;
-}
-
-/**
- * Form errors interface
- */
-interface FormErrors {
-  name?: string;
-  address?: string;
-  phone?: string;
-}
-
-/**
- * Props for the EditStorePage component
- */
-interface EditStorePageProps {
-  store?: Store | null;
-}
-
-/**
- * EditStorePage component
- */
-export const EditStorePage: React.FC<EditStorePageProps> = ({
-  store: propStore,
-}) => {
+export const EditStorePage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
   const { storeId } = useParams<{ storeId: string }>();
   
-  // Form state
-  const [formData, setFormData] = useState<FormData>({
-    name: '',
-    address: '',
-    phone: '',
-    is_active: true,
-  });
+  // Get store data and states from Redux
+  const currentStore = useSelector((state: RootState) => state.stores.currentStore);
+  const fetchLoading = useSelector((state: RootState) => 
+    state.stores.asyncStates.fetchStore.loading
+  );
+  const fetchError = useSelector((state: RootState) => 
+    state.stores.asyncStates.fetchStore.error
+  );
+  const updateLoading = useSelector((state: RootState) => 
+    state.stores.asyncStates.updateStore.loading
+  );
+  const updateError = useSelector((state: RootState) => 
+    state.stores.asyncStates.updateStore.error
+  );
 
-  const [formErrors, setFormErrors] = useState<FormErrors>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [store, setStore] = useState<Store | null>(propStore || null);
-
-  // Store operations hook
-  const {
-    updateStore,
-    getStore,
-    loading,
-    errors,
-    reset: resetStoreOperations,
-  } = useStoreOperations();
-
-  // Load store data if not provided via props
+  // Fetch store data on component mount
   useEffect(() => {
-    const loadStore = async () => {
-      if (!store && storeId) {
-        try {
-          const result = await getStore(storeId);
-          if (result.success && result.store) {
-            setStore(result.store);
-          } else {
-            // Store not found, redirect to stores list
-            navigate('/stores', {
-              state: {
-                message: 'Store not found',
-                type: 'error'
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Failed to load store:', error);
-          navigate('/stores', {
-            state: {
-              message: 'Failed to load store',
-              type: 'error'
-            }
-          });
-        }
-      }
-    };
-
-    loadStore();
-  }, [storeId, store, getStore, navigate]);
-
-  // Initialize form data when store is loaded
-  useEffect(() => {
-    if (store) {
-      const initialData = {
-        name: store.name,
-        address: store.metadata.address,
-        phone: formatPhoneDisplay(store.metadata.phone),
-        is_active: store.is_active,
-      };
-      
-      setFormData(initialData);
-      setHasChanges(false);
+    if (storeId) {
+      dispatch(fetchStoreById(storeId));
     }
-  }, [store]);
+  }, [dispatch, storeId]);
 
-  // Check for changes
-  useEffect(() => {
-    if (store) {
-      const currentPhone = formatPhoneDisplay(store.metadata.phone);
-      const changed = 
-        formData.name !== store.name ||
-        formData.address !== store.metadata.address ||
-        formData.phone !== currentPhone ||
-        formData.is_active !== store.is_active;
-      
-      setHasChanges(changed);
-    }
-  }, [formData, store]);
-
-  // Validation function
-  const validateForm = (): boolean => {
-    const errors: FormErrors = {};
-
-    // Validate Store Name
-    if (!formData.name.trim()) {
-      errors.name = 'Store name is required';
-    } else if (formData.name.trim().length < 2) {
-      errors.name = 'Store name must be at least 2 characters';
-    } else if (formData.name.trim().length > 100) {
-      errors.name = 'Store name must not exceed 100 characters';
-    }
-
-    // Validate Address
-    if (!formData.address.trim()) {
-      errors.address = 'Address is required';
-    } else if (formData.address.trim().length < 5) {
-      errors.address = 'Address must be at least 5 characters';
-    } else if (formData.address.trim().length > 200) {
-      errors.address = 'Address must not exceed 200 characters';
-    }
-
-    // Validate Phone
-    if (!formData.phone.trim()) {
-      errors.phone = 'Phone number is required';
-    } else {
-      const phoneDigits = formData.phone.replace(/\D/g, '');
-      if (phoneDigits.length < 10) {
-        errors.phone = 'Phone number must be at least 10 digits';
-      } else if (phoneDigits.length > 20) {
-        errors.phone = 'Phone number must not exceed 20 digits';
-      }
-    }
-
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  // Handle input changes
-  const handleInputChange = (field: keyof FormData, value: string | boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-
-    // Clear error for this field
-    if (formErrors[field as keyof FormErrors]) {
-      setFormErrors(prev => ({
-        ...prev,
-        [field]: undefined
-      }));
-    }
-  };
-
-  // Format phone number for display
-  const formatPhoneDisplay = (value: string) => {
-    const digits = value.replace(/\D/g, '');
-    if (digits.length >= 10) {
-      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-    }
-    return value;
-  };
-
-  // Handle phone input change with formatting
-  const handlePhoneChange = (value: string) => {
-    const formatted = formatPhoneDisplay(value);
-    handleInputChange('phone', formatted);
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!store) {
+  const handleSubmit = async (data: UpdateStorePayload) => {
+    if (!storeId) {
+      toast.error('Store ID is missing');
       return;
     }
-
-    if (!validateForm()) {
-      return;
-    }
-
-    if (!hasChanges) {
-      // No changes, just navigate back
-      navigate('/stores');
-      return;
-    }
-
-    setIsSubmitting(true);
 
     try {
-      // Transform form data to API payload
-      const payload: UpdateStorePayload = {
-        name: formData.name.trim(),
-        metadata: {
-          address: formData.address.trim(),
-          phone: formData.phone.replace(/\D/g, ''), // Remove non-digits for API
-        },
-        is_active: formData.is_active,
-      };
-
-      const result = await updateStore(store.id, payload);
-
-      if (result.success) {
-        // Navigate back to stores list
-        navigate('/stores', {
-          state: {
-            message: `Store "${result.store!.name}" updated successfully!`,
-            type: 'success'
-          }
-        });
-      }
-    } catch (error) {
-      console.error('Failed to update store:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle cancel/back navigation with unsaved changes warning
-  const handleCancel = () => {
-    if (hasChanges) {
-      const confirmLeave = window.confirm(
-        'You have unsaved changes. Are you sure you want to leave without saving?'
-      );
-      if (!confirmLeave) return;
-    }
-    
-    navigate('/stores');
-  };
-
-  // Handle reset form
-  const handleReset = () => {
-    if (store) {
-      const initialData = {
-        name: store.name,
-        address: store.metadata.address,
-        phone: formatPhoneDisplay(store.metadata.phone),
-        is_active: store.is_active,
-      };
+      await dispatch(updateStore({ storeId, payload: data })).unwrap();
       
-      setFormData(initialData);
-      setFormErrors({});
-      setHasChanges(false);
+      // Show success message
+      toast.success('Store updated successfully!', {
+        description: `Store "${data.name}" has been updated.`,
+      });
+      
+      // Navigate back to store details or stores list
+      navigate(`/stores/view/${storeId}`);
+    } catch (error) {
+      // Error is handled by Redux and displayed in the form
+      console.error('Failed to update store:', error);
+      
+      // Show error toast
+      toast.error('Failed to update store', {
+        description: 'Please check the form and try again.',
+      });
     }
   };
 
-  const isLoading = loading.update || loading.get || isSubmitting;
+  const handleGoBack = () => {
+    if (storeId) {
+      navigate(`/stores/view/${storeId}`);
+    } else {
+      navigate('/stores');
+    }
+  };
 
-  // Show loading state while fetching store
-  if (loading.get && !store) {
+  // Show error if store ID is missing
+  if (!storeId) {
     return (
-      <div className="container mx-auto py-6 max-w-4xl">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading store...</span>
-        </div>
+      <div className="container mx-auto py-6 px-4">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Store ID is missing from the URL. Please navigate to this page from the stores list.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
-  // Show error if store not found
-  if (!store && !loading.get) {
+  // Show error if failed to fetch store
+  if (fetchError && !fetchLoading) {
     return (
-      <div className="container mx-auto py-6 max-w-4xl">
-        <div className="text-center py-12">
-          <h2 className="text-2xl font-bold mb-4">Store Not Found</h2>
-          <p className="text-muted-foreground mb-6">The requested store could not be found.</p>
-          <Button onClick={() => navigate('/stores')}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Stores
+      <div className="container mx-auto py-6 px-4">
+        <div className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-2 mb-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
           </Button>
         </div>
+        
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load store data: {fetchError}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Show loading skeleton while fetching
+  if (fetchLoading || !currentStore) {
+    return (
+      <div className="container mx-auto py-6 px-4">
+        {/* Header Skeleton */}
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <Skeleton className="h-9 w-32" />
+          </div>
+          <Skeleton className="h-8 w-64 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+
+        {/* Form Skeleton */}
+        <Card className="w-full max-w-2xl">
+          <CardContent className="p-6">
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-20" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Skeleton className="h-6 w-10" />
+                <Skeleton className="h-4 w-24" />
+              </div>
+              <div className="flex justify-end space-x-4 pt-4">
+                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-10 w-28" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
+    <div className="container mx-auto py-6 px-4">
       {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          disabled={isLoading}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Stores
-        </Button>
-        <div className="flex-1">
+      <div className="mb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGoBack}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Store Details
+          </Button>
+        </div>
+        
+        <div>
           <h1 className="text-3xl font-bold tracking-tight">Edit Store</h1>
-          <p className="text-muted-foreground">
-            Update the store information
+          <p className="text-muted-foreground mt-2">
+            Update the details for store: <span className="font-medium">{currentStore.name}</span>
           </p>
         </div>
-        {hasChanges && (
-          <Badge variant="secondary">
-            Unsaved Changes
-          </Badge>
-        )}
       </div>
 
-      {/* Store ID Display */}
-      {store && (
-        <div className="mb-6 p-4 bg-muted rounded-lg">
-          <p className="text-sm font-medium text-muted-foreground">
-            Editing Store: <span className="font-mono font-bold text-foreground">{store.id}</span>
-          </p>
-        </div>
-      )}
-
-      {/* Main Form Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Store Information</CardTitle>
-          <CardDescription>
-            Update the store details. Changes will be saved when you click "Save Changes".
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Store Name Field */}
-            <div className="space-y-2">
-              <Label htmlFor="store-name">Store Name</Label>
-              <Input
-                id="store-name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Downtown Location"
-                disabled={isLoading}
-              />
-              <p className="text-sm text-muted-foreground">
-                Display name for the store location
-              </p>
-              {formErrors.name && (
-                <p className="text-sm text-red-500">{formErrors.name}</p>
-              )}
-            </div>
-
-            {/* Address Field */}
-            <div className="space-y-2">
-              <Label htmlFor="store-address">Address</Label>
-              <Textarea
-                id="store-address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                placeholder="123 Main Street, City, State 12345"
-                className="min-h-[80px]"
-                disabled={isLoading}
-              />
-              <p className="text-sm text-muted-foreground">
-                Full address of the store location
-              </p>
-              {formErrors.address && (
-                <p className="text-sm text-red-500">{formErrors.address}</p>
-              )}
-            </div>
-
-            {/* Phone Number Field */}
-            <div className="space-y-2">
-              <Label htmlFor="store-phone">Phone Number</Label>
-              <Input
-                id="store-phone"
-                value={formData.phone}
-                onChange={(e) => handlePhoneChange(e.target.value)}
-                placeholder="(555) 123-4567"
-                type="tel"
-                disabled={isLoading}
-              />
-              <p className="text-sm text-muted-foreground">
-                Contact phone number for the store
-              </p>
-              {formErrors.phone && (
-                <p className="text-sm text-red-500">{formErrors.phone}</p>
-              )}
-            </div>
-
-            {/* Active Status Field */}
-            <div className="flex items-center justify-between rounded-lg border p-4">
-              <div className="space-y-0.5">
-                <Label htmlFor="store-active" className="text-base">Active Store</Label>
-                <p className="text-sm text-muted-foreground">
-                  Enable this store for operations and display
-                </p>
-              </div>
-              <Switch
-                id="store-active"
-                checked={formData.is_active}
-                onCheckedChange={(checked) => handleInputChange('is_active', checked)}
-                disabled={isLoading}
-              />
-            </div>
-
-            {/* Changes Indicator */}
-            {hasChanges && (
-              <Alert>
-                <AlertDescription>
-                  You have unsaved changes that will be lost if you navigate away.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Error Display */}
-            {errors.update && (
-              <Alert variant="destructive">
-                <AlertDescription>
-                  {errors.update}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* Form Actions */}
-            <div className="flex items-center justify-between pt-6">
-              <div className="flex items-center gap-2">
-                {hasChanges && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleReset}
-                    disabled={isLoading}
-                  >
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Reset
-                  </Button>
-                )}
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-                
-                <Button
-                  type="submit"
-                  disabled={isLoading || !hasChanges}
-                >
-                  {isLoading && (
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  )}
-                  <Save className="h-4 w-4 mr-2" />
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+      {/* Form */}
+      <div className="max-w-2xl">
+        <StoreForm
+          mode="edit"
+          initialData={currentStore}
+          onSubmit={handleSubmit}
+          loading={updateLoading}
+          error={updateError}
+        />
+      </div>
     </div>
   );
 };

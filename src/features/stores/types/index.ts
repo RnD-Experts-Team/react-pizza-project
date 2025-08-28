@@ -184,6 +184,7 @@ export interface GetStoresParams {
   per_page?: number;
   page?: number;
   search?: string;
+  is_active?: boolean;
 }
 
 /**

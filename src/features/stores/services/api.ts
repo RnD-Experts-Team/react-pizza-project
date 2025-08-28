@@ -188,15 +188,21 @@ class StoreApiService {
    * Get all stores with optional pagination and search
    */
   async getStores(params: GetStoresParams = {}): Promise<PaginatedStores> {
-    const { per_page = 10, page = 1, search = '' } = params;
+    const { per_page = 10, page = 1, search = '', is_active } = params;
+    
+    const apiParams: any = {
+      per_page,
+      page,
+      search,
+    };
+    
+    if (is_active !== undefined) {
+      apiParams.is_active = is_active;
+    }
     
     const response = await apiCall(
       () => storeApiClient.get<GetStoresResponse>(STORE_ENDPOINTS.STORES, {
-        params: {
-          per_page,
-          page,
-          search,
-        },
+        params: apiParams,
       }),
       'getStores'
     );
