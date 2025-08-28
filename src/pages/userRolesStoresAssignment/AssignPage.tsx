@@ -9,6 +9,8 @@ import React, { useState, useMemo } from 'react';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { useStores } from '../../features/stores/hooks/useStores';
+import { useAssignmentOperations } from '../../features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
+import type { BulkAssignUserRolesRequest, BulkAssignmentItem } from '../../features/userRolesStoresAssignment/types';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -240,30 +242,74 @@ export const AssignPage: React.FC = () => {
     setAssignmentResult(null);
   };
 
+  // Get assignment operations hook
+  const { bulkAssignUserRoles, isBulkAssigning, bulkAssignError } = useAssignmentOperations();
+
   const handleAssignment = async () => {
     setIsAssigning(true);
     setShowConfirmDialog(false);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const assignmentPromises: Promise<any>[] = [];
+      let totalAssignments = 0;
 
-      // TODO: Implement actual assignment logic
-      console.log('Assignment data:', assignmentData);
+      // Create bulk assignment requests for each selected user
+      for (const userId of assignmentData.selectedUsers) {
+        // Create assignments array for this user (all combinations of roles and stores)
+        const assignments: BulkAssignmentItem[] = [];
+        
+        for (const roleId of assignmentData.selectedRoles) {
+          for (const storeId of assignmentData.selectedStores) {
+            assignments.push({
+              role_id: roleId,
+              store_id: storeId,
+              metadata: {
+                start_date: new Date().toISOString(),
+                notes: 'Bulk assignment via Assignment Page'
+              }
+            });
+            totalAssignments++;
+          }
+        }
 
-      setAssignmentResult({
-        success: true,
-        message: `Successfully assigned ${assignmentData.selectedRoles.length} roles to ${assignmentData.selectedUsers.length} users across ${assignmentData.selectedStores.length} stores.`,
-      });
+        // Create bulk assignment request for this user
+        const bulkRequest: BulkAssignUserRolesRequest = {
+          user_id: userId,
+          assignments: assignments
+        };
 
-      // Clear selection after successful assignment
-      setTimeout(() => {
-        handleClearSelection();
-      }, 3000);
+        // Add the promise to the array
+        assignmentPromises.push(bulkAssignUserRoles(bulkRequest));
+      }
+
+      // Execute all bulk assignments in parallel
+      const results = await Promise.allSettled(assignmentPromises);
+      
+      // Check results
+      const successfulAssignments = results.filter(result => result.status === 'fulfilled').length;
+      const failedAssignments = results.filter(result => result.status === 'rejected').length;
+
+      if (failedAssignments === 0) {
+        setAssignmentResult({
+          success: true,
+          message: `Successfully assigned ${assignmentData.selectedRoles.length} roles to ${assignmentData.selectedUsers.length} users across ${assignmentData.selectedStores.length} stores (${totalAssignments} total assignments).`,
+        });
+
+        // Clear selection after successful assignment
+        setTimeout(() => {
+          handleClearSelection();
+        }, 3000);
+      } else {
+        setAssignmentResult({
+          success: false,
+          message: `Partial success: ${successfulAssignments} users assigned successfully, ${failedAssignments} failed. Please check the failed assignments and try again.`,
+        });
+      }
     } catch (error) {
+      console.error('Assignment error:', error);
       setAssignmentResult({
         success: false,
-        message: 'Failed to assign roles. Please try again.',
+        message: bulkAssignError?.message || 'Failed to assign roles. Please try again.',
       });
     } finally {
       setIsAssigning(false);
@@ -273,6 +319,9 @@ export const AssignPage: React.FC = () => {
   const canAssign = assignmentData.selectedUsers.length > 0 &&
                    assignmentData.selectedRoles.length > 0 &&
                    assignmentData.selectedStores.length > 0;
+
+  // Use the hook's loading state for better consistency
+  const isActuallyAssigning = isAssigning || isBulkAssigning;
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -315,15 +364,15 @@ export const AssignPage: React.FC = () => {
             <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
               <DialogTrigger asChild>
                 <Button
-                  disabled={!canAssign || isAssigning}
+                  disabled={!canAssign || isActuallyAssigning}
                   className="flex items-center gap-2"
                 >
-                  {isAssigning ? (
+                  {isActuallyAssigning ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <UserCheck className="h-4 w-4" />
                   )}
-                  {isAssigning ? 'Assigning...' : 'Assign Roles'}
+                  {isActuallyAssigning ? 'Assigning...' : 'Assign Roles'}
                 </Button>
               </DialogTrigger>
               <DialogContent>

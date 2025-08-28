@@ -48,31 +48,29 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
   );
 
   const handleAssignUserRole = (userId: number) => {
-    // TODO: Implement assign role functionality
-    console.log('Assign role to user:', userId);
+    navigate(`/user-role-store-assignment/assign?userId=${userId}`);
   };
 
   const handleAssignStoreRole = (storeId: string) => {
-    // TODO: Implement assign role functionality
-    console.log('Assign role to store:', storeId);
+    navigate(`/user-role-store-assignment/assign?storeId=${storeId}`);
   };
 
   const handleAssignRoles = () => {
     // TODO: Implement assign roles functionality
-    navigate(`/assign`);
+    navigate(`/user-role-store-assignment/assign`);
   };
 
   const handleBulkAssign = () => {
     // TODO: Implement bulk assign functionality
-    console.log('Bulk assign');
+    navigate(`/user-role-store-assignment/bulk`);
   };
 
   const handleViewUserAssignments = (userId: number) => {
-    navigate(`/user-role-assignments/${userId}`);
+    navigate(`/user-role-store-assignment/users/${userId}`);
   };
 
   const handleViewStoreAssignments = (storeId: string) => {
-    navigate(`/store-role-assignments/${storeId}`);
+    navigate(`/user-role-store-assignment/stores/${storeId}`);
   };
 
   const formatDate = (dateString: string) => {

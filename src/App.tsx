@@ -54,6 +54,7 @@ import UserRoleStoreAssignmentPage from './pages/userRolesStoresAssignment/UserR
 import UserAssignmentsPage from './pages/userRolesStoresAssignment/UserAssignmentsPage';
 import StoreAssignmentsPage from './pages/userRolesStoresAssignment/StoreAssignmentsPage';
 import AssignPage from './pages/userRolesStoresAssignment/AssignPage';
+import SingleAssignPage from './pages/userRolesStoresAssignment/SingleAssignPage';
 
 function App() {
   return (
@@ -284,7 +285,7 @@ function App() {
                 }
               />
               <Route
-                path="/assign"
+                path="/user-role-store-assignment/bulk"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -294,7 +295,17 @@ function App() {
                 }
               />
               <Route
-                path="/user-role-assignments/:userId"
+                path="/user-role-store-assignment/assign"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <SingleAssignPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-store-assignment/users/:userId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -304,7 +315,7 @@ function App() {
                 }
               />
               <Route
-                path="/store-role-assignments/:storeId"
+                path="/user-role-store-assignment/stores/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
