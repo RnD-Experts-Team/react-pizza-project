@@ -41,12 +41,13 @@ import CreateRole from './pages/roles/CreateRole';
 import AssignPermissionsPage from './pages/roles/AssignPermissions';
 import CreatePermission from './pages/permissions/CreatePermission';
 
+// Stores Management Routes
 import StoresListPage from './pages/stores/StoresListPage';
 import CreateStorePage from './pages/stores/CreateStorePage';
 import EditStorePage from './pages/stores/EditStorePage';
 import StoreDetailsPage from './pages/stores/StoreDetailsPage';
-
-// Service Client Management Pages
+import StoresHierarchyPage from './pages/stores/StoresHierarchyPage';
+import StoreHierarchyDetailPage from './pages/stores/StoreHierarchyDetailPage'; //Service Client Management Pages
 import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
 
 // User Role Store Assignment Pages
@@ -362,6 +363,26 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <StoreDetailsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores/hierarchy"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <StoresHierarchyPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores/:storeId/hierarchy"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <StoreHierarchyDetailPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }
