@@ -163,16 +163,16 @@ const AssignPermissionsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className=" mx-auto space-y-6">
+    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
+      <div className=" mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Assign Permissions</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Assign Permissions</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Assign permissions to roles - users with these roles will inherit the permissions
             </p>
           </div>
@@ -180,9 +180,9 @@ const AssignPermissionsPage: React.FC = () => {
 
         {/* Success Alert */}
         {successMessage && (
-          <Alert className="border-green-200 bg-green-50">
-            <Shield className="h-4 w-4 text-green-600" />
-            <AlertDescription className="text-green-800">
+          <Alert className="border-primary/20 bg-primary/10">
+            <Shield className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-primary">
               {successMessage}
             </AlertDescription>
           </Alert>
@@ -190,38 +190,40 @@ const AssignPermissionsPage: React.FC = () => {
 
         {/* Error Alert */}
         {assignError && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-destructive bg-destructive/10">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{assignError}</AlertDescription>
+            <AlertDescription className="text-destructive-foreground">{assignError}</AlertDescription>
           </Alert>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Role Selection */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Select Role</CardTitle>
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-card-foreground">Select Role</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Choose the role to assign permissions to
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4">
               {rolesLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading roles...
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                  <span className="text-muted-foreground">Loading roles...</span>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="role-select">Role *</Label>
+                  <Label htmlFor="role-select" className="text-sm font-medium text-foreground">Role *</Label>
                   <Select value={selectedRoleId} onValueChange={handleRoleChange}>
-                    <SelectTrigger className={formErrors.role ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Select a role" />
+                    <SelectTrigger className={`bg-background border-input text-foreground ${
+                      formErrors.role ? 'border-destructive focus:ring-destructive' : 'focus:ring-ring'
+                    }`}>
+                      <SelectValue placeholder="Select a role" className="text-muted-foreground" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-popover border-border">
                       {roles.map((role) => (
-                        <SelectItem key={role.id} value={role.id.toString()}>
+                        <SelectItem key={role.id} value={role.id.toString()} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
                           <div className="flex items-center justify-between w-full">
                             <span>{role.name}</span>
                             <span className="text-xs text-muted-foreground ml-2">
@@ -233,23 +235,23 @@ const AssignPermissionsPage: React.FC = () => {
                     </SelectContent>
                   </Select>
                   {formErrors.role && (
-                    <p className="text-sm text-red-500">{formErrors.role}</p>
+                    <p className="text-sm text-destructive">{formErrors.role}</p>
                   )}
                 </div>
               )}
 
               {/* Current Role Permissions */}
               {selectedRole && currentRolePermissions.size > 0 && (
-                <div className="mt-4 p-4 bg-muted rounded-lg">
-                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2">
+                <div className="mt-4 p-3 sm:p-4 bg-muted rounded-lg border border-border">
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-2 text-muted-foreground">
                     <Lock className="h-4 w-4" />
                     Current Permissions ({currentRolePermissions.size})
                   </h4>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {Array.from(currentRolePermissions).map((permission) => (
                       <span
                         key={permission}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-secondary text-secondary-foreground border border-border"
                       >
                         {permission}
                       </span>
@@ -262,23 +264,24 @@ const AssignPermissionsPage: React.FC = () => {
 
           {/* Permission Assignment */}
           {selectedRole && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
+            <Card className="bg-card border-border shadow-sm">
+              <CardHeader className="pb-3 sm:pb-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div>
-                    <CardTitle>Available Permissions</CardTitle>
+                    <CardTitle className="text-lg sm:text-xl text-card-foreground">Available Permissions</CardTitle>
                     <p className="text-sm text-muted-foreground">
                       Select permissions to assign to {selectedRole.name}
                     </p>
                   </div>
                   {availablePermissions.length > 0 && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
                         onClick={handleSelectAll}
                         disabled={selectedPermissions.size === availablePermissions.length}
+                        className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                       >
                         Select All
                       </Button>
@@ -288,6 +291,7 @@ const AssignPermissionsPage: React.FC = () => {
                         size="sm"
                         onClick={handleClearAll}
                         disabled={selectedPermissions.size === 0}
+                        className="bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                       >
                         Clear All
                       </Button>
@@ -297,33 +301,34 @@ const AssignPermissionsPage: React.FC = () => {
               </CardHeader>
               <CardContent>
                 {permissionsLoading ? (
-                  <div className="flex items-center justify-center py-4">
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading permissions...
+                  <div className="flex items-center justify-center py-6 sm:py-8">
+                    <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                    <span className="text-muted-foreground">Loading permissions...</span>
                   </div>
                 ) : availablePermissions.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="text-center py-8 sm:py-12 text-muted-foreground">
                     <Shield className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>All available permissions are already assigned to this role.</p>
+                    <p className="text-sm sm:text-base">All available permissions are already assigned to this role.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 max-h-60 sm:max-h-80 overflow-y-auto border border-border rounded-md p-3 sm:p-4 bg-background/50">
                     {availablePermissions.map((permission) => {
                       const isChecked = selectedPermissions.has(permission.name);
                       
                       return (
-                        <div key={permission.id} className="flex items-start space-x-3 space-y-0">
+                        <div key={permission.id} className="flex items-start space-x-2 sm:space-x-3 space-y-0 p-2 rounded-md hover:bg-accent/50 transition-colors">
                           <Checkbox
                             id={`permission-${permission.id}`}
                             checked={isChecked}
                             onCheckedChange={(checked) => 
                               handlePermissionChange(permission.name, checked as boolean)
                             }
+                            className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                           />
-                          <div className="grid gap-1.5 leading-none">
+                          <div className="grid gap-1.5 leading-none flex-1">
                             <Label
                               htmlFor={`permission-${permission.id}`}
-                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                              className="text-sm font-medium leading-none text-foreground cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
                               {permission.name}
                             </Label>
@@ -337,13 +342,13 @@ const AssignPermissionsPage: React.FC = () => {
                   </div>
                 )}
                 {formErrors.permissions && (
-                  <p className="text-sm text-red-500 mt-2">{formErrors.permissions}</p>
+                  <p className="text-sm text-destructive mt-2">{formErrors.permissions}</p>
                 )}
                 
                 {/* Selected Count */}
                 {selectedPermissions.size > 0 && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="mt-4 p-3 sm:p-4 bg-primary/10 rounded-lg border border-primary/20">
+                    <p className="text-sm text-primary font-medium">
                       {selectedPermissions.size} permission(s) selected for assignment
                     </p>
                   </div>
@@ -353,19 +358,20 @@ const AssignPermissionsPage: React.FC = () => {
           )}
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleBack}
               disabled={isSubmitting}
+              className="w-full sm:w-auto bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || assignLoading || !selectedRole || selectedPermissions.size === 0}
-              className="min-w-[140px]"
+              className="w-full sm:w-auto min-w-[140px] bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring"
             >
               {isSubmitting ? (
                 <>

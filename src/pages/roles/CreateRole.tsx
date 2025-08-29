@@ -104,16 +104,16 @@ const CreateRolePage: React.FC = () => {
   }, [formData]);
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className=" mx-auto space-y-6">
+    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
+      <div className=" mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
+        <div className="flex items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2">
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create Role</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Create Role</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Add a new role to the system
             </p>
           </div>
@@ -121,23 +121,23 @@ const CreateRolePage: React.FC = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-destructive bg-destructive/10">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription className="text-destructive-foreground">{error}</AlertDescription>
           </Alert>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Role Information</CardTitle>
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-card-foreground">Role Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Role Name *</Label>
+                  <Label htmlFor="name" className="text-sm font-medium text-foreground">Role Name *</Label>
                   <Input
                     id="name"
                     name="name"
@@ -145,26 +145,30 @@ const CreateRolePage: React.FC = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter role name (e.g., Manager, Editor)"
-                    className={validationErrors.name ? 'border-red-500' : ''}
+                    className={`bg-background border-input text-foreground placeholder:text-muted-foreground ${
+                      validationErrors.name ? 'border-destructive focus:ring-destructive' : 'focus:ring-ring'
+                    }`}
                   />
                   {validationErrors.name && (
-                    <p className="text-sm text-red-500">{validationErrors.name}</p>
+                    <p className="text-sm text-destructive">{validationErrors.name}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="guard_name">Guard Type *</Label>
+                  <Label htmlFor="guard_name" className="text-sm font-medium text-foreground">Guard Type *</Label>
                   <Select value={formData.guard_name} onValueChange={handleGuardChange}>
-                    <SelectTrigger className={validationErrors.guard_name ? 'border-red-500' : ''}>
-                      <SelectValue placeholder="Select guard type" />
+                    <SelectTrigger className={`bg-background border-input text-foreground ${
+                      validationErrors.guard_name ? 'border-destructive focus:ring-destructive' : 'focus:ring-ring'
+                    }`}>
+                      <SelectValue placeholder="Select guard type" className="text-muted-foreground" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={GUARD_NAMES.WEB}>Web</SelectItem>
-                      <SelectItem value={GUARD_NAMES.API}>API</SelectItem>
+                    <SelectContent className="bg-popover border-border">
+                      <SelectItem value={GUARD_NAMES.WEB} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">Web</SelectItem>
+                      <SelectItem value={GUARD_NAMES.API} className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">API</SelectItem>
                     </SelectContent>
                   </Select>
                   {validationErrors.guard_name && (
-                    <p className="text-sm text-red-500">{validationErrors.guard_name}</p>
+                    <p className="text-sm text-destructive">{validationErrors.guard_name}</p>
                   )}
                 </div>
               </div>
@@ -172,34 +176,35 @@ const CreateRolePage: React.FC = () => {
           </Card>
 
           {/* Permissions */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Permissions</CardTitle>
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-card-foreground">Permissions</CardTitle>
               <p className="text-sm text-muted-foreground">
                 Select permissions for this role
               </p>
             </CardHeader>
             <CardContent>
               {permissionsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading permissions...
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2 text-primary" />
+                  <span className="text-muted-foreground">Loading permissions...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 max-h-60 sm:max-h-80 overflow-y-auto border border-border rounded-md p-3 sm:p-4 bg-background/50">
                   {permissions.map((permission) => (
-                    <div key={permission.id} className="flex items-start space-x-3 space-y-0">
+                    <div key={permission.id} className="flex items-start space-x-2 sm:space-x-3 space-y-0 p-2 rounded-md hover:bg-accent/50 transition-colors">
                       <Checkbox
                         id={`permission-${permission.id}`}
                         checked={formData.permissions.includes(permission.name)}
                         onCheckedChange={(checked) => 
                           handlePermissionChange(permission.name, checked as boolean)
                         }
+                        className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
-                      <div className="grid gap-1.5 leading-none">
+                      <div className="grid gap-1.5 leading-none flex-1">
                         <Label
                           htmlFor={`permission-${permission.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className="text-sm font-medium leading-none text-foreground cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
                           {permission.name}
                         </Label>
@@ -209,14 +214,14 @@ const CreateRolePage: React.FC = () => {
                 </div>
               )}
               {validationErrors.permissions && (
-                <p className="text-sm text-red-500 mt-2">{validationErrors.permissions}</p>
+                <p className="text-sm text-destructive mt-2">{validationErrors.permissions}</p>
               )}
               {formData.permissions.length > 0 && (
-                <div className="mt-4 p-3 bg-muted rounded-lg">
-                  <p className="text-sm font-medium mb-2">Selected permissions ({formData.permissions.length}):</p>
-                  <div className="flex flex-wrap gap-1">
+                <div className="mt-4 p-3 sm:p-4 bg-muted rounded-lg border border-border">
+                  <p className="text-sm font-medium mb-2 text-muted-foreground">Selected permissions ({formData.permissions.length}):</p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {formData.permissions.map((permissionName) => (
-                      <span key={permissionName} className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs">
+                      <span key={permissionName} className="inline-flex items-center px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium border border-primary/20">
                         {permissionName}
                       </span>
                     ))}
@@ -227,19 +232,20 @@ const CreateRolePage: React.FC = () => {
           </Card>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4 sm:pt-6">
             <Button
               type="button"
               variant="outline"
               onClick={handleBack}
               disabled={isSubmitting}
+              className="w-full sm:w-auto bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting || loading}
-              className="min-w-[120px]"
+              className="w-full sm:w-auto min-w-[120px] bg-primary text-primary-foreground hover:bg-primary/90 focus:ring-ring"
             >
               {isSubmitting ? (
                 <>
