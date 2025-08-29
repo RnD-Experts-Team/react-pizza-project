@@ -23,7 +23,13 @@ export const AuthRuleStatusBadge: React.FC<AuthRuleStatusBadgeProps> = ({
     return (
       <Badge 
         variant={isActive ? 'default' : 'secondary'}
-        className={isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}
+        className="text-xs sm:text-sm px-1.5 py-0.5 sm:px-2 sm:py-1"
+        style={{
+          backgroundColor: isActive ? 'var(--chart-2)' : 'var(--muted)',
+          color: isActive ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+          borderColor: isActive ? 'var(--chart-2)' : 'var(--border)',
+          fontSize: 'clamp(0.75rem, 2vw, 0.875rem)'
+        }}
       >
         {isActive ? 'Active' : 'Inactive'}
       </Badge>
@@ -33,20 +39,38 @@ export const AuthRuleStatusBadge: React.FC<AuthRuleStatusBadgeProps> = ({
   return (
     <Badge 
       variant={isActive ? 'default' : 'secondary'}
-      className={`flex items-center gap-1 ${
-        isActive 
-          ? 'bg-green-100 text-green-800 border-green-200' 
-          : 'bg-gray-100 text-gray-600 border-gray-200'
-      }`}
+      className="flex items-center gap-0.5 sm:gap-1 text-xs sm:text-sm px-1.5 py-0.5 sm:px-2 sm:py-1"
+      style={{
+        backgroundColor: isActive ? 'var(--chart-2)' : 'var(--muted)',
+        color: isActive ? 'var(--primary-foreground)' : 'var(--muted-foreground)',
+        borderColor: isActive ? 'var(--chart-2)' : 'var(--border)',
+        fontSize: 'clamp(0.75rem, 2vw, 0.875rem)'
+      }}
     >
       {showIcon && (
         isActive ? (
-          <CheckCircle className="h-3 w-3" />
+          <CheckCircle 
+            className="h-2.5 w-2.5 sm:h-3 sm:w-3" 
+            style={{ 
+              color: 'var(--primary-foreground)',
+              minWidth: '0.625rem',
+              minHeight: '0.625rem'
+            }}
+          />
         ) : (
-          <XCircle className="h-3 w-3" />
+          <XCircle 
+            className="h-2.5 w-2.5 sm:h-3 sm:w-3" 
+            style={{ 
+              color: 'var(--muted-foreground)',
+              minWidth: '0.625rem',
+              minHeight: '0.625rem'
+            }}
+          />
         )
       )}
-      {isActive ? 'Active' : 'Inactive'}
+      <span className="whitespace-nowrap">
+        {isActive ? 'Active' : 'Inactive'}
+      </span>
     </Badge>
   );
 };

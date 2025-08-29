@@ -16,17 +16,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import {  X, AlertCircle, Loader2, Users, Shield } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useAuthRulesForm } from '../../features/authorizationRules/hooks/useAuthRules';
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { usePermissions } from '../../features/permissions/hooks/usePermissions';
 import { AuthRuleTestDialog } from './AuthRuleTestDialog';
+import { RolesSelectionSection } from './RolesSelectionSection';
+import { PermissionsSelectionSection } from './PermissionsSelectionSection';
 import type { HttpMethod } from '../../features/authorizationRules/types';
 
 const HTTP_METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
@@ -214,8 +214,8 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="mx-auto space-y-6">
+    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
+      <div className="mx-auto space-y-4 sm:space-y-5 lg:space-y-6">
         {/* Error Alert */}
         {error && (
           <Alert variant="destructive">
@@ -225,35 +225,35 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 lg:space-y-6">
           {/* Basic Information */}
           <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-lg sm:text-xl">Basic Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="service">Service *</Label>
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-1 sm:space-y-2">
+                  <Label htmlFor="service" className="text-sm sm:text-base font-medium">Service *</Label>
                   <Input
                     id="service"
                     value={service}
                     onChange={(e) => handleInputChange('service', e.target.value)}
                     placeholder="e.g., data, auth, api"
-                    className={validationErrors.service ? 'border-red-500' : ''}
+                    className={`text-sm sm:text-base ${validationErrors.service ? 'border-red-500' : ''}`}
                   />
                   {validationErrors.service && (
-                    <p className="text-sm text-red-500">{validationErrors.service}</p>
+                    <p className="text-xs sm:text-sm text-red-500">{validationErrors.service}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="method">HTTP Method *</Label>
+                <div className="space-y-1 sm:space-y-2">
+                  <Label htmlFor="method" className="text-sm sm:text-base font-medium">HTTP Method *</Label>
                   <select
                     id="method"
                     value={method}
                     onChange={(e) => handleInputChange('method', e.target.value as HttpMethod)}
-                    className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background ${
+                    className={`flex h-9 sm:h-10 w-full rounded-md border border-input bg-background px-2 sm:px-3 py-1 sm:py-2 text-sm ring-offset-background ${
                       validationErrors.method ? 'border-red-500' : ''
                     }`}
                   >
@@ -264,35 +264,37 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
                     ))}
                   </select>
                   {validationErrors.method && (
-                    <p className="text-sm text-red-500">{validationErrors.method}</p>
+                    <p className="text-xs sm:text-sm text-red-500">{validationErrors.method}</p>
                   )}
                 </div>
               </div>
 
               {/* Path Configuration */}
-              <div className="space-y-4">
-                <Label>Path Configuration *</Label>
+              <div className="space-y-3 sm:space-y-4">
+                <Label className="text-sm sm:text-base font-medium">Path Configuration *</Label>
                 <Tabs value={pathType} onValueChange={(value) => setPathType(value as 'dsl' | 'route')}>
-                  <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="dsl">Path DSL</TabsTrigger>
-                    <TabsTrigger value="route">Route Name</TabsTrigger>
+                  <TabsList className="grid w-full grid-cols-2 h-9 sm:h-10">
+                    <TabsTrigger value="dsl" className="text-xs sm:text-sm">Path DSL</TabsTrigger>
+                    <TabsTrigger value="route" className="text-xs sm:text-sm">Route Name</TabsTrigger>
                   </TabsList>
                   
-                  <TabsContent value="dsl" className="mt-4">
+                  <TabsContent value="dsl" className="mt-3 sm:mt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="pathDsl">Path DSL Pattern</Label>
-                      <div className="flex gap-2">
+                      <Label htmlFor="pathDsl" className="text-sm sm:text-base">Path DSL Pattern</Label>
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Textarea
                           id="pathDsl"
                           value={pathDsl}
                           onChange={(e) => handleInputChange('pathDsl', e.target.value)}
                           placeholder="/api/users/{id}/posts/*"
-                          className={validationErrors.pathDsl ? 'border-red-500' : ''}
+                          className={`text-sm font-mono min-h-[2.5rem] sm:min-h-[3rem] flex-1 ${validationErrors.pathDsl ? 'border-red-500' : ''}`}
                         />
                         {pathDsl.trim() && (
                           <Button
                             type="button"
                             variant="outline"
+                            size="sm"
+                            className="w-full sm:w-auto text-sm"
                             onClick={() => setShowTestDialog(true)}
                           >
                             Test
@@ -300,23 +302,23 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
                         )}
                       </div>
                       {validationErrors.pathDsl && (
-                        <p className="text-sm text-red-500">{validationErrors.pathDsl}</p>
+                        <p className="text-xs sm:text-sm text-red-500">{validationErrors.pathDsl}</p>
                       )}
                     </div>
                   </TabsContent>
                   
-                  <TabsContent value="route" className="mt-4">
+                  <TabsContent value="route" className="mt-3 sm:mt-4">
                     <div className="space-y-2">
-                      <Label htmlFor="routeName">Route Name</Label>
+                      <Label htmlFor="routeName" className="text-sm sm:text-base">Route Name</Label>
                       <Input
                         id="routeName"
                         value={routeName}
                         onChange={(e) => handleInputChange('routeName', e.target.value)}
                         placeholder="users.posts.index"
-                        className={validationErrors.routeName ? 'border-red-500' : ''}
+                        className={`text-sm sm:text-base ${validationErrors.routeName ? 'border-red-500' : ''}`}
                       />
                       {validationErrors.routeName && (
-                        <p className="text-sm text-red-500">{validationErrors.routeName}</p>
+                        <p className="text-xs sm:text-sm text-red-500">{validationErrors.routeName}</p>
                       )}
                     </div>
                   </TabsContent>
@@ -324,9 +326,9 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
               </div>
 
               {/* Priority and Status */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="priority">Priority (1-1000) *</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-1 sm:space-y-2">
+                  <Label htmlFor="priority" className="text-sm sm:text-base font-medium">Priority (1-1000) *</Label>
                   <Input
                     id="priority"
                     type="number"
@@ -334,17 +336,17 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
                     max="1000"
                     value={priority}
                     onChange={(e) => handleInputChange('priority', parseInt(e.target.value) || 0)}
-                    className={validationErrors.priority ? 'border-red-500' : ''}
+                    className={`text-sm sm:text-base ${validationErrors.priority ? 'border-red-500' : ''}`}
                   />
                   {validationErrors.priority && (
-                    <p className="text-sm text-red-500">{validationErrors.priority}</p>
+                    <p className="text-xs sm:text-sm text-red-500">{validationErrors.priority}</p>
                   )}
                 </div>
 
-                <div className="flex flex-row items-center justify-between rounded-lg border p-3">
+                <div className="flex flex-row items-center justify-between rounded-lg border p-2 sm:p-3">
                   <div className="space-y-0.5">
-                    <Label>Active Rule</Label>
-                    <div className="text-sm text-muted-foreground">
+                    <Label className="text-sm sm:text-base">Active Rule</Label>
+                    <div className="text-xs sm:text-sm text-muted-foreground">
                       Enable this rule immediately
                     </div>
                   </div>
@@ -359,13 +361,13 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
 
           {/* Authorization Requirements */}
           <Card>
-            <CardHeader>
-              <CardTitle>Authorization Requirements</CardTitle>
-              <p className="text-sm text-muted-foreground">
+            <CardHeader className="pb-3 sm:pb-4">
+              <CardTitle className="text-lg sm:text-xl">Authorization Requirements</CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Select roles and permissions required to access this endpoint
               </p>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-5 lg:space-y-6">
               {/* Authorization Error */}
               {validationErrors.authorization && (
                 <Alert variant="destructive">
@@ -375,206 +377,41 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
               )}
 
               {/* Roles Section */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-600" />
-                  <Label className="text-base font-medium">Roles</Label>
-                  <span className="text-sm text-muted-foreground">(User must have ANY of these roles)</span>
-                </div>
-
-                {rolesLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                    <span className="text-sm text-muted-foreground">Loading roles...</span>
-                  </div>
-                ) : availableRoles && availableRoles.length > 0 ? (
-                  <div className="space-y-3">
-                    {/* Bulk actions */}
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={selectAllRoles}
-                      >
-                        Select All
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={clearAllRoles}
-                      >
-                        Clear All
-                      </Button>
-                    </div>
-
-                    {/* Roles grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto border rounded-md p-3">
-                      {availableRoles.map((role) => (
-                        <div key={role.id} className="flex items-start space-x-3">
-                          <Checkbox
-                            id={`role-${role.id}`}
-                            checked={selectedRoles.includes(role.name)}
-                            onCheckedChange={() => toggleRoleSelection(role.name)}
-                          />
-                          <Label
-                            htmlFor={`role-${role.id}`}
-                            className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {role.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Selected roles display */}
-                    {selectedRoles.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground">
-                          Selected Roles ({selectedRoles.length})
-                        </Label>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedRoles.map((roleName) => (
-                            <Badge key={roleName} variant="secondary" className="flex items-center gap-1">
-                              {roleName}
-                              <X
-                                className="h-3 w-3 cursor-pointer hover:text-red-500"
-                                onClick={() => toggleRoleSelection(roleName)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 border rounded-md bg-gray-50">
-                    <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No roles available</p>
-                  </div>
-                )}
-              </div>
+              <RolesSelectionSection
+                availableRoles={availableRoles}
+                selectedRoles={selectedRoles}
+                rolesLoading={rolesLoading}
+                onToggleRole={toggleRoleSelection}
+                onSelectAllRoles={selectAllRoles}
+                onClearAllRoles={clearAllRoles}
+              />
 
               {/* Separator */}
               <Separator />
 
               {/* Permissions Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-green-600" />
-                    <Label className="text-base font-medium">Permissions</Label>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className={authorizationType === 'any' ? 'font-medium text-blue-600' : 'text-muted-foreground'}>
-                      Any
-                    </span>
-                    <Switch
-                      checked={authorizationType === 'all'}
-                      onCheckedChange={(checked) => setAuthorizationType(checked ? 'all' : 'any')}
-                    />
-                    <span className={authorizationType === 'all' ? 'font-medium text-blue-600' : 'text-muted-foreground'}>
-                      All
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-muted-foreground">
-                  {authorizationType === 'any' 
-                    ? 'User needs ANY of these permissions'
-                    : 'User needs ALL of these permissions'
-                  }
-                </p>
-
-                {permissionsLoading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                    <span className="text-sm text-muted-foreground">Loading permissions...</span>
-                  </div>
-                ) : availablePermissions && availablePermissions.length > 0 ? (
-                  <div className="space-y-3">
-                    {/* Bulk actions */}
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        size="sm"
-                        onClick={selectAllPermissions}
-                      >
-                        Select All
-                      </Button>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={clearAllPermissions}
-                      >
-                        Clear All
-                      </Button>
-                    </div>
-
-                    {/* Permissions grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-48 overflow-y-auto border rounded-md p-3">
-                      {availablePermissions.map((permission) => (
-                        <div key={permission.id} className="flex items-start space-x-3">
-                          <Checkbox
-                            id={`permission-${permission.id}`}
-                            checked={selectedPermissions.includes(permission.name)}
-                            onCheckedChange={() => togglePermissionSelection(permission.name)}
-                          />
-                          <Label
-                            htmlFor={`permission-${permission.id}`}
-                            className="text-sm font-medium leading-none cursor-pointer peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            {permission.name}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Selected permissions display */}
-                    {selectedPermissions.length > 0 && (
-                      <div className="space-y-2">
-                        <Label className="text-sm text-muted-foreground">
-                          Selected Permissions ({selectedPermissions.length}) - {authorizationType.toUpperCase()}
-                        </Label>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedPermissions.map((permissionName) => (
-                            <Badge
-                              key={permissionName}
-                              variant={authorizationType === 'all' ? 'default' : 'outline'}
-                              className="flex items-center gap-1"
-                            >
-                              {permissionName}
-                              <X
-                                className="h-3 w-3 cursor-pointer hover:text-red-500"
-                                onClick={() => togglePermissionSelection(permissionName)}
-                              />
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 border rounded-md bg-gray-50">
-                    <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground">No permissions available</p>
-                  </div>
-                )}
-              </div>
+              <PermissionsSelectionSection
+                availablePermissions={availablePermissions}
+                selectedPermissions={selectedPermissions}
+                permissionsLoading={permissionsLoading}
+                authorizationType={authorizationType}
+                onTogglePermission={togglePermissionSelection}
+                onSelectAllPermissions={selectAllPermissions}
+                onClearAllPermissions={clearAllPermissions}
+                onAuthorizationTypeChange={setAuthorizationType}
+              />
             </CardContent>
           </Card>
 
           {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4">
             {onCancel && (
               <Button
                 type="button"
                 variant="outline"
                 onClick={onCancel}
                 disabled={isSubmitting}
+                className="w-full sm:w-auto"
               >
                 Cancel
               </Button>
@@ -582,7 +419,7 @@ export const CreateAuthRuleForm: React.FC<CreateAuthRuleFormProps> = ({
             <Button
               type="submit"
               disabled={isSubmitting || isCreating}
-              className="min-w-[120px]"
+              className="w-full sm:w-auto min-w-[120px]"
             >
               {isSubmitting ? (
                 <>

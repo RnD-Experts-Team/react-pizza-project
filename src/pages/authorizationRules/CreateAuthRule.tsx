@@ -38,20 +38,22 @@ const CreateAuthRulePage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
+      <div className="mx-auto space-y-4 sm:space-y-5 lg:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={handleBack} className="p-2 self-start sm:self-auto">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Shield className="h-6 w-6 text-primary" />
+          <div className="flex items-start sm:items-center gap-3 w-full">
+            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
+              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Create Authorization Rule</h1>
-              <p className="text-muted-foreground">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight break-words">
+                Create Authorization Rule
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Define a new access control rule for your application
               </p>
             </div>
@@ -59,15 +61,15 @@ const CreateAuthRulePage: React.FC = () => {
         </div>
 
         {/* Breadcrumb */}
-        <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
+        <nav className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm text-muted-foreground overflow-x-auto">
           <button 
             onClick={handleBack}
-            className="hover:text-foreground transition-colors"
+            className="hover:text-foreground transition-colors whitespace-nowrap"
           >
             Authorization Rules
           </button>
-          <span>/</span>
-          <span className="text-foreground">Create New Rule</span>
+          <span className="flex-shrink-0">/</span>
+          <span className="text-foreground whitespace-nowrap">Create New Rule</span>
         </nav>
 
         {/* Global Error Alert */}
@@ -90,12 +92,12 @@ const CreateAuthRulePage: React.FC = () => {
         )}
 
         {/* Instructions Card */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-medium text-blue-900 mb-2">Creating Authorization Rules</h3>
-          <div className="text-sm text-blue-800 space-y-1">
-            <p>• <strong>Service:</strong> The application service this rule applies to (e.g., api, data, auth)</p>
-            <p>• <strong>Path DSL:</strong> Dynamic path pattern with variables like <code className="bg-blue-100 px-1 rounded">/users/{'{id}'}/posts/*</code></p>
-            <p>• <strong>Route Name:</strong> Named route identifier like <code className="bg-blue-100 px-1 rounded">users.posts.show</code></p>
+        <div className="bg-primary-50 border border-primary-200 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-primary-900 mb-2 text-sm sm:text-base">Creating Authorization Rules</h3>
+          <div className="text-xs sm:text-sm text-primary-800 space-y-1 sm:space-y-1.5">
+            <p className="break-words">• <strong>Service:</strong> The application service this rule applies to (e.g., api, data, auth)</p>
+            <p className="break-words">• <strong>Path DSL:</strong> Dynamic path pattern with variables like <code className="bg-primary-100 px-1 rounded text-xs">/users/{'{id}'}/posts/*</code></p>
+            <p className="break-words">• <strong>Route Name:</strong> Named route identifier like <code className="bg-primary-100 px-1 rounded text-xs">users.posts.show</code></p>
             <p>• <strong>Roles:</strong> User must have ANY of the specified roles</p>
             <p>• <strong>Permissions (Any):</strong> User needs ANY of these permissions</p>
             <p>• <strong>Permissions (All):</strong> User needs ALL of these permissions</p>
@@ -110,32 +112,32 @@ const CreateAuthRulePage: React.FC = () => {
         />
 
         {/* Help Section */}
-        <div className="border-t pt-6">
-          <h3 className="font-medium mb-3">Common Examples</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div className="border-t pt-4 sm:pt-5 lg:pt-6">
+          <h3 className="font-medium mb-3 text-sm sm:text-base">Common Examples</h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 text-xs sm:text-sm">
             <div className="space-y-2">
-              <h4 className="font-medium text-green-700">Path DSL Examples:</h4>
+              <h4 className="font-medium text-chart-3 text-sm sm:text-base">Path DSL Examples:</h4>
               <ul className="space-y-1 text-muted-foreground">
-                <li><code className="bg-gray-100 px-1 rounded">/api/users/{'{id}'}</code> - Matches /api/users/123</li>
-                <li><code className="bg-gray-100 px-1 rounded">/files/*</code> - Matches any path starting with /files/</li>
-                <li><code className="bg-gray-100 px-1 rounded">/admin/{'{section}'}/settings</code> - Matches admin sections</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">/api/users/{'{id}'}</code> - Matches /api/users/123</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">/files/*</code> - Matches any path starting with /files/</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">/admin/{'{section}'}/settings</code> - Matches admin sections</li>
               </ul>
             </div>
             <div className="space-y-2">
-              <h4 className="font-medium text-blue-700">Route Name Examples:</h4>
+              <h4 className="font-medium text-chart-4 text-sm sm:text-base">Route Name Examples:</h4>
               <ul className="space-y-1 text-muted-foreground">
-                <li><code className="bg-gray-100 px-1 rounded">users.show</code> - Show user profile</li>
-                <li><code className="bg-gray-100 px-1 rounded">admin.dashboard</code> - Admin dashboard</li>
-                <li><code className="bg-gray-100 px-1 rounded">api.data.export</code> - Data export endpoint</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">users.show</code> - Show user profile</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">admin.dashboard</code> - Admin dashboard</li>
+                <li className="break-all"><code className="bg-muted px-1 rounded text-xs">api.data.export</code> - Data export endpoint</li>
               </ul>
             </div>
           </div>
         </div>
 
         {/* Tips Section */}
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-          <h3 className="font-medium text-amber-900 mb-2">💡 Pro Tips</h3>
-          <ul className="text-sm text-amber-800 space-y-1">
+        <div className="bg-chart-2/10 border border-chart-2/30 rounded-lg p-3 sm:p-4">
+          <h3 className="font-medium text-chart-2 mb-2 text-sm sm:text-base">💡 Pro Tips</h3>
+          <ul className="text-xs sm:text-sm text-chart-2/80 space-y-1">
             <li>• Use the <strong>Test</strong> button to validate your Path DSL patterns before saving</li>
             <li>• Lower priority numbers take precedence (priority 1 beats priority 100)</li>
             <li>• Either Path DSL OR Route Name is required, not both</li>
