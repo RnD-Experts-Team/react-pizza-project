@@ -88,124 +88,140 @@ const CreatePermissionPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className=" mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create Permission</h1>
-            <p className="text-muted-foreground">
-              Add a new permission to the system
-            </p>
+    <div className="min-h-screen bg-background text-foreground">
+      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 lg:py-8 lg:px-8">
+        <div className="mx-auto space-y-4 sm:space-y-6">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <Button 
+              variant="ghost" 
+              onClick={handleBack} 
+              className="p-2 self-start hover:bg-accent hover:text-accent-foreground transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+            <div className="space-y-1">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+                Create Permission
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Add a new permission to the system
+              </p>
+            </div>
           </div>
-        </div>
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive" className="border-destructive bg-destructive/10 text-destructive">
+              <AlertDescription className="text-sm sm:text-base">{error}</AlertDescription>
+            </Alert>
+          )}
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Permission Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Key className="h-5 w-5" />
-                Permission Details
-              </CardTitle>
-              <CardDescription>
-                Enter the permission name and guard configuration
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Permission Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Permission Name *
-                  </Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    placeholder="e.g., manage-users, view-reports"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    className={errors.name ? 'border-red-500' : ''}
-                    disabled={isLoading}
-                  />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Use lowercase letters, numbers, and hyphens only
-                  </p>
-                </div>
-
-                {/* Guard Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="guard_name" className="text-sm font-medium">
-                    Guard Name *
-                  </Label>
-                  <div className="flex gap-2">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            {/* Permission Information */}
+            <Card className="bg-card border-border shadow-sm hover:shadow-md transition-shadow">
+              <CardHeader className="pb-4 sm:pb-6">
+                <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-card-foreground">
+                  <Key className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  Permission Details
+                </CardTitle>
+                <CardDescription className="text-sm sm:text-base text-muted-foreground">
+                  Enter the permission name and guard configuration
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                  {/* Permission Name */}
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label htmlFor="name" className="text-sm sm:text-base font-medium text-foreground">
+                      Permission Name *
+                    </Label>
                     <Input
-                      id="guard_name"
+                      id="name"
                       type="text"
-                      placeholder="web"
-                      value={formData.guard_name}
-                      onChange={(e) => handleInputChange('guard_name', e.target.value)}
-                      className={errors.guard_name ? 'border-red-500' : ''}
+                      placeholder="e.g., manage-users, view-reports"
+                      value={formData.name}
+                      onChange={(e) => handleInputChange('name', e.target.value)}
+                      className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring transition-colors ${
+                        errors.name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                      }`}
                       disabled={isLoading}
                     />
-                    <Badge variant="outline" className="px-3 py-2 text-xs">
-                      Default: web
-                    </Badge>
+                    {errors.name && (
+                      <p className="text-xs sm:text-sm text-destructive font-medium">{errors.name}</p>
+                    )}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Use lowercase letters, numbers, and hyphens only
+                    </p>
                   </div>
-                  {errors.guard_name && (
-                    <p className="text-sm text-red-500">{errors.guard_name}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Specifies the authentication guard for this permission
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleBack}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="min-w-[120px]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Permission
-                </>
-              )}
-            </Button>
-          </div>
-        </form>
+                  {/* Guard Name */}
+                  <div className="space-y-2 sm:space-y-3">
+                    <Label htmlFor="guard_name" className="text-sm sm:text-base font-medium text-foreground">
+                      Guard Name *
+                    </Label>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                      <Input
+                        id="guard_name"
+                        type="text"
+                        placeholder="web"
+                        value={formData.guard_name}
+                        onChange={(e) => handleInputChange('guard_name', e.target.value)}
+                        className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring transition-colors flex-1 ${
+                          errors.guard_name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                        }`}
+                        disabled={isLoading}
+                      />
+                      <Badge 
+                        variant="outline" 
+                        className="px-3 py-2 text-xs sm:text-sm border-border text-muted-foreground bg-muted/50 self-start sm:self-center whitespace-nowrap"
+                      >
+                        Default: web
+                      </Badge>
+                    </div>
+                    {errors.guard_name && (
+                      <p className="text-xs sm:text-sm text-destructive font-medium">{errors.guard_name}</p>
+                    )}
+                    <p className="text-xs sm:text-sm text-muted-foreground">
+                      Specifies the authentication guard for this permission
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Form Actions */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 sm:pt-6">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleBack}
+                disabled={isLoading}
+                className="order-2 sm:order-1 bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="order-1 sm:order-2 min-w-[120px] sm:min-w-[140px] bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-sm"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <span className="text-sm sm:text-base">Creating...</span>
+                  </>
+                ) : (
+                  <>
+                    <Plus className="mr-2 h-4 w-4" />
+                    <span className="text-sm sm:text-base">Create Permission</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
