@@ -47,30 +47,40 @@ export const RotateTokenDialog: React.FC<RotateTokenDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] mx-2 sm:mx-0 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Rotate Service Token</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">Rotate Service Token</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Generate a new token for "{serviceClient.name}". The old token will be invalidated.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="expires_at">New Expiration Date (Optional)</Label>
+            <Label htmlFor="expires_at" className="text-sm sm:text-base">New Expiration Date (Optional)</Label>
             <Input
               id="expires_at"
               type="date"
               value={form.expires_at}
               onChange={(e) => setForm(prev => ({ ...prev, expires_at: e.target.value }))}
+              className="mt-1"
             />
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading.rotating}>
+            <Button 
+              type="submit" 
+              disabled={loading.rotating}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               {loading.rotating ? 'Rotating...' : 'Rotate Token'}
             </Button>
           </DialogFooter>

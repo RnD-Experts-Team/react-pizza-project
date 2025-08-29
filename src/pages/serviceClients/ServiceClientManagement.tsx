@@ -73,18 +73,19 @@ const ServiceClientsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
+    <div className="container mx-auto p-2 sm:p-4 lg:p-6 max-w-7xl">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Service Client Management</h1>
-          <p className="text-muted-foreground mt-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Service Client Management</h1>
+          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
             Manage API service clients and their authentication tokens
           </p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+        <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
           <Plus className="mr-2 h-4 w-4" />
-          Create Service Client
+          <span className="hidden sm:inline">Create Service Client</span>
+          <span className="sm:hidden">Create Client</span>
         </Button>
       </div>
 
@@ -104,21 +105,25 @@ const ServiceClientsPage: React.FC = () => {
           
           {/* Pagination */}
           {pagination && pagination.total > perPage && (
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4">
               <Button
                 variant="outline"
+                size="sm"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
+                className="w-full sm:w-auto"
               >
                 Previous
               </Button>
-              <span className="flex items-center px-4">
+              <span className="flex items-center px-2 sm:px-4 text-sm sm:text-base order-first sm:order-none">
                 Page {currentPage} of {pagination.last_page}
               </span>
               <Button
                 variant="outline"
+                size="sm"
                 disabled={currentPage === pagination.last_page}
                 onClick={() => setCurrentPage(currentPage + 1)}
+                className="w-full sm:w-auto"
               >
                 Next
               </Button>
@@ -181,8 +186,8 @@ const ServiceClientsPage: React.FC = () => {
               </div>
             </div>
             
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 <strong>Important:</strong> Store this token securely. You won't be able to retrieve it again.
               </p>
             </div>

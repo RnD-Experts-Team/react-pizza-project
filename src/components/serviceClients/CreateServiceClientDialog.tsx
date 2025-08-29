@@ -46,23 +46,24 @@ export const CreateServiceClientDialog: React.FC<CreateServiceClientDialogProps>
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] mx-2 sm:mx-0 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Service Client</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg sm:text-xl">Create Service Client</DialogTitle>
+          <DialogDescription className="text-sm sm:text-base">
             Create a new API service client with authentication token
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
           <div>
-            <Label htmlFor="name">Name</Label>
+            <Label htmlFor="name" className="text-sm sm:text-base">Name</Label>
             <Input
               id="name"
               value={form.name}
               onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
               placeholder="Enter service client name"
               required
+              className="mt-1"
             />
           </div>
           
@@ -72,35 +73,46 @@ export const CreateServiceClientDialog: React.FC<CreateServiceClientDialogProps>
               checked={form.is_active}
               onCheckedChange={(checked) => setForm(prev => ({ ...prev, is_active: checked }))}
             />
-            <Label htmlFor="is_active">Active</Label>
+            <Label htmlFor="is_active" className="text-sm sm:text-base">Active</Label>
           </div>
           
           <div>
-            <Label htmlFor="expires_at">Expires At (Optional)</Label>
+            <Label htmlFor="expires_at" className="text-sm sm:text-base">Expires At (Optional)</Label>
             <Input
               id="expires_at"
               type="date"
               value={form.expires_at}
               onChange={(e) => setForm(prev => ({ ...prev, expires_at: e.target.value }))}
+              className="mt-1"
             />
           </div>
           
           <div>
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes" className="text-sm sm:text-base">Notes</Label>
             <Textarea
               id="notes"
               value={form.notes}
               onChange={(e) => setForm(prev => ({ ...prev, notes: e.target.value }))}
               placeholder="Enter notes about this service client"
               rows={3}
+              className="mt-1 resize-none"
             />
           </div>
           
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)}
+              className="w-full sm:w-auto order-2 sm:order-1"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading.creating}>
+            <Button 
+              type="submit" 
+              disabled={loading.creating}
+              className="w-full sm:w-auto order-1 sm:order-2"
+            >
               {loading.creating ? 'Creating...' : 'Create Client'}
             </Button>
           </DialogFooter>
