@@ -5,108 +5,180 @@
 @layer base {
   :root {
     --background: #ffffff;
-    --foreground: #262626;
+    --foreground: #09090b;
     --card: #ffffff;
-    --card-foreground: #262626;
+    --card-foreground: #09090b;
     --popover: #ffffff;
-    --popover-foreground: #262626;
-    --primary: #f59e0b;
-    --primary-foreground: #000000;
-    --secondary: #f3f4f6;
-    --secondary-foreground: #4b5563;
-    --muted: #f9fafb;
-    --muted-foreground: #6b7280;
-    --accent: #fffbeb;
-    --accent-foreground: #92400e;
+    --popover-foreground: #09090b;
+
+    /* === Primary base (hex) === */
+    --primary: #ff6000;
+    --primary-foreground: #ffffff;
+
+    /* === Auto-derived primary shades (hex + color-mix) === */
+    /* lighter (toward white) */
+    --primary-50:  color-mix(in srgb, var(--primary) 8%,  white);
+    --primary-100: color-mix(in srgb, var(--primary) 16%, white);
+    --primary-200: color-mix(in srgb, var(--primary) 32%, white);
+    --primary-300: color-mix(in srgb, var(--primary) 48%, white);
+    --primary-400: color-mix(in srgb, var(--primary) 64%, white);
+    /* base */
+    --primary-500: var(--primary);
+    /* darker (toward black) */
+    --primary-600: color-mix(in srgb, var(--primary) 86%, black);
+    --primary-700: color-mix(in srgb, var(--primary) 72%, black);
+    --primary-800: color-mix(in srgb, var(--primary) 58%, black);
+    --primary-900: color-mix(in srgb, var(--primary) 44%, black);
+
+    --secondary: #f4f4f5;
+    --secondary-foreground: #09090b;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --accent: #f4f4f5;
+    --accent-foreground: #09090b;
     --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #e5e7eb;
-    --input: #e5e7eb;
-    --ring: #f59e0b;
-    --chart-1: #f59e0b;
-    --chart-2: #d97706;
-    --chart-3: #b45309;
-    --chart-4: #92400e;
-    --chart-5: #78350f;
-    --sidebar-background: #f9fafb;
-    --sidebar-foreground: #262626;
-    --sidebar-primary: #f59e0b;
+    --destructive-foreground: #fafafa;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #ff6000;
+
+    --chart-1: #ff6000;
+    --chart-2: #f59e0b;
+    --chart-3: #84cc16;
+    --chart-4: #3b82f6;
+    --chart-5: #a855f7;
+
+    --sidebar-background: #f4f4f5;
+    --sidebar-foreground: #71717a;
+    --sidebar-primary: #ff6000;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #fffbeb;
-    --sidebar-accent-foreground: #92400e;
-    --sidebar-border: #e5e7eb;
-    --sidebar-ring: #f59e0b;
-    --font-sans: Inter, sans-serif;
-    --font-serif: Source Serif 4, serif;
-    --font-mono: JetBrains Mono, monospace;
-    --radius: 0.375rem;
-    --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-    --shadow-sm:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-    --shadow:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-    --shadow-md:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-lg:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
-    --shadow-xl:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
-    --tracking-normal: 0em;
+    --sidebar-accent: #ffffff;
+    --sidebar-accent-foreground: #09090b;
+    --sidebar-border: #e4e4e7;
+    --sidebar-ring: #ff6000;
+
+    --font-sans: Afacad, ui-sans-serif, sans-serif, system-ui;
+    --font-serif: serif;
+    --font-mono: B612 Mono, ui-monospace, monospace;
+
+    --radius: 0.5rem;
+
+    --shadow-2xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.25);
+
+    --tracking-normal: 0rem;
     --spacing: 0.25rem;
+
+    /* Dashboard Component Colors */
+    --channel-header: #7f675b;
+    --channel-header-foreground: #ffffff;
+    --performance-bg-1: #f3f4f6;
+    --performance-bg-2: #fef3c7;
+    --performance-bg-3: #d1fae5;
+    --performance-bg-4: #fde68a;
+    --performance-bg-5: #e9d5ff;
+    --performance-bg-6: #fecaca;
+    --performance-bg-7: #fbcfe8;
+    --performance-bg-8: #fed7aa;
+
+    /* DSQR Component Colors */
+    --dsqr-warning: #d97706;
+    --dsqr-warning-foreground: #ffffff;
+
+    /* Realistic Shadow System */
+    --shadow-realistic: 0 2px 5px 0 rgb(0 0 0 / 0.2), 0 2px 3px -1px rgb(0 0 0 / 0.15), inset 0 1px 0 0 rgb(255 255 255 / 0.08);
+    --shadow-realistic-lg: 0 6px 10px -2px rgb(0 0 0 / 0.2), 0 4px 6px -2px rgb(0 0 0 / 0.15), inset 0 1px 0 0 rgb(255 255 255 / 0.12);
+    --shadow-realistic-xl: 0 14px 20px -4px rgb(0 0 0 / 0.25), 0 8px 10px -5px rgb(0 0 0 / 0.2), inset 0 1px 0 0 rgb(255 255 255 / 0.12);
   }
 
   .dark {
-    --background: #171717;
-    --foreground: #e5e5e5;
-    --card: #262626;
-    --card-foreground: #e5e5e5;
-    --popover: #262626;
-    --popover-foreground: #e5e5e5;
-    --primary: #f59e0b;
-    --primary-foreground: #000000;
-    --secondary: #262626;
-    --secondary-foreground: #e5e5e5;
-    --muted: #262626;
-    --muted-foreground: #a3a3a3;
-    --accent: #92400e;
-    --accent-foreground: #fde68a;
-    --destructive: #ef4444;
-    --destructive-foreground: #ffffff;
-    --border: #404040;
-    --input: #404040;
-    --ring: #f59e0b;
-    --chart-1: #fbbf24;
-    --chart-2: #d97706;
-    --chart-3: #92400e;
-    --chart-4: #b45309;
-    --chart-5: #92400e;
-    --sidebar-background: #0f0f0f;
-    --sidebar-foreground: #e5e5e5;
-    --sidebar-primary: #f59e0b;
+    --background: #0c0a09;
+    --foreground: #fafafa;
+    --card: #18181b;
+    --card-foreground: #fafafa;
+    --popover: #18181b;
+    --popover-foreground: #fafafa;
+
+    /* keep or change base; shades auto-update */
+    --primary: #ff6000;
+    --primary-foreground: #ffffff;
+
+    /* same auto-derivation in dark mode */
+    --primary-50:  color-mix(in srgb, var(--primary) 8%,  white);
+    --primary-100: color-mix(in srgb, var(--primary) 16%, white);
+    --primary-200: color-mix(in srgb, var(--primary) 32%, white);
+    --primary-300: color-mix(in srgb, var(--primary) 48%, white);
+    --primary-400: color-mix(in srgb, var(--primary) 64%, white);
+    --primary-500: var(--primary);
+    --primary-600: color-mix(in srgb, var(--primary) 86%, black);
+    --primary-700: color-mix(in srgb, var(--primary) 72%, black);
+    --primary-800: color-mix(in srgb, var(--primary) 58%, black);
+    --primary-900: color-mix(in srgb, var(--primary) 44%, black);
+
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fafafa;
+    --border: #27272a;
+    --input: #27272a;
+    --ring: #ff6000;
+
+    --chart-1: #ff6000;
+    --chart-2: #f59e0b;
+    --chart-3: #84cc16;
+    --chart-4: #3b82f6;
+    --chart-5: #a855f7;
+
+    --sidebar-background: #18181b;
+    --sidebar-foreground: #a1a1aa;
+    --sidebar-primary: #ff6000;
     --sidebar-primary-foreground: #ffffff;
-    --sidebar-accent: #92400e;
-    --sidebar-accent-foreground: #fde68a;
-    --sidebar-border: #404040;
-    --sidebar-ring: #f59e0b;
-    --font-sans: Inter, sans-serif;
-    --font-serif: Source Serif 4, serif;
-    --font-mono: JetBrains Mono, monospace;
-    --radius: 0.375rem;
-    --shadow-2xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-    --shadow-xs: 0px 4px 8px -1px hsl(0 0% 0% / 0.05);
-    --shadow-sm:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-    --shadow:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 1px 2px -2px hsl(0 0% 0% / 0.1);
-    --shadow-md:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 2px 4px -2px hsl(0 0% 0% / 0.1);
-    --shadow-lg:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 4px 6px -2px hsl(0 0% 0% / 0.1);
-    --shadow-xl:
-      0px 4px 8px -1px hsl(0 0% 0% / 0.1), 0px 8px 10px -2px hsl(0 0% 0% / 0.1);
-    --shadow-2xl: 0px 4px 8px -1px hsl(0 0% 0% / 0.25);
+    --sidebar-accent: #27272a;
+    --sidebar-accent-foreground: #fafafa;
+    --sidebar-border: #27272a;
+    --sidebar-ring: #ff6000;
+
+    --radius: 0.5rem;
+
+    --shadow-2xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+    --shadow-xs: 0px 2px 4px 0px hsl(0 0% 0% / 0.05);
+    --shadow-sm: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-md: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 2px 4px -1px hsl(0 0% 0% / 0.1);
+    --shadow-lg: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 4px 6px -1px hsl(0 0% 0% / 0.1);
+    --shadow-xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.1), 0px 8px 10px -1px hsl(0 0% 0% / 0.1);
+    --shadow-2xl: 0px 2px 4px 0px hsl(0 0% 0% / 0.25);
+
+    /* Dashboard Component Colors - Dark Mode */
+    --channel-header: #5a4a42;
+    --channel-header-foreground: #ffffff;
+    --performance-bg-1: #374151;
+    --performance-bg-2: #451a03;
+    --performance-bg-3: #064e3b;
+    --performance-bg-4: #451a03;
+    --performance-bg-5: #581c87;
+    --performance-bg-6: #7f1d1d;
+    --performance-bg-7: #831843;
+    --performance-bg-8: #9a3412;
+
+    /* DSQR Component Colors - Dark Mode */
+    --dsqr-warning: #f59e0b;
+    --dsqr-warning-foreground: #000000;
+
+    /* Realistic Shadow System - Dark Mode */
+    --shadow-realistic: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3), inset 0 1px 0 0 rgb(255 255 255 / 0.02);
+    --shadow-realistic-lg: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
+    --shadow-realistic-xl: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3), inset 0 1px 0 0 rgb(255 255 255 / 0.05);
   }
 }
 

@@ -1,8 +1,10 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { MetricRow, MetricRowWithStatus } from './MetricRow';
 import { OnTrackSection } from './OnTrackSection';
+import { useTheme } from '@/hooks/useTheme';
+import { getThemeIcon, isDarkTheme } from '@/types/dsqr';
 import type { PlatformCardProps } from '@/types/dsqr';
 
 interface PlatformCardComponentProps extends PlatformCardProps {
@@ -10,7 +12,7 @@ interface PlatformCardComponentProps extends PlatformCardProps {
 }
 
 export const PlatformCard: React.FC<PlatformCardComponentProps> = ({
-  icon: IconComponent,
+  iconSrc,
   title,
   data = null,
   metrics = null,
@@ -19,43 +21,48 @@ export const PlatformCard: React.FC<PlatformCardComponentProps> = ({
   className,
   isMobile = false,
 }) => {
+  const { theme } = useTheme();
   const safeData = data || [];
   const safeMetrics = metrics || [];
+
+  // Determine if we should use dark icons
+  const shouldUseDarkIcon = theme === 'dark' || (theme === 'system' && isDarkTheme());
+
+  // Get the appropriate icon based on theme
+  const getIconSrc = () => {
+    if (iconSrc) {
+      // If iconSrc is provided, try to determine platform from the path
+      if (iconSrc.includes('doordash')) {
+        return getThemeIcon('doordash', shouldUseDarkIcon);
+      } else if (iconSrc.includes('ubereats')) {
+        return getThemeIcon('ubereats', shouldUseDarkIcon);
+      } else if (iconSrc.includes('grubhub')) {
+        return getThemeIcon('grubhub', shouldUseDarkIcon);
+      }
+      // If we can't determine the platform, return the original iconSrc
+      return iconSrc;
+    }
+    return getThemeIcon('default', shouldUseDarkIcon);
+  };
 
   return (
     <Card
       className={cn(
-        'w-full shadow-lg hover:shadow-xl transition-shadow duration-200',
-        isMobile ? 'max-w-full' : 'max-w-sm mx-auto',
+        'w-full shadow-realistic hover:shadow-realistic-lg transition-shadow duration-200',
+        isMobile ? 'max-w-full' : 'max-w-full mx-auto',
         className,
       )}
     >
-      <CardHeader className={cn(isMobile ? 'pb-2 p-3' : 'pb-4')}>
-        <div className="flex items-center justify-between">
-          {IconComponent && (
-            <IconComponent
-              className={cn(
-                'text-muted-foreground',
-                isMobile ? 'w-4 h-4' : 'w-6 h-6',
-              )}
-            />
-          )}
-          <CardTitle
+      <CardHeader className={cn(isMobile ? 'p-2' : 'p-2')}>
+        <div className="flex items-center justify-center">
+          <img
+            src={getIconSrc()}
+            alt={`${title} icon`}
             className={cn(
-              'font-bold text-center flex-1',
-              isMobile ? 'text-base' : 'text-lg',
+              'text-muted-foreground',
+              isMobile ? 'w-4 h-4' : 'w-12 h-12',
             )}
-          >
-            {title}
-          </CardTitle>
-          {IconComponent && (
-            <IconComponent
-              className={cn(
-                'text-muted-foreground',
-                isMobile ? 'w-4 h-4' : 'w-6 h-6',
-              )}
-            />
-          )}
+          />
         </div>
       </CardHeader>
 

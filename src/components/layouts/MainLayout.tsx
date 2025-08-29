@@ -46,7 +46,6 @@ import {
 import { useAuth } from '../../features/auth/hooks/useAuth';
 import {
   Home,
-  Pizza,
   LogOut,
   Settings,
   Store,
@@ -84,11 +83,6 @@ function AppSidebar() {
       icon: Home,
     },
     {
-      title: 'Pizzas',
-      url: '/pizza',
-      icon: Pizza,
-    },
-    {
       title: 'User Management',
       url: '/user-management',
       icon: Users,
@@ -112,6 +106,11 @@ function AppSidebar() {
       title: 'User Role Store Assignment',
       url: '/user-role-store-assignment',
       icon: Users,
+    },
+    {
+      title: 'Stores Hierarchy',
+      url: '/stores-hierarchy',
+      icon: Store,
     },
     {
       title: 'Settings',

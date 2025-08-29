@@ -6,7 +6,7 @@
  * Redux actions, API services, or state selectors.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   // Async thunks
@@ -113,6 +113,10 @@ export const useStores = (
   // Local state for search
   const [searchTerm, setSearchTerm] = useState('');
   
+  // Stabilize initialParams to prevent unnecessary re-renders
+  const initialParamsRef = useRef(initialParams);
+  initialParamsRef.current = initialParams;
+  
   // Select state from Redux store
   const stores = useSelector(selectStores);
   const loading = useSelector(selectStoresLoading);
@@ -153,12 +157,12 @@ export const useStores = (
 
  
 
-  // Auto-fetch on mount if enabled
+  // Auto-fetch on mount if enabled (prevent fetching when there's an error)
   useEffect(() => {
-    if (autoFetch && !hasStores && !loading) {
-      fetchStoresCallback(initialParams);
+    if (autoFetch && !hasStores && !loading && !error) {
+      fetchStoresCallback(initialParamsRef.current);
     }
-  }, [autoFetch, hasStores, loading, fetchStoresCallback, initialParams]);
+  }, [autoFetch, hasStores, loading, error, fetchStoresCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {
@@ -250,12 +254,12 @@ export const useStore = (
     [dispatch]
   );
 
-  // Auto-fetch when storeId changes
+  // Auto-fetch when storeId changes (prevent fetching when there's an error)
   useEffect(() => {
-    if (autoFetch && storeId && storeId !== selectedStoreId && !loading) {
+    if (autoFetch && storeId && storeId !== selectedStoreId && !loading && !error) {
       fetchStoreCallback(storeId);
     }
-  }, [autoFetch, storeId, selectedStoreId, loading, fetchStoreCallback]);
+  }, [autoFetch, storeId, selectedStoreId, loading, error, fetchStoreCallback]);
 
   // Clear store when storeId becomes null
   useEffect(() => {
@@ -502,12 +506,12 @@ export const useStoreUsers = (
     [dispatch]
   );
 
-  // Auto-fetch when storeId changes
+  // Auto-fetch when storeId changes (prevent fetching when there's an error)
   useEffect(() => {
-    if (autoFetch && storeId && !hasUsers && !loading) {
+    if (autoFetch && storeId && !hasUsers && !loading && !error) {
       fetchStoreUsersCallback(storeId);
     }
-  }, [autoFetch, storeId, hasUsers, loading, fetchStoreUsersCallback]);
+  }, [autoFetch, storeId, hasUsers, loading, error, fetchStoreUsersCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {
@@ -570,12 +574,12 @@ export const useStoreRoles = (
     [dispatch]
   );
 
-  // Auto-fetch when storeId changes
+  // Auto-fetch when storeId changes (prevent fetching when there's an error)
   useEffect(() => {
-    if (autoFetch && storeId && !hasRoles && !loading) {
+    if (autoFetch && storeId && !hasRoles && !loading && !error) {
       fetchStoreRolesCallback(storeId);
     }
-  }, [autoFetch, storeId, hasRoles, loading, fetchStoreRolesCallback]);
+  }, [autoFetch, storeId, hasRoles, loading, error, fetchStoreRolesCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {

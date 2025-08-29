@@ -7,7 +7,7 @@
  * All utility functions are integrated for complete business logic encapsulation.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchUsers,
@@ -206,6 +206,10 @@ export const useUsers = (
     return calculateUserStats(users);
   }, [users]);
 
+  // Stable reference for initial params to prevent unnecessary re-renders
+  const initialParamsRef = useRef(initialParams);
+  initialParamsRef.current = initialParams;
+
   // Fetch function with error handling
   const fetchUsersCallback = useCallback(
     async (params?: GetUsersParams) => {
@@ -221,20 +225,20 @@ export const useUsers = (
 
   // Refetch with current parameters
   const refetch = useCallback(async () => {
-    await fetchUsersCallback(initialParams);
-  }, [fetchUsersCallback, initialParams]);
+    await fetchUsersCallback(initialParamsRef.current);
+  }, [fetchUsersCallback]);
 
   // Set search term with Redux dispatch
   const setSearchTermCallback = useCallback((term: string) => {
     dispatch(setSearchTerm(term));
   }, [dispatch]);
 
-  // Auto-fetch on mount if enabled
+  // Auto-fetch on mount if enabled - prevent fetching when there's an error
   useEffect(() => {
-    if (autoFetch && !hasUsers && !loading) {
-      fetchUsersCallback(initialParams);
+    if (autoFetch && !hasUsers && !loading && !error) {
+      fetchUsersCallback(initialParamsRef.current);
     }
-  }, [autoFetch, hasUsers, loading, fetchUsersCallback, initialParams]);
+  }, [autoFetch, hasUsers, loading, error, fetchUsersCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {

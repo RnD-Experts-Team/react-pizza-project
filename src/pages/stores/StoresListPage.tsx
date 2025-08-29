@@ -16,6 +16,7 @@ import {
   Plus,
   AlertCircle,
   Building2,
+  RefreshCw,
 } from 'lucide-react';
 import type { AppDispatch, RootState } from '../../store';
 
@@ -46,6 +47,10 @@ export const StoresListPage: React.FC = () => {
 
   const handleCreateStore = () => {
     navigate('/stores/create');
+  };
+
+  const handleRetry = () => {
+    dispatch(fetchStores());
   };
 
 
@@ -84,8 +89,17 @@ export const StoresListPage: React.FC = () => {
         {error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load stores: {error}
+            <AlertDescription className="flex items-center justify-between">
+              <span>Failed to load stores: {error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="ml-4 h-8"
+              >
+                <RefreshCw className="mr-2 h-3 w-3" />
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         )}

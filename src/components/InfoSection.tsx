@@ -31,9 +31,9 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
   return (
     <section
       className={cn(
-        'w-full',
+        'w-full p-2 space-y-2',
         // Responsive padding and spacing
-        isMobile ? 'p-2 space-y-3' : 'p-4 md:p-6 lg:p-8 space-y-6',
+        isMobile ? ' space-y-2' : ' space-y-6',
         className,
       )}
     >

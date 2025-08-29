@@ -18,7 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
-import { Users, AlertCircle, Mail, Calendar } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Users, AlertCircle, Mail, Calendar, RefreshCw } from 'lucide-react';
 import type { StoreUser } from '../../features/stores/types';
 import type { AppDispatch, RootState } from '../../store';
 
@@ -48,6 +49,12 @@ export const StoreUsersSection: React.FC<StoreUsersSectionProps> = ({
       dispatch(fetchStoreUsers(storeId));
     }
   }, [dispatch, storeId]);
+
+  const handleRetry = () => {
+    if (storeId) {
+      dispatch(fetchStoreUsers(storeId));
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -172,8 +179,17 @@ export const StoreUsersSection: React.FC<StoreUsersSectionProps> = ({
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load store users: {error}
+            <AlertDescription className="flex items-center justify-between">
+              <span>Failed to load store users: {error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="ml-4 h-8"
+              >
+                <RefreshCw className="mr-2 h-3 w-3" />
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         )}

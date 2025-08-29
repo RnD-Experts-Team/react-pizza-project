@@ -4,6 +4,7 @@ import type { CardDataProps } from '@/types/infoCards';
 const defaultData: CardDataProps[] = [
   {
     title: 'Total Tips',
+    bgColor: 'bg-blue-500',
     daily: '$13.91',
     weekly: '$70.22',
     icon: 'currency',
@@ -11,6 +12,7 @@ const defaultData: CardDataProps[] = [
   },
   {
     title: 'Total Sales',
+    bgColor: 'bg-blue-400',
     daily: '$13.91',
     weekly: '$70.22',
     icon: 'chart',
@@ -18,6 +20,7 @@ const defaultData: CardDataProps[] = [
   },
   {
     title: 'Performance',
+    bgColor: 'bg-blue-300',
     daily: '$13.91',
     weekly: '$70.22',
     icon: 'trophy',
@@ -25,6 +28,7 @@ const defaultData: CardDataProps[] = [
   },
   {
     title: 'Growth',
+    bgColor: 'bg-green-200',
     daily: '$13.91',
     weekly: '$70.22',
     icon: 'trending',

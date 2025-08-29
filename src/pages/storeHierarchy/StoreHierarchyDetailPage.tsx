@@ -7,7 +7,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useHierarchyTree } from '../../features/roleHierarchy/hooks/UseRoleHierarchy';
+import { useHierarchyTree } from '../../features/storeHierarchy/hooks/UseRoleHierarchy';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
@@ -16,6 +16,8 @@ import { Skeleton } from '../../components/ui/skeleton';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { ScrollArea } from '../../components/ui/scroll-area';
+
+
 import { 
   ArrowLeft,
   Search,
@@ -29,13 +31,13 @@ import {
   RefreshCw,
   AlertCircle,
   Eye,
-  Settings,
-  Plus,
   Trash2,
-  Edit
+  CheckCircle,
+  Link,
+
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import type { RoleTreeNode, Role } from '../../features/roleHierarchy/types';
+import type { RoleTreeNode, Role } from '../../features/storeHierarchy/types';
 
 interface RoleNodeProps {
   node: RoleTreeNode;
@@ -173,6 +175,9 @@ const RoleNode: React.FC<RoleNodeProps> = ({
   );
 };
 
+
+
+
 const RoleDetailPanel: React.FC<{ role: Role; onClose: () => void }> = ({ role, onClose }) => {
   return (
     <Card className="h-full">
@@ -193,10 +198,7 @@ const RoleDetailPanel: React.FC<{ role: Role; onClose: () => void }> = ({ role, 
             <p className="text-lg font-semibold">{role.name}</p>
           </div>
           
-          <div>
-            <label className="text-sm font-medium text-muted-foreground">Description</label>
-            <p className="text-sm">No description provided</p>
-          </div>
+
           
           <div className="flex items-center space-x-4">
             <div>
@@ -252,26 +254,7 @@ const RoleDetailPanel: React.FC<{ role: Role; onClose: () => void }> = ({ role, 
           )}
         </div>
 
-        <Separator />
 
-        {/* Actions */}
-        <div className="space-y-2">
-          <h4 className="font-medium text-sm">Actions</h4>
-          <div className="flex flex-wrap gap-2">
-            <Button size="sm" variant="outline">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit Role
-            </Button>
-            <Button size="sm" variant="outline">
-              <Settings className="h-4 w-4 mr-2" />
-              Manage Permissions
-            </Button>
-            <Button size="sm" variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Child Role
-            </Button>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );
@@ -339,7 +322,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate('/stores/hierarchy');
+    navigate('/stores-hierarchy');
   };
 
   if (!storeId) {
@@ -377,6 +360,30 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-2">
+          <Button
+            onClick={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}
+            variant="outline"
+            size="sm"
+          >
+            <Link className="h-4 w-4 mr-2" />
+            Create Hierarchy
+          </Button>
+          <Button
+            onClick={() => navigate(`/stores-hierarchy/${storeId}/delete-confirmation`)}
+            variant="outline"
+            size="sm"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Remove Hierarchy
+          </Button>
+          <Button
+            onClick={() => navigate(`/stores-hierarchy/${storeId}/validate`)}
+            variant="outline"
+            size="sm"
+          >
+            <CheckCircle className="h-4 w-4 mr-2" />
+            Validate Hierarchy
+          </Button>
           <Button
             onClick={() => refetch(storeId!)}
             variant="outline"
@@ -472,8 +479,8 @@ export const StoreHierarchyDetailPage: React.FC = () => {
                   <p className="text-muted-foreground mb-4">
                     This store doesn't have any role hierarchy configured yet.
                   </p>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
+                  <Button onClick={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}>
+                    <Link className="h-4 w-4 mr-2" />
                     Create Hierarchy
                   </Button>
                 </div>

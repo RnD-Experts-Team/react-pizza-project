@@ -18,7 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Skeleton } from '../ui/skeleton';
 import { Alert, AlertDescription } from '../ui/alert';
-import { Shield, AlertCircle, Calendar, User } from 'lucide-react';
+import { Button } from '../ui/button';
+import { Shield, AlertCircle, Calendar, User, RefreshCw } from 'lucide-react';
 import type { AppDispatch, RootState } from '../../store';
 
 interface StoreRolesSectionProps {
@@ -47,6 +48,12 @@ export const StoreRolesSection: React.FC<StoreRolesSectionProps> = ({
       dispatch(fetchStoreRoles(storeId));
     }
   }, [dispatch, storeId]);
+
+  const handleRetry = () => {
+    if (storeId) {
+      dispatch(fetchStoreRoles(storeId));
+    }
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -187,8 +194,17 @@ export const StoreRolesSection: React.FC<StoreRolesSectionProps> = ({
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Failed to load store roles: {error}
+            <AlertDescription className="flex items-center justify-between">
+              <span>Failed to load store roles: {error}</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleRetry}
+                className="ml-4 h-8"
+              >
+                <RefreshCw className="mr-2 h-3 w-3" />
+                Retry
+              </Button>
             </AlertDescription>
           </Alert>
         )}

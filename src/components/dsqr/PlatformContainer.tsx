@@ -28,7 +28,7 @@ export const PlatformContainer: React.FC<PlatformContainerProps> = ({
       case 'grid':
         return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
       default:
-        return 'flex flex-col lg:flex-row justify-center gap-6 overflow-x-auto';
+        return 'flex flex-col lg:flex-row justify-start gap-4 lg:gap-6 overflow-x-auto';
     }
   };
 
@@ -38,7 +38,9 @@ export const PlatformContainer: React.FC<PlatformContainerProps> = ({
         <PlatformCard
           key={`platform-${index}`}
           {...platform}
-          className="flex-shrink-0"
+          className={cn(
+            layout === 'horizontal' && !isMobile ? 'flex-1 min-w-0' : 'flex-shrink-0'
+          )}
           isMobile={isMobile}
         />
       ))}

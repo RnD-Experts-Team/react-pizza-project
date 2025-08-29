@@ -3,7 +3,6 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { MetricDataProps, MetricWithStatusProps } from '@/types/dsqr';
-import { getStatusVariant, getStatusBgColor } from '@/types/dsqr';
 
 interface MetricRowProps extends MetricDataProps {
   isLast?: boolean;
@@ -27,7 +26,7 @@ export const MetricRow: React.FC<MetricRowProps> = ({
       >
         <span
           className={cn(
-            'font-semibold text-muted-foreground',
+            'font-semibold text-muted-foreground truncate flex-1',
             isMobile ? 'text-xs' : 'text-sm',
             multiline ? 'leading-relaxed' : 'whitespace-nowrap',
           )}
@@ -47,7 +46,7 @@ export const MetricRow: React.FC<MetricRowProps> = ({
         </span>
         <span
           className={cn(
-            'font-bold text-foreground',
+            'font-bold text-foreground truncate flex-shrink-0',
             isMobile ? 'text-xs' : 'text-sm',
           )}
         >
@@ -83,7 +82,7 @@ export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
       >
         <span
           className={cn(
-            'font-semibold text-muted-foreground flex-1',
+            'font-semibold text-muted-foreground flex-1 truncate',
             isMobile ? 'text-xs' : 'text-sm',
             multiline ? 'leading-relaxed' : 'whitespace-nowrap',
           )}
@@ -105,7 +104,7 @@ export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
         <div className={cn('flex items-center', isMobile ? 'gap-1' : 'gap-2')}>
           <span
             className={cn(
-              'font-bold text-foreground',
+              'font-bold text-foreground truncate flex-shrink-0',
               isMobile ? 'text-xs' : 'text-sm',
             )}
           >
@@ -113,15 +112,16 @@ export const MetricRowWithStatus: React.FC<MetricRowWithStatusProps> = ({
           </span>
           <div
             className={cn(
-              'flex items-center justify-center rounded-sm',
-              getStatusBgColor(statusColor),
+              'flex items-center justify-center rounded-lg overflow-hidden',
+              
               isMobile ? 'w-6 h-5' : 'w-8 h-6',
             )}
           >
             <Badge
-              variant={getStatusVariant(status)}
+              variant={status === 'OT' ? 'secondary' : 'destructive'}
               className={cn(
-                'px-1 py-0',
+                'p-2 ',
+                status === 'OT' && 'bg-[var(--chart-3)] text-foreground',
                 isMobile ? 'text-xs h-3' : 'text-xs h-4',
               )}
               style={{ color: statusColor }}

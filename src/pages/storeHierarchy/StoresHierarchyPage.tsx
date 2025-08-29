@@ -22,7 +22,6 @@ import {
   Phone, 
   Calendar,
   Network,
-  Eye,
   Filter,
   Grid3X3,
   List,
@@ -36,10 +35,9 @@ import type { Store } from '../../features/stores/types';
 interface StoreCardProps {
   store: Store;
   onViewHierarchy: (storeId: string) => void;
-  onViewDetails: (storeId: string) => void;
 }
 
-const StoreCard: React.FC<StoreCardProps> = ({ store, onViewHierarchy, onViewDetails }) => {
+const StoreCard: React.FC<StoreCardProps> = ({ store, onViewHierarchy }) => {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -114,15 +112,6 @@ const StoreCard: React.FC<StoreCardProps> = ({ store, onViewHierarchy, onViewDet
             <Network className="h-4 w-4 mr-2" />
             Show Hierarchy
           </Button>
-          
-          <Button 
-            onClick={() => onViewDetails(store.id)}
-            variant="outline"
-            size="sm"
-            className="hover:bg-primary/5"
-          >
-            <Eye className="h-4 w-4" />
-          </Button>
         </div>
       </CardContent>
     </Card>
@@ -152,7 +141,6 @@ const StoreCardSkeleton: React.FC = () => (
       <Separator />
       <div className="flex space-x-2">
         <Skeleton className="h-8 flex-1" />
-        <Skeleton className="h-8 w-10" />
       </div>
     </CardContent>
   </Card>
@@ -207,11 +195,7 @@ export const StoresHierarchyPage: React.FC = () => {
   }, [stores, searchTerm, showActiveOnly]);
 
   const handleViewHierarchy = (storeId: string) => {
-    navigate(`/stores/${storeId}/hierarchy`);
-  };
-
-  const handleViewDetails = (storeId: string) => {
-    navigate(`/stores/view/${storeId}`);
+    navigate(`/stores-hierarchy/${storeId}`);
   };
 
   const handleRefresh = () => {
@@ -396,7 +380,6 @@ export const StoresHierarchyPage: React.FC = () => {
                 key={store.id}
                 store={store}
                 onViewHierarchy={handleViewHierarchy}
-                onViewDetails={handleViewDetails}
               />
             ))}
           </div>

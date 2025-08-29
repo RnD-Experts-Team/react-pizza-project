@@ -4,13 +4,13 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Separator } from '../components/ui/separator';
+} from '../../components/ui/card';
+import { Separator } from '../../components/ui/separator';
 import { ScrollText, Calendar, Shield, AlertTriangle } from 'lucide-react';
 
 const TermsOfService: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto p-2 md:p-4 max-w-4xl">
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-4">
           <ScrollText className="h-8 w-8 text-primary mr-3" />

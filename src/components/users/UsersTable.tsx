@@ -31,11 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '../ui/alert-dialog';
-import { Eye, Edit, Trash2, Plus, Loader2 } from 'lucide-react';
+import { Eye, Edit, Trash2, Plus, Loader2, RefreshCw } from 'lucide-react';
 
 export const UsersTable: React.FC = () => {
   const navigate = useNavigate();
-  const { users, loading, error } = useUsers();
+  const { users, loading, error, refetch } = useUsers();
   const { deleteUser, loading: deleteLoading } = useDeleteUser();
   
   // State for delete confirmation dialog
@@ -76,8 +76,17 @@ export const UsersTable: React.FC = () => {
   if (error) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Users</CardTitle>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="text-red-500 text-center py-4">

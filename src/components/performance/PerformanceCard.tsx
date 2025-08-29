@@ -10,46 +10,49 @@ interface PerformanceCardProps {
   item: PerformanceItemProps;
   isLoading?: boolean;
   isMobile?: boolean;
+  bgColor?: string;
 }
 
 export const PerformanceCard: React.FC<PerformanceCardProps> = ({
   item,
   isLoading = false,
   isMobile = false,
+  bgColor,
 }) => {
   const IconComponent = iconMap[item.icon]; // Access icon component directly from item
 
   return (
     <Card
       className={cn(
-        'w-full h-full shadow-md transition-all duration-200',
+        'w-full h-full shadow-realistic transition-all duration-200 overflow-hidden',
+        'hover:shadow-realistic-lg transform hover:scale-[1.02]',
         isLoading && 'opacity-50 pointer-events-none',
       )}
     >
       <CardHeader
         className={cn(
           'flex flex-row items-center justify-between space-y-0 rounded-t-md',
-          item.bgColor,
-          isMobile ? 'p-2 pb-1' : 'p-4 pb-2',
+          bgColor || item.bgColor,
+          isMobile ? 'p-2' : 'p-4',
         )}
       >
         <CardTitle
           className={cn(
-            'font-medium text-foreground',
-            isMobile ? 'text-xs leading-tight' : 'text-sm',
+            'font-medium text-foreground truncate',
+            isMobile ? 'text-sm leading-tight' : 'text-base',
           )}
         >
           {item.title}
         </CardTitle>
         <IconComponent
-          className={cn('text-foreground', isMobile ? 'h-3 w-3' : 'h-5 w-5')}
+          className={cn('text-foreground', isMobile ? 'h-4 w-4' : 'h-6 w-6')}
         />
       </CardHeader>
       <CardContent
         className={cn(
           'space-y-2',
           isMobile ? 'p-2' : 'p-4',
-          isMobile ? 'space-y-1' : 'space-y-3',
+          isMobile ? 'space-y-2' : 'space-y-4',
         )}
       >
         <MetricRow
@@ -77,21 +80,21 @@ const MetricRow: React.FC<MetricRowProps> = ({
   primary = false,
   isMobile = false,
 }) => (
-  <div className="flex items-center justify-between">
+  <div className="flex items-center justify-between gap-2 min-w-0">
     <span
       className={cn(
-        'text-muted-foreground',
+        'text-muted-foreground truncate flex-shrink',
         primary && 'font-semibold',
-        isMobile ? 'text-xs' : 'text-sm',
+        isMobile ? 'text-sm' : 'text-base',
       )}
     >
       {label}
     </span>
     <span
       className={cn(
-        'text-foreground',
+        'text-foreground truncate flex-shrink-0',
         primary && 'font-bold',
-        isMobile ? 'text-xs font-medium' : 'text-sm',
+        isMobile ? 'text-sm font-medium' : 'text-base',
         primary && !isMobile && 'font-bold',
       )}
     >

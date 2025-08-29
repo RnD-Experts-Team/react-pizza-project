@@ -19,11 +19,11 @@ import {
 } from '../ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Badge } from '../ui/badge';
-import { Settings, Plus, Loader2 } from 'lucide-react';
+import { Settings, Plus, Loader2, RefreshCw } from 'lucide-react';
 
 export const RolesTable: React.FC = () => {
   const navigate = useNavigate();
-  const { roles, loading, error } = useRoles();
+  const { roles, loading, error, refetch } = useRoles();
 
   const handleAssignPermissions = () => {
     navigate('/user-management/assign-permissions');
@@ -36,8 +36,17 @@ export const RolesTable: React.FC = () => {
   if (error) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Roles</CardTitle>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="text-red-500 text-center py-4">

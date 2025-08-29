@@ -19,11 +19,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, RefreshCw } from 'lucide-react';
 
 export const PermissionsTable: React.FC = () => {
   const navigate = useNavigate();
-  const { permissions, loading, error } = usePermissions();
+  const { permissions, loading, error, refetch } = usePermissions();
 
   const handleCreatePermission = () => {
     navigate('/user-management/create-permission');
@@ -32,8 +32,17 @@ export const PermissionsTable: React.FC = () => {
   if (error) {
     return (
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Permissions</CardTitle>
+          <Button 
+            onClick={() => refetch()} 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Retry
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="text-red-500 text-center py-4">

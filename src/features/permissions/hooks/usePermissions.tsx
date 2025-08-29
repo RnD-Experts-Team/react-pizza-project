@@ -6,7 +6,7 @@
  * and not directly with utilities, API services, or Redux actions.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchPermissions,
@@ -112,6 +112,10 @@ export const usePermissions = (
     return permissionTransformers.toSelectOptions(filteredPermissions);
   }, [filteredPermissions]);
 
+  // Stable reference for initial params to prevent unnecessary re-renders
+  const initialParamsRef = useRef(initialParams);
+  initialParamsRef.current = initialParams;
+
   // Fetch function with error handling
   const fetchPermissionsCallback = useCallback(
     async (params?: GetPermissionsParams) => {
@@ -127,15 +131,15 @@ export const usePermissions = (
 
   // Refetch with current parameters
   const refetch = useCallback(async () => {
-    await fetchPermissionsCallback(initialParams);
-  }, [fetchPermissionsCallback, initialParams]);
+    await fetchPermissionsCallback(initialParamsRef.current);
+  }, [fetchPermissionsCallback]);
 
-  // Auto-fetch on mount if enabled
+  // Auto-fetch on mount if enabled - prevent fetching when there's an error
   useEffect(() => {
-    if (autoFetch && !hasPermissions && !loading) {
-      fetchPermissionsCallback(initialParams);
+    if (autoFetch && !hasPermissions && !loading && !error) {
+      fetchPermissionsCallback(initialParamsRef.current);
     }
-  }, [autoFetch, hasPermissions, loading, fetchPermissionsCallback, initialParams]);
+  }, [autoFetch, hasPermissions, loading, error, fetchPermissionsCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {

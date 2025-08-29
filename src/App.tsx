@@ -25,10 +25,9 @@ import ResetPassword from './pages/auth/ResetPassword';
 
 // Main Pages
 import Dashboard from './pages/Dashboard';
-import Pizza from './pages/Pizza';
-import TermsOfService from './pages/TermsOfService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import Settings from './pages/Settings';
+import TermsOfService from './pages/settings-and-abouts/TermsOfService';
+import PrivacyPolicy from './pages/settings-and-abouts/PrivacyPolicy';
+import Settings from './pages/settings-and-abouts/Settings';
 import AuthRulesManagement from './pages/authorizationRules/AuthRulesManagement';
 import CreateAuthRule from './pages/authorizationRules/CreateAuthRule';
 
@@ -46,8 +45,11 @@ import StoresListPage from './pages/stores/StoresListPage';
 import CreateStorePage from './pages/stores/CreateStorePage';
 import EditStorePage from './pages/stores/EditStorePage';
 import StoreDetailsPage from './pages/stores/StoreDetailsPage';
-import StoresHierarchyPage from './pages/stores/StoresHierarchyPage';
-import StoreHierarchyDetailPage from './pages/stores/StoreHierarchyDetailPage'; //Service Client Management Pages
+import StoresHierarchyPage from './pages/storeHierarchy/StoresHierarchyPage';
+import StoreHierarchyDetailPage from './pages/storeHierarchy/StoreHierarchyDetailPage';
+import CreateHierarchyPage from './pages/storeHierarchy/CreateHierarchy';
+import ValidateHierarchyPage from './pages/storeHierarchy/ValidateHierarchy';
+import DeleteHierarchyConfirmationPage from './pages/storeHierarchy/DeleteHierarchyConfirmationPage'; //Service Client Management Pages
 import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
 
 // User Role Store Assignment Pages
@@ -124,16 +126,6 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <Dashboard />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/pizza"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <Pizza />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -368,7 +360,7 @@ function App() {
                 }
               />
               <Route
-                path="/stores/hierarchy"
+                path="/stores-hierarchy"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -378,11 +370,41 @@ function App() {
                 }
               />
               <Route
-                path="/stores/:storeId/hierarchy"
+                path="/stores-hierarchy/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
                       <StoreHierarchyDetailPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores-hierarchy/:storeId/create-hierarchy"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <CreateHierarchyPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores-hierarchy/:storeId/delete-confirmation"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <DeleteHierarchyConfirmationPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/stores-hierarchy/:storeId/validate"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ValidateHierarchyPage />
                     </MainLayout>
                   </ProtectedRoute>
                 }

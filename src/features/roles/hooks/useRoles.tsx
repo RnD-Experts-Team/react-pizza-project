@@ -7,7 +7,7 @@
  * All utility functions are integrated for complete business logic encapsulation.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { 
   fetchRoles,
@@ -127,6 +127,10 @@ export const useRoles = (
     return roleTransformers.toSelectOptions(filteredRoles);
   }, [filteredRoles]);
 
+  // Stable reference for initial params to prevent unnecessary re-renders
+  const initialParamsRef = useRef(initialParams);
+  initialParamsRef.current = initialParams;
+
   // Fetch function with error handling
   const fetchRolesCallback = useCallback(
     async (params?: GetRolesParams) => {
@@ -142,15 +146,15 @@ export const useRoles = (
 
   // Refetch with current parameters
   const refetch = useCallback(async () => {
-    await fetchRolesCallback(initialParams);
-  }, [fetchRolesCallback, initialParams]);
+    await fetchRolesCallback(initialParamsRef.current);
+  }, [fetchRolesCallback]);
 
-  // Auto-fetch on mount if enabled
+  // Auto-fetch on mount if enabled - prevent fetching when there's an error
   useEffect(() => {
-    if (autoFetch && !hasRoles && !loading) {
-      fetchRolesCallback(initialParams);
+    if (autoFetch && !hasRoles && !loading && !error) {
+      fetchRolesCallback(initialParamsRef.current);
     }
-  }, [autoFetch, hasRoles, loading, fetchRolesCallback, initialParams]);
+  }, [autoFetch, hasRoles, loading, error, fetchRolesCallback]);
 
   // Cleanup errors on unmount
   useEffect(() => {
