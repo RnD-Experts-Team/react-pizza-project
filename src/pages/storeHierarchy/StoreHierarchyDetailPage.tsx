@@ -327,10 +327,10 @@ export const StoreHierarchyDetailPage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-sm sm:text-base">
             Store ID is required to view hierarchy.
           </AlertDescription>
         </Alert>
@@ -339,91 +339,102 @@ export const StoreHierarchyDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 space-y-6">
+    <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Button onClick={handleBack} variant="outline" size="sm">
+      <div className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+        <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:space-y-0 sm:space-x-4">
+          <Button onClick={handleBack} variant="outline" size="sm" className="hover:bg-accent w-fit">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Stores
+            <span className="hidden sm:inline">Back to Stores</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold flex items-center space-x-2">
-              <Building2 className="h-6 w-6" />
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold flex items-center space-x-2 text-foreground">
+              <Building2 className="h-5 w-5 sm:h-6 sm:w-6" />
               <span>Store Hierarchy</span>
             </h1>
-            <p className="text-muted-foreground">
-              Role hierarchy for store: <span className="font-mono">{storeId}</span>
+            <p className="text-sm sm:text-base text-muted-foreground">
+              Role hierarchy for store: <span className="font-mono text-foreground">{storeId}</span>
             </p>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button
             onClick={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}
             variant="outline"
             size="sm"
+            className="hover:bg-accent text-xs sm:text-sm"
           >
-            <Link className="h-4 w-4 mr-2" />
-            Create Hierarchy
+            <Link className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Create Hierarchy</span>
+            <span className="sm:hidden">Create</span>
           </Button>
           <Button
             onClick={() => navigate(`/stores-hierarchy/${storeId}/delete-confirmation`)}
             variant="outline"
             size="sm"
+            className="hover:bg-accent text-xs sm:text-sm"
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Remove Hierarchy
+            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Remove Hierarchy</span>
+            <span className="sm:hidden">Remove</span>
           </Button>
           <Button
             onClick={() => navigate(`/stores-hierarchy/${storeId}/validate`)}
             variant="outline"
             size="sm"
+            className="hover:bg-accent text-xs sm:text-sm"
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            Validate Hierarchy
+            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">Validate Hierarchy</span>
+            <span className="sm:hidden">Validate</span>
           </Button>
           <Button
             onClick={() => refetch(storeId!)}
             variant="outline"
             size="sm"
             disabled={loading}
+            className="hover:bg-accent text-xs sm:text-sm"
           >
-            <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
-            Refresh
+            <RefreshCw className={cn("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2", loading && "animate-spin")} />
+            <span className="hidden sm:inline">Refresh</span>
+            <span className="sm:hidden">↻</span>
           </Button>
         </div>
       </div>
 
       {/* Error State */}
       {error && (
-        <Alert variant="destructive">
+        <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-sm sm:text-base">
             {error?.message || 'An error occurred while loading the hierarchy.'}
           </AlertDescription>
         </Alert>
       )}
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Hierarchy Tree */}
-        <div className="lg:col-span-2 space-y-4">
+        <div className="xl:col-span-2 space-y-4">
           <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center space-x-2">
-                  <Trash2 className="h-5 w-5" />
+            <CardHeader className="pb-3 p-4 sm:p-6">
+              <div className="flex flex-col space-y-3 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+                <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl text-foreground">
+                  <Users className="h-5 w-5" />
                   <span>Role Hierarchy Tree</span>
                 </CardTitle>
                 
                 <div className="flex items-center space-x-2">
-                  <Button onClick={handleExpandAll} variant="outline" size="sm">
-                    Expand All
+                  <Button onClick={handleExpandAll} variant="outline" size="sm" className="hover:bg-accent text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Expand All</span>
+                    <span className="sm:hidden">Expand</span>
                   </Button>
-                  <Button onClick={handleCollapseAll} variant="outline" size="sm">
-                    Collapse All
+                  <Button onClick={handleCollapseAll} variant="outline" size="sm" className="hover:bg-accent text-xs sm:text-sm">
+                    <span className="hidden sm:inline">Collapse All</span>
+                    <span className="sm:hidden">Collapse</span>
                   </Button>
                 </div>
               </div>
@@ -440,7 +451,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
               </div>
             </CardHeader>
             
-            <CardContent>
+            <CardContent className="p-4 sm:p-6">
               {loading ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, index) => (
@@ -456,7 +467,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
                   ))}
                 </div>
               ) : hierarchyTree && hierarchyTree.length > 0 ? (
-                <ScrollArea className="h-[600px]">
+                <ScrollArea className="h-[400px] sm:h-[500px] lg:h-[600px]">
                   <div className="space-y-2">
                     {hierarchyTree.map((node: RoleTreeNode) => (
                       <RoleNode
@@ -473,13 +484,16 @@ export const StoreHierarchyDetailPage: React.FC = () => {
                   </div>
                 </ScrollArea>
               ) : (
-                <div className="text-center py-12">
-                  <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No hierarchy found</h3>
-                  <p className="text-muted-foreground mb-4">
+                <div className="text-center py-8 sm:py-12">
+                  <Building2 className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-base sm:text-lg font-semibold mb-2 text-foreground">No hierarchy found</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-4">
                     This store doesn't have any role hierarchy configured yet.
                   </p>
-                  <Button onClick={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}>
+                  <Button 
+                    onClick={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}
+                    className="text-sm sm:text-base"
+                  >
                     <Link className="h-4 w-4 mr-2" />
                     Create Hierarchy
                   </Button>
@@ -498,10 +512,10 @@ export const StoreHierarchyDetailPage: React.FC = () => {
             />
           ) : (
             <Card>
-              <CardContent className="p-12 text-center">
-                <Eye className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Select a Role</h3>
-                <p className="text-muted-foreground">
+              <CardContent className="p-6 sm:p-8 lg:p-12 text-center">
+                <Eye className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-base sm:text-lg font-semibold mb-2 text-foreground">Select a Role</h3>
+                <p className="text-sm sm:text-base text-muted-foreground">
                   Click on any role in the hierarchy tree to view its details and permissions.
                 </p>
               </CardContent>

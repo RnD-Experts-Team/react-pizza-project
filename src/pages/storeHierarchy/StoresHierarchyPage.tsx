@@ -2,197 +2,43 @@
  * Stores Hierarchy Main Page
  * 
  * A modern, responsive page that displays all stores with hierarchy navigation.
- * Features beautiful UI, search functionality, and direct access to role hierarchies.
+ * Features beautiful UI and direct access to role hierarchies.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStores } from '../../features/stores/hooks/useStores';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../../components/ui/table';
 import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
 import { Badge } from '../../components/ui/badge';
-import { Skeleton } from '../../components/ui/skeleton';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { Separator } from '../../components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { 
-  Building2, 
-  Search, 
-  MapPin, 
-  Phone, 
-  Calendar,
   Network,
-  Filter,
-  Grid3X3,
-  List,
   RefreshCw,
   AlertCircle,
-  Store as StoreIcon
+  Building2
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import type { Store } from '../../features/stores/types';
 
-interface StoreCardProps {
-  store: Store;
-  onViewHierarchy: (storeId: string) => void;
-}
 
-const StoreCard: React.FC<StoreCardProps> = ({ store, onViewHierarchy }) => {
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
-
-  return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-primary/20">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <Building2 className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold group-hover:text-primary transition-colors">
-                {store.name}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground font-mono">
-                {store.id}
-              </p>
-            </div>
-          </div>
-          <Badge 
-            variant={store.is_active ? "default" : "secondary"}
-            className={cn(
-              "transition-colors",
-              store.is_active 
-                ? "bg-green-100 text-green-800 hover:bg-green-200" 
-                : "bg-gray-100 text-gray-600"
-            )}
-          >
-            {store.is_active ? 'Active' : 'Inactive'}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-4">
-        {/* Store Details */}
-        <div className="space-y-2">
-          {store.metadata.address && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{store.metadata.address}</span>
-            </div>
-          )}
-          
-          {store.metadata.phone && (
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Phone className="h-4 w-4" />
-              <span>{store.metadata.phone}</span>
-            </div>
-          )}
-          
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>Created {formatDate(store.created_at)}</span>
-          </div>
-        </div>
-
-        <Separator />
-        
-        {/* Action Buttons */}
-        <div className="flex space-x-2">
-          <Button 
-            onClick={() => onViewHierarchy(store.id)}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-            size="sm"
-          >
-            <Network className="h-4 w-4 mr-2" />
-            Show Hierarchy
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-const StoreCardSkeleton: React.FC = () => (
-  <Card>
-    <CardHeader className="pb-3">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center space-x-3">
-          <Skeleton className="h-9 w-9 rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-5 w-32" />
-            <Skeleton className="h-4 w-20" />
-          </div>
-        </div>
-        <Skeleton className="h-6 w-16 rounded-full" />
-      </div>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-      <Separator />
-      <div className="flex space-x-2">
-        <Skeleton className="h-8 flex-1" />
-      </div>
-    </CardContent>
-  </Card>
-);
-
-type ViewMode = 'grid' | 'list';
 
 export const StoresHierarchyPage: React.FC = () => {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [showActiveOnly, setShowActiveOnly] = useState(false);
   
   const {
     stores,
     loading,
     error,
-    refetch,
-    totalStores,
-    hasStores,
-    isEmpty
+    refetch
   } = useStores(true);
-
-  // Handle search with debouncing
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (searchTerm !== '') {
-        refetch({ search: searchTerm });
-      }
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchTerm, refetch]);
-
-  // Filter stores based on search and active status
-  const filteredStores = useMemo(() => {
-    let filtered = stores;
-    
-    if (searchTerm) {
-      filtered = filtered.filter(store => 
-        store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        store.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        store.metadata.address?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-    
-    if (showActiveOnly) {
-      filtered = filtered.filter(store => store.is_active);
-    }
-    
-    return filtered;
-  }, [stores, searchTerm, showActiveOnly]);
 
   const handleViewHierarchy = (storeId: string) => {
     navigate(`/stores-hierarchy/${storeId}`);
@@ -202,16 +48,113 @@ export const StoresHierarchyPage: React.FC = () => {
     refetch();
   };
 
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
+        {/* Header Section */}
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="space-y-1 sm:space-y-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+                Store Hierarchies
+              </h1>
+              <p className="text-sm sm:text-base text-muted-foreground">
+                Manage and view role hierarchies across all store locations
+              </p>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                disabled={loading}
+                className="hover:bg-accent"
+              >
+                <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Loading Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+              <Building2 className="h-5 w-5" />
+              <span>Store Locations</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[100px]">Store ID</TableHead>
+                    <TableHead className="min-w-[150px]">Name</TableHead>
+                    <TableHead className="hidden sm:table-cell min-w-[120px]">Phone</TableHead>
+                    <TableHead className="hidden md:table-cell min-w-[200px]">Address</TableHead>
+                    <TableHead className="min-w-[80px]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell min-w-[100px]">Created</TableHead>
+                    <TableHead className="min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(5)].map((_, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-32 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <div className="h-4 w-24 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="h-4 w-40 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-4 w-16 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="h-4 w-20 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                      <TableCell>
+                        <div className="h-8 w-24 bg-muted animate-pulse rounded" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 space-y-8">
+    <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Header Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+      <div className="space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1 sm:space-y-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
               Store Hierarchies
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Manage and view role hierarchies across all store locations
             </p>
           </div>
@@ -222,190 +165,104 @@ export const StoresHierarchyPage: React.FC = () => {
               variant="outline"
               size="sm"
               disabled={loading}
-              className="hover:bg-primary/5"
+              className="hover:bg-accent"
             >
               <RefreshCw className={cn("h-4 w-4 mr-2", loading && "animate-spin")} />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
           </div>
         </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <StoreIcon className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Stores</p>
-                  <p className="text-2xl font-bold">{totalStores}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Building2 className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Stores</p>
-                  <p className="text-2xl font-bold">
-                    {stores.filter(store => store.is_active).length}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-2">
-                <Network className="h-5 w-5 text-purple-600" />
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Filtered Results</p>
-                  <p className="text-2xl font-bold">{filteredStores.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
 
-      {/* Search and Filters */}
+      {/* Error State */}
+      {error && (
+        <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-sm sm:text-base">
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Stores Table */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search Input */}
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search stores by name, ID, or address..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
+            <Building2 className="h-5 w-5" />
+            <span>Store Locations</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          {stores.length === 0 ? (
+            <div className="p-6 sm:p-8 text-center">
+              <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No stores found
+              </h3>
+              <p className="text-muted-foreground text-sm sm:text-base">
+                Get started by adding your first store location
+              </p>
             </div>
-            
-            {/* Filters */}
-            <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setShowActiveOnly(!showActiveOnly)}
-                variant={showActiveOnly ? "default" : "outline"}
-                size="sm"
-                className="whitespace-nowrap"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Active Only
-              </Button>
-              
-              {/* View Mode Toggle */}
-              <div className="flex border rounded-lg p-1">
-                <Button
-                  onClick={() => setViewMode('grid')}
-                  variant={viewMode === 'grid' ? "default" : "ghost"}
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  onClick={() => setViewMode('list')}
-                  variant={viewMode === 'list' ? "default" : "ghost"}
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[100px]">Store ID</TableHead>
+                    <TableHead className="min-w-[150px]">Name</TableHead>
+                    <TableHead className="hidden sm:table-cell min-w-[120px]">Phone</TableHead>
+                    <TableHead className="hidden md:table-cell min-w-[200px]">Address</TableHead>
+                    <TableHead className="min-w-[80px]">Status</TableHead>
+                    <TableHead className="hidden lg:table-cell min-w-[100px]">Created</TableHead>
+                    <TableHead className="min-w-[120px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stores.map((store) => (
+                    <TableRow key={store.id} className="hover:bg-muted/50">
+                      <TableCell className="font-mono text-xs sm:text-sm">
+                        {store.id}
+                      </TableCell>
+                      <TableCell className="font-medium text-sm sm:text-base">
+                        {store.name}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-sm">
+                        {store.metadata.phone || 'N/A'}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell max-w-[200px] truncate text-sm">
+                        {store.metadata.address || 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={store.is_active ? 'default' : 'secondary'}
+                          className="text-xs"
+                        >
+                          {store.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-xs sm:text-sm text-muted-foreground">
+                        {formatDate(store.created_at)}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => handleViewHierarchy(store.id)}
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-xs sm:text-sm hover:bg-accent"
+                        >
+                          <Network className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                          <span className="hidden sm:inline">View Hierarchy</span>
+                          <span className="sm:hidden">View</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
-
-      {/* Content Area */}
-      <div className="space-y-6">
-        {/* Error State */}
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' 
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-              : "grid-cols-1"
-          )}>
-            {Array.from({ length: 6 }).map((_, index) => (
-              <StoreCardSkeleton key={index} />
-            ))}
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!loading && isEmpty && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No stores found</h3>
-              <p className="text-muted-foreground mb-4">
-                {searchTerm ? 'Try adjusting your search criteria' : 'No stores have been created yet'}
-              </p>
-              {searchTerm && (
-                <Button onClick={() => setSearchTerm('')} variant="outline">
-                  Clear Search
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Stores Grid/List */}
-        {!loading && hasStores && (
-          <div className={cn(
-            "grid gap-6",
-            viewMode === 'grid' 
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-              : "grid-cols-1"
-          )}>
-            {filteredStores.map((store) => (
-              <StoreCard
-                key={store.id}
-                store={store}
-                onViewHierarchy={handleViewHierarchy}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* No Results State */}
-        {!loading && hasStores && filteredStores.length === 0 && (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No matching stores</h3>
-              <p className="text-muted-foreground mb-4">
-                No stores match your current search and filter criteria
-              </p>
-              <div className="flex justify-center space-x-2">
-                <Button onClick={() => setSearchTerm('')} variant="outline">
-                  Clear Search
-                </Button>
-                <Button onClick={() => setShowActiveOnly(false)} variant="outline">
-                  Show All Stores
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
     </div>
   );
 };

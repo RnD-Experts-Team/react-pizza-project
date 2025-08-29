@@ -139,10 +139,10 @@ const CreateHierarchyPage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Alert variant="destructive">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <Alert variant="destructive" className="border-destructive/50 text-destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+          <AlertDescription className="text-sm sm:text-base">
             Store ID is required to create hierarchy.
           </AlertDescription>
         </Alert>
@@ -151,58 +151,58 @@ const CreateHierarchyPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="container mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className=" mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={handleBack} className="p-2 hover:bg-accent">
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Create Hierarchy</h1>
-            <p className="text-muted-foreground">
-              Create a new role hierarchy for store: <span className="font-mono">{storeId}</span>
+          <div className="flex-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Create Hierarchy</h1>
+            <p className="text-sm sm:text-base text-muted-foreground mt-1">
+              Create a new role hierarchy for store: <span className="font-mono text-foreground">{storeId}</span>
             </p>
           </div>
         </div>
 
         {/* Error Alert */}
         {(error || validationErrors.general) && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="border-destructive/50 text-destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+            <AlertDescription className="text-sm sm:text-base">
               {error?.message || validationErrors.general}
             </AlertDescription>
           </Alert>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Higher Role Selection */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Crown className="h-5 w-5 text-yellow-600" />
-                <span>Higher Role</span>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
+                <span className="text-foreground">Higher Role</span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Select the role that will be higher in the hierarchy (parent role)
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 sm:pt-6">
               {rolesLoading ? (
-                <div className="flex items-center justify-center py-4">
+                <div className="flex items-center justify-center py-6 sm:py-8">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading roles...
+                  <span className="text-sm sm:text-base text-muted-foreground">Loading roles...</span>
                 </div>
               ) : (
                 <RadioGroup
                   value={formData.higher_role_id}
                   onValueChange={(value) => handleRoleChange('higher_role_id', value)}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                 >
                   {roles.map((role) => (
-                    <div key={role.id} className="flex items-center space-x-2">
+                    <div key={role.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent/50">
                       <RadioGroupItem
                         value={role.id.toString()}
                         id={`higher-role-${role.id}`}
@@ -211,13 +211,13 @@ const CreateHierarchyPage: React.FC = () => {
                       <Label
                         htmlFor={`higher-role-${role.id}`}
                         className={cn(
-                          "text-sm font-medium leading-none cursor-pointer",
+                          "text-xs sm:text-sm font-medium leading-none cursor-pointer flex-1",
                           formData.lower_role_id === role.id.toString() && "text-muted-foreground cursor-not-allowed"
                         )}
                       >
-                        {role.name}
+                        <span className="text-foreground">{role.name}</span>
                         {role.permissions && role.permissions.length > 0 && (
-                          <span className="text-xs text-muted-foreground ml-1">
+                          <span className="text-xs text-muted-foreground ml-1 block sm:inline">
                             ({role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''})
                           </span>
                         )}
@@ -227,36 +227,36 @@ const CreateHierarchyPage: React.FC = () => {
                 </RadioGroup>
               )}
               {validationErrors.higher_role_id && (
-                <p className="text-sm text-red-500 mt-2">{validationErrors.higher_role_id}</p>
+                <p className="text-xs sm:text-sm text-destructive mt-2">{validationErrors.higher_role_id}</p>
               )}
             </CardContent>
           </Card>
 
           {/* Lower Role Selection */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5 text-blue-600" />
-                <span>Lower Role</span>
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                <UserCheck className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
+                <span className="text-foreground">Lower Role</span>
               </CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Select the role that will be lower in the hierarchy (child role)
               </p>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 sm:pt-6">
               {rolesLoading ? (
-                <div className="flex items-center justify-center py-4">
+                <div className="flex items-center justify-center py-6 sm:py-8">
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading roles...
+                  <span className="text-sm sm:text-base text-muted-foreground">Loading roles...</span>
                 </div>
               ) : (
                 <RadioGroup
                   value={formData.lower_role_id}
                   onValueChange={(value) => handleRoleChange('lower_role_id', value)}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-3"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
                 >
                   {roles.map((role) => (
-                    <div key={role.id} className="flex items-center space-x-2">
+                    <div key={role.id} className="flex items-center space-x-2 p-2 rounded-md hover:bg-accent/50">
                       <RadioGroupItem
                         value={role.id.toString()}
                         id={`lower-role-${role.id}`}
@@ -265,13 +265,13 @@ const CreateHierarchyPage: React.FC = () => {
                       <Label
                         htmlFor={`lower-role-${role.id}`}
                         className={cn(
-                          "text-sm font-medium leading-none cursor-pointer",
+                          "text-xs sm:text-sm font-medium leading-none cursor-pointer flex-1",
                           formData.higher_role_id === role.id.toString() && "text-muted-foreground cursor-not-allowed"
                         )}
                       >
-                        {role.name}
+                        <span className="text-foreground">{role.name}</span>
                         {role.permissions && role.permissions.length > 0 && (
-                          <span className="text-xs text-muted-foreground ml-1">
+                          <span className="text-xs text-muted-foreground ml-1 block sm:inline">
                             ({role.permissions.length} permission{role.permissions.length > 1 ? 's' : ''})
                           </span>
                         )}
@@ -281,23 +281,23 @@ const CreateHierarchyPage: React.FC = () => {
                 </RadioGroup>
               )}
               {validationErrors.lower_role_id && (
-                <p className="text-sm text-red-500 mt-2">{validationErrors.lower_role_id}</p>
+                <p className="text-xs sm:text-sm text-destructive mt-2">{validationErrors.lower_role_id}</p>
               )}
             </CardContent>
           </Card>
 
           {/* Metadata */}
           <Card>
-            <CardHeader>
-              <CardTitle>Metadata</CardTitle>
-              <p className="text-sm text-muted-foreground">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-base sm:text-lg text-foreground">Metadata</CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 Additional information about this hierarchy relationship
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-4 sm:space-y-6 pt-0 sm:pt-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="created_by">Created By</Label>
+                  <Label htmlFor="created_by" className="text-sm font-medium text-foreground">Created By</Label>
                   <Input
                     id="created_by"
                     name="created_by"
@@ -305,26 +305,32 @@ const CreateHierarchyPage: React.FC = () => {
                     value={formData.created_by}
                     onChange={handleInputChange}
                     placeholder="Enter creator name"
-                    className={validationErrors.created_by ? 'border-red-500' : ''}
+                    className={cn(
+                      "text-sm sm:text-base",
+                      validationErrors.created_by && 'border-destructive'
+                    )}
                   />
                   {validationErrors.created_by && (
-                    <p className="text-sm text-red-500">{validationErrors.created_by}</p>
+                    <p className="text-xs sm:text-sm text-destructive">{validationErrors.created_by}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="reason">Reason (Optional)</Label>
+                  <Label htmlFor="reason" className="text-sm font-medium text-foreground">Reason (Optional)</Label>
                   <Textarea
                     id="reason"
                     name="reason"
                     value={formData.reason}
                     onChange={handleInputChange}
                     placeholder="e.g., Store manager manages assistant manager"
-                    className={validationErrors.reason ? 'border-red-500' : ''}
+                    className={cn(
+                      "text-sm sm:text-base min-h-[80px] sm:min-h-[100px]",
+                      validationErrors.reason && 'border-destructive'
+                    )}
                     rows={3}
                   />
                   {validationErrors.reason && (
-                    <p className="text-sm text-red-500">{validationErrors.reason}</p>
+                    <p className="text-xs sm:text-sm text-destructive">{validationErrors.reason}</p>
                   )}
                 </div>
               </div>
@@ -332,22 +338,31 @@ const CreateHierarchyPage: React.FC = () => {
           </Card>
 
           {/* Submit Actions */}
-          <div className="flex justify-end space-x-4">
-            <Button type="button" variant="outline" onClick={handleBack}>
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-2">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleBack}
+              className="w-full sm:w-auto text-sm sm:text-base hover:bg-accent"
+            >
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting || isLoading || rolesLoading}
-              className="min-w-[120px]"
+              className="w-full sm:w-auto min-w-[120px] sm:min-w-[140px] text-sm sm:text-base"
             >
               {isSubmitting || isLoading ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Creating...
+                  <span className="hidden sm:inline">Creating...</span>
+                  <span className="sm:hidden">Creating</span>
                 </>
               ) : (
-                'Create Hierarchy'
+                <>
+                  <span className="hidden sm:inline">Create Hierarchy</span>
+                  <span className="sm:hidden">Create</span>
+                </>
               )}
             </Button>
           </div>
