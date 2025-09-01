@@ -1,6 +1,7 @@
 /**
  * EditStorePage Component
  * Page for editing existing stores using the StoreForm component
+ * Fully responsive with comprehensive breakpoint support and CSS custom properties
  */
 
 import React, { useEffect } from 'react';
@@ -82,10 +83,18 @@ export const EditStorePage: React.FC = () => {
   // Show error if store ID is missing
   if (!storeId) {
     return (
-      <div className="container mx-auto py-6 px-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+      <div className="container mx-auto py-3 px-3 sm:py-4 sm:px-4 md:py-6 md:px-6 lg:py-8 lg:px-8">
+        <Alert 
+          variant="destructive" 
+          className="max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
+          style={{
+            backgroundColor: 'var(--destructive)',
+            color: 'var(--destructive-foreground)',
+            borderColor: 'var(--destructive)'
+          }}
+        >
+          <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+          <AlertDescription className="text-sm sm:text-base">
             Store ID is missing from the URL. Please navigate to this page from the stores list.
           </AlertDescription>
         </Alert>
@@ -96,22 +105,34 @@ export const EditStorePage: React.FC = () => {
   // Show error if failed to fetch store
   if (fetchError && !fetchLoading) {
     return (
-      <div className="container mx-auto py-6 px-4">
-        <div className="mb-6">
+      <div className="container mx-auto py-3 px-3 sm:py-4 sm:px-4 md:py-6 md:px-6 lg:py-8 lg:px-8">
+        <div className="mb-4 sm:mb-5 md:mb-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleGoBack}
-            className="flex items-center gap-2 mb-4"
+            className="flex items-center gap-1 sm:gap-2 mb-3 sm:mb-4 text-sm sm:text-base"
+            style={{
+              color: 'var(--foreground)',
+              backgroundColor: 'transparent'
+            }}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
         </div>
         
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+        <Alert 
+          variant="destructive"
+          className="max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
+          style={{
+            backgroundColor: 'var(--destructive)',
+            color: 'var(--destructive-foreground)',
+            borderColor: 'var(--destructive)'
+          }}
+        >
+          <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+          <AlertDescription className="text-sm sm:text-base">
             Failed to load store data: {fetchError}
           </AlertDescription>
         </Alert>
@@ -122,43 +143,95 @@ export const EditStorePage: React.FC = () => {
   // Show loading skeleton while fetching
   if (fetchLoading || !currentStore) {
     return (
-      <div className="container mx-auto py-6 px-4">
+      <div className="container mx-auto py-3 px-3 sm:py-4 sm:px-4 md:py-6 md:px-6 lg:py-8 lg:px-8">
         {/* Header Skeleton */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Skeleton className="h-9 w-32" />
+        <div className="mb-4 sm:mb-5 md:mb-6 lg:mb-8">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4">
+            <Skeleton 
+              className="h-8 w-24 sm:h-9 sm:w-28 md:w-32" 
+              style={{ backgroundColor: 'var(--muted)' }}
+            />
           </div>
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
+          <Skeleton 
+            className="h-6 w-48 sm:h-7 sm:w-56 md:h-8 md:w-64 mb-2" 
+            style={{ backgroundColor: 'var(--muted)' }}
+          />
+          <Skeleton 
+            className="h-3 w-64 sm:h-4 sm:w-80 md:w-96" 
+            style={{ backgroundColor: 'var(--muted)' }}
+          />
         </div>
 
         {/* Form Skeleton */}
-        <Card className="w-full max-w-2xl">
-          <CardContent className="p-6">
-            <div className="space-y-6">
+        <Card 
+          className="w-full max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl mx-auto"
+          style={{
+            backgroundColor: 'var(--card)',
+            borderColor: 'var(--border)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <CardContent className="p-3 sm:p-4 md:p-5 lg:p-6">
+            <div className="space-y-4 sm:space-y-5 md:space-y-6">
               <div className="space-y-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton 
+                  className="h-3 w-16 sm:h-4 sm:w-20" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-8 w-full sm:h-9 md:h-10" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
               <div className="space-y-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton 
+                  className="h-3 w-12 sm:h-4 sm:w-16" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-8 w-full sm:h-9 md:h-10" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
               <div className="space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-10 w-full" />
+                <Skeleton 
+                  className="h-3 w-20 sm:h-4 sm:w-24" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-8 w-full sm:h-9 md:h-10" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
               <div className="space-y-2">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-20 w-full" />
+                <Skeleton 
+                  className="h-3 w-12 sm:h-4 sm:w-16" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-16 w-full sm:h-18 md:h-20" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
               <div className="flex items-center space-x-2">
-                <Skeleton className="h-6 w-10" />
-                <Skeleton className="h-4 w-24" />
+                <Skeleton 
+                  className="h-5 w-8 sm:h-6 sm:w-10" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-3 w-20 sm:h-4 sm:w-24" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
-              <div className="flex justify-end space-x-4 pt-4">
-                <Skeleton className="h-10 w-20" />
-                <Skeleton className="h-10 w-28" />
+              <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 pt-4">
+                <Skeleton 
+                  className="h-8 w-full sm:h-9 sm:w-20 md:h-10" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
+                <Skeleton 
+                  className="h-8 w-full sm:h-9 sm:w-24 md:h-10 md:w-28" 
+                  style={{ backgroundColor: 'var(--muted)' }}
+                />
               </div>
             </div>
           </CardContent>
@@ -168,38 +241,73 @@ export const EditStorePage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-6 px-4">
+    <div 
+      className="container mx-auto py-3 px-3 sm:py-4 sm:px-4 md:py-6 md:px-6 lg:py-8 lg:px-8"
+      style={{
+        backgroundColor: 'var(--background)',
+        color: 'var(--foreground)',
+        minHeight: '100vh'
+      }}
+    >
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center gap-4 mb-4">
+      <div className="mb-4 sm:mb-5 md:mb-6 lg:mb-8">
+        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 md:mb-5">
           <Button
             variant="ghost"
             size="sm"
             onClick={handleGoBack}
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 text-sm sm:text-base hover:bg-opacity-80 transition-all duration-200"
+            style={{
+              color: 'var(--foreground)',
+              backgroundColor: 'transparent'
+            }}
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Store Details
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
+            <span className="hidden sm:inline">Back to Store Details</span>
+            <span className="sm:hidden">Back</span>
           </Button>
         </div>
         
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Store</h1>
-          <p className="text-muted-foreground mt-2">
-            Update the details for store: <span className="font-medium">{currentStore.name}</span>
+        <div className="space-y-1 sm:space-y-2">
+          <h1 
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-tight"
+            style={{ color: 'var(--foreground)' }}
+          >
+            Edit Store
+          </h1>
+          <p 
+            className="text-sm sm:text-base md:text-lg mt-1 sm:mt-2 leading-relaxed"
+            style={{ color: 'var(--muted-foreground)' }}
+          >
+            Update the details for store: 
+            <span 
+              className="font-medium break-words"
+              style={{ color: 'var(--foreground)' }}
+            >
+              {currentStore.name}
+            </span>
           </p>
         </div>
       </div>
 
       {/* Form */}
-      <div className="max-w-2xl">
-        <StoreForm
-          mode="edit"
-          initialData={currentStore}
-          onSubmit={handleSubmit}
-          loading={updateLoading}
-          error={updateError}
-        />
+      <div className="w-full max-w-full sm:max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto">
+        <div 
+          className="p-4 sm:p-6 lg:p-8 rounded-lg border shadow-sm"
+          style={{
+            backgroundColor: 'var(--card)',
+            borderColor: 'var(--border)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <StoreForm
+            mode="edit"
+            initialData={currentStore}
+            onSubmit={handleSubmit}
+            loading={updateLoading}
+            error={updateError}
+          />
+        </div>
       </div>
     </div>
   );

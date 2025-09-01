@@ -9,7 +9,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Switch } from '../ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+// Card components removed - using div wrapper instead
 import { Alert, AlertDescription } from '../ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import type { Store, CreateStorePayload, UpdateStorePayload } from '../../features/stores/types';
@@ -187,25 +187,34 @@ export const StoreForm: React.FC<StoreFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>
-          {mode === 'create' ? 'Create New Store' : 'Edit Store'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
+    <div className="w-full">
+      {/* Form Header */}
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
+          {mode === 'create' ? 'Store Information' : 'Edit Store Information'}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {mode === 'create' 
+            ? 'Please fill in all required fields to create a new store.'
+            : 'Update the store information below.'
+          }
+        </p>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Store ID - only for create mode */}
           {mode === 'create' && (
             <div className="space-y-2">
-              <Label htmlFor="id">Store ID *</Label>
+              <Label htmlFor="id" className="text-sm sm:text-base font-medium text-foreground">
+                Store ID *
+              </Label>
               <Input
                 id="id"
                 type="text"
@@ -213,17 +222,19 @@ export const StoreForm: React.FC<StoreFormProps> = ({
                 onChange={(e) => handleInputChange('id', e.target.value)}
                 onBlur={() => handleBlur('id')}
                 placeholder="Enter unique store ID"
-                className={errors.id && touched.id ? 'border-destructive' : ''}
+                className={`w-full text-sm sm:text-base ${errors.id && touched.id ? 'border-destructive focus:ring-destructive' : 'border-input focus:ring-ring'} bg-background text-foreground`}
               />
               {errors.id && touched.id && (
-                <p className="text-sm text-destructive">{errors.id}</p>
+                <p className="text-xs sm:text-sm text-destructive">{errors.id}</p>
               )}
             </div>
           )}
 
           {/* Store Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Store Name *</Label>
+            <Label htmlFor="name" className="text-sm sm:text-base font-medium text-foreground">
+              Store Name *
+            </Label>
             <Input
               id="name"
               type="text"
@@ -231,16 +242,18 @@ export const StoreForm: React.FC<StoreFormProps> = ({
               onChange={(e) => handleInputChange('name', e.target.value)}
               onBlur={() => handleBlur('name')}
               placeholder="Enter store name"
-              className={errors.name && touched.name ? 'border-destructive' : ''}
+              className={`w-full text-sm sm:text-base ${errors.name && touched.name ? 'border-destructive focus:ring-destructive' : 'border-input focus:ring-ring'} bg-background text-foreground`}
             />
             {errors.name && touched.name && (
-              <p className="text-sm text-destructive">{errors.name}</p>
+              <p className="text-xs sm:text-sm text-destructive">{errors.name}</p>
             )}
           </div>
 
           {/* Phone */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phone" className="text-sm sm:text-base font-medium text-foreground">
+              Phone Number
+            </Label>
             <Input
               id="phone"
               type="tel"
@@ -248,58 +261,67 @@ export const StoreForm: React.FC<StoreFormProps> = ({
               onChange={(e) => handleInputChange('phone', e.target.value)}
               onBlur={() => handleBlur('phone')}
               placeholder="Enter phone number"
-              className={errors.phone && touched.phone ? 'border-destructive' : ''}
+              className={`w-full text-sm sm:text-base ${errors.phone && touched.phone ? 'border-destructive focus:ring-destructive' : 'border-input focus:ring-ring'} bg-background text-foreground`}
             />
             {errors.phone && touched.phone && (
-              <p className="text-sm text-destructive">{errors.phone}</p>
+              <p className="text-xs sm:text-sm text-destructive">{errors.phone}</p>
             )}
           </div>
 
           {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
+            <Label htmlFor="address" className="text-sm sm:text-base font-medium text-foreground">
+              Address *
+            </Label>
             <Textarea
               id="address"
               value={formData.address}
               onChange={(e) => handleInputChange('address', e.target.value)}
               onBlur={() => handleBlur('address')}
               placeholder="Enter store address"
-              className={errors.address && touched.address ? 'border-destructive' : ''}
+              className={`w-full text-sm sm:text-base resize-none ${errors.address && touched.address ? 'border-destructive focus:ring-destructive' : 'border-input focus:ring-ring'} bg-background text-foreground`}
               rows={3}
             />
             {errors.address && touched.address && (
-              <p className="text-sm text-destructive">{errors.address}</p>
+              <p className="text-xs sm:text-sm text-destructive">{errors.address}</p>
             )}
           </div>
 
           {/* Active Status */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 sm:space-x-3 py-2">
             <Switch
               id="is_active"
               checked={formData.is_active}
               onCheckedChange={(checked) => handleInputChange('is_active', checked)}
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
             />
-            <Label htmlFor="is_active">Store is active</Label>
+            <Label htmlFor="is_active" className="text-sm sm:text-base font-medium text-foreground cursor-pointer">
+              Store is active
+            </Label>
           </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-4 pt-4">
+          {/* Submit Buttons */}
+          <div className="flex flex-col sm:flex-row justify-end gap-3 sm:gap-4 pt-6 sm:pt-8 border-t border-border">
             <Button
               type="button"
               variant="outline"
               onClick={() => window.history.back()}
               disabled={loading}
+              className="w-full sm:w-auto order-2 sm:order-1 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 border-border hover:bg-accent hover:text-accent-foreground"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="w-full sm:w-auto order-1 sm:order-2 text-sm sm:text-base px-4 sm:px-6 py-2 sm:py-3 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {loading && <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />}
               {mode === 'create' ? 'Create Store' : 'Update Store'}
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
   );
 };
 

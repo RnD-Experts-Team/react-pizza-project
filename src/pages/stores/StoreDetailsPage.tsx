@@ -48,13 +48,13 @@ export const StoreDetailsPage: React.FC = () => {
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'active':
-        return 'bg-green-100 text-green-800 border-green-200';
+        return 'bg-[#d1fae5] text-[#064e3b] border-[#a7f3d0] dark:bg-[#064e3b] dark:text-[#d1fae5] dark:border-[#065f46]';
       case 'inactive':
-        return 'bg-red-100 text-red-800 border-red-200';
+        return 'bg-[#fecaca] text-[#7f1d1d] border-[#fca5a5] dark:bg-[#7f1d1d] dark:text-[#fecaca] dark:border-[#991b1b]';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+        return 'bg-[#fef3c7] text-[#92400e] border-[#fde68a] dark:bg-[#92400e] dark:text-[#fef3c7] dark:border-[#b45309]';
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
+        return 'bg-secondary text-secondary-foreground border-border';
     }
   };
 
@@ -65,43 +65,43 @@ export const StoreDetailsPage: React.FC = () => {
   };
 
   const renderLoadingSkeleton = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header skeleton */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-10 w-10" />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <Skeleton className="h-8 w-8 sm:h-10 sm:w-10" />
           <div className="space-y-2">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-4 w-32" />
+            <Skeleton className="h-6 w-32 sm:h-8 sm:w-48" />
+            <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
           </div>
         </div>
-        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-8 w-20 sm:h-10 sm:w-24" />
       </div>
       
       {/* Content skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex justify-between">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+                <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
               </div>
             ))}
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
+          <CardHeader className="pb-3 sm:pb-6">
+            <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3 sm:space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex justify-between">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+                <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
               </div>
             ))}
           </CardContent>
@@ -112,8 +112,8 @@ export const StoreDetailsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto">
           {renderLoadingSkeleton()}
         </div>
       </div>
@@ -122,18 +122,18 @@ export const StoreDetailsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+            <AlertDescription className="text-sm sm:text-base">
               Failed to load store details: {error}
             </AlertDescription>
           </Alert>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/stores')} variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Stores
+          <div className="mt-3 sm:mt-4">
+            <Button onClick={() => navigate('/stores')} variant="outline" size="sm" className="sm:size-default">
+              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-sm sm:text-base">Back to Stores</span>
             </Button>
           </div>
         </div>
@@ -143,18 +143,18 @@ export const StoreDetailsPage: React.FC = () => {
 
   if (!store) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+        <div className="max-w-7xl mx-auto">
           <Alert>
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+            <AlertDescription className="text-sm sm:text-base">
               Store not found. The store may have been deleted or the ID is invalid.
             </AlertDescription>
           </Alert>
-          <div className="mt-4">
-            <Button onClick={() => navigate('/stores')} variant="outline">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Stores
+          <div className="mt-3 sm:mt-4">
+            <Button onClick={() => navigate('/stores')} variant="outline" size="sm" className="sm:size-default">
+              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-sm sm:text-base">Back to Stores</span>
             </Button>
           </div>
         </div>
@@ -163,70 +163,71 @@ export const StoreDetailsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
             <Button
               onClick={() => navigate('/stores')}
               variant="ghost"
               size="sm"
+              className="shrink-0"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back
+              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="text-sm sm:text-base">Back</span>
             </Button>
-            <div className="flex items-center space-x-3">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Store className="h-6 w-6 text-primary" />
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
               </div>
-              <div>
-                <h1 className="text-2xl font-bold">{store.name}</h1>
-                <p className="text-muted-foreground">Store ID: {store.id}</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">{store.name}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">Store ID: {store.id}</p>
               </div>
             </div>
           </div>
-          <Button onClick={handleEditStore}>
-            <Edit className="mr-2 h-4 w-4" />
-            Edit Store
+          <Button onClick={handleEditStore} size="sm" className="sm:size-default w-full sm:w-auto">
+            <Edit className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-sm sm:text-base">Edit Store</span>
           </Button>
         </div>
 
         {/* Store Information Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
           {/* Basic Information */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Building2 className="h-5 w-5" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Basic Information</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Store ID</span>
-                <div className="flex items-center space-x-2">
-                  <Hash className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-mono text-sm">{store.id}</span>
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Store ID</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Hash className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <span className="font-mono text-xs sm:text-sm break-all">{store.id}</span>
                 </div>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Name</span>
-                <span className="font-medium">{store.name}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Name</span>
+                <span className="font-medium text-sm sm:text-base break-words">{store.name}</span>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Phone</span>
-                <div className="flex items-center space-x-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <span>{store.metadata?.phone || 'Not provided'}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Phone</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Phone className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <span className="text-xs sm:text-sm break-all">{store.metadata?.phone || 'Not provided'}</span>
                 </div>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Status</span>
-                <Badge className={getStatusColor(store.is_active ? 'active' : 'inactive')}>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Status</span>
+                <Badge className={`text-xs sm:text-sm ${getStatusColor(store.is_active ? 'active' : 'inactive')}`}>
                   {store.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </div>
@@ -235,38 +236,38 @@ export const StoreDetailsPage: React.FC = () => {
 
           {/* Location & Timestamps */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <MapPin className="h-5 w-5" />
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+                <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>Location & Timeline</span>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <span className="text-sm font-medium text-muted-foreground">Address</span>
-                <div className="flex items-start space-x-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
-                  <span className="text-sm">
+            <CardContent className="space-y-3 sm:space-y-4">
+              <div className="space-y-1 sm:space-y-2">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Address</span>
+                <div className="flex items-start space-x-1 sm:space-x-2">
+                  <MapPin className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground mt-0.5 shrink-0" />
+                  <span className="text-xs sm:text-sm break-words">
                     {store.metadata?.address || 'No address provided'}
                   </span>
                 </div>
               </div>
               
-              <Separator />
+              <Separator className="my-2 sm:my-4" />
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Created</span>
-                <div className="flex items-center space-x-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{formatDate(store.created_at)}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Created</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <span className="text-xs sm:text-sm break-words">{formatDate(store.created_at)}</span>
                 </div>
               </div>
               
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{formatDate(store.updated_at)}</span>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">Last Updated</span>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                  <span className="text-xs sm:text-sm break-words">{formatDate(store.updated_at)}</span>
                 </div>
               </div>
             </CardContent>
@@ -274,7 +275,7 @@ export const StoreDetailsPage: React.FC = () => {
         </div>
 
         {/* Users and Roles Sections */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <StoreUsersSection 
             storeId={store.id}
           />
