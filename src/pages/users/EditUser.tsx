@@ -2,6 +2,7 @@
  * Edit User Page - Updated with Role-Permission Linking
  * 
  * When a role is checked, all its permissions are automatically checked and locked
+ * Refactored for consistent color variables and comprehensive responsiveness
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -18,7 +19,7 @@ import { Label } from '../../components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/card';
 import { Checkbox } from '../../components/ui/checkbox';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { ArrowLeft, Loader2, AlertCircle, Eye, EyeOff, Lock } from 'lucide-react';
+import { ArrowLeft, Loader2, AlertCircle, Eye, EyeOff, Lock, Save } from 'lucide-react';
 
 const EditUserPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ const EditUserPage: React.FC = () => {
   const userId = id ? parseInt(id) : undefined;
   
   const { user, loading: userLoading, error: userError } = useUser(userId);
-  const { updateUser, loading, error, validateForm } = useUpdateUser();
+  const { updateUser, error, validateForm } = useUpdateUser();
   const { roles, loading: rolesLoading } = useRoles();
   const { permissions, loading: permissionsLoading } = usePermissions();
   // ADDED: Get getUserProfile function and current user for manual profile refresh
@@ -245,10 +246,10 @@ const EditUserPage: React.FC = () => {
 
   if (userLoading) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span className="ml-2">Loading user...</span>
+      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 md:py-8 lg:py-10 xl:py-12">
+        <div className="flex items-center justify-center py-8 sm:py-10 md:py-12 lg:py-16">
+          <Loader2 className="h-6 w-6 sm:h-7 sm:w-7 md:h-8 md:w-8 animate-spin text-primary" />
+          <span className="ml-2 text-sm sm:text-base md:text-lg text-foreground">Loading user...</span>
         </div>
       </div>
     );
@@ -256,19 +257,19 @@ const EditUserPage: React.FC = () => {
 
   if (userError || !user) {
     return (
-      <div className="container mx-auto py-8 px-4">
-        <div className=" mx-auto space-y-6">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={handleBack} className="p-2">
-              <ArrowLeft className="h-4 w-4" />
+      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 md:py-8 lg:py-10 xl:py-12">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2">
+              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </Button>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Edit User</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">Edit User</h1>
             </div>
           </div>
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
+          <Alert variant="destructive" className="border-destructive bg-destructive/10">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <AlertDescription className="text-destructive">
               {userError || 'User not found'}
             </AlertDescription>
           </Alert>
@@ -278,16 +279,18 @@ const EditUserPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className=" mx-auto space-y-6">
+    <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 md:py-8 lg:py-10 xl:py-12">
+      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2">
-            <ArrowLeft className="h-4 w-4" />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+          <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2 self-start">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Edit User</h1>
-            <p className="text-muted-foreground">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+              Edit User
+            </h1>
+            <p className="text-sm sm:text-base md:text-lg text-muted-foreground mt-1">
               Update {user.name}'s information
             </p>
           </div>
@@ -295,23 +298,23 @@ const EditUserPage: React.FC = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
+          <Alert variant="destructive" className="border-destructive bg-destructive/10">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <AlertDescription className="text-destructive">{error}</AlertDescription>
           </Alert>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Information - Same as Create */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+          {/* Basic Information */}
+          <Card className="border-border bg-card shadow-[var(--shadow-realistic)]">
+            <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+              <CardTitle className="text-lg sm:text-xl md:text-2xl text-card-foreground">Basic Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="space-y-3 sm:space-y-4 md:space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name *</Label>
+                  <Label htmlFor="name" className="text-sm sm:text-base font-medium text-foreground">Full Name *</Label>
                   <Input
                     id="name"
                     name="name"
@@ -319,15 +322,17 @@ const EditUserPage: React.FC = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     placeholder="Enter full name"
-                    className={validationErrors.name ? 'border-red-500' : ''}
+                    className={`h-9 sm:h-10 md:h-11 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-ring ${
+                      validationErrors.name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                    }`}
                   />
                   {validationErrors.name && (
-                    <p className="text-sm text-red-500">{validationErrors.name}</p>
+                    <p className="text-xs sm:text-sm text-destructive">{validationErrors.name}</p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
+                  <Label htmlFor="email" className="text-sm sm:text-base font-medium text-foreground">Email Address *</Label>
                   <Input
                     id="email"
                     name="email"
@@ -335,26 +340,28 @@ const EditUserPage: React.FC = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="Enter email address"
-                    className={validationErrors.email ? 'border-red-500' : ''}
+                    className={`h-9 sm:h-10 md:h-11 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-ring ${
+                      validationErrors.email ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                    }`}
                   />
                   {validationErrors.email && (
-                    <p className="text-sm text-red-500">{validationErrors.email}</p>
+                    <p className="text-xs sm:text-sm text-destructive">{validationErrors.email}</p>
                   )}
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Password Change - Same as before */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Password</CardTitle>
-              <p className="text-sm text-muted-foreground">
+          {/* Password Change */}
+          <Card className="border-border bg-card shadow-[var(--shadow-realistic)]">
+            <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+              <CardTitle className="text-lg sm:text-xl md:text-2xl text-card-foreground">Password</CardTitle>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
                 Leave blank to keep current password
               </p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <CardContent className="space-y-3 sm:space-y-4 md:space-y-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <Checkbox
                   id="includePassword"
                   checked={includePassword}
@@ -368,16 +375,17 @@ const EditUserPage: React.FC = () => {
                       }));
                     }
                   }}
+                  className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
-                <Label htmlFor="includePassword">
+                <Label htmlFor="includePassword" className="text-sm sm:text-base font-medium text-foreground cursor-pointer">
                   Change password
                 </Label>
               </div>
 
               {includePassword && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="password">New Password *</Label>
+                    <Label htmlFor="password" className="text-sm sm:text-base font-medium text-foreground">New Password *</Label>
                     <div className="relative">
                       <Input
                         id="password"
@@ -386,29 +394,31 @@ const EditUserPage: React.FC = () => {
                         value={formData.password}
                         onChange={handleInputChange}
                         placeholder="Enter new password"
-                        className={validationErrors.password ? 'border-red-500' : ''}
+                        className={`h-9 sm:h-10 md:h-11 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-ring pr-10 ${
+                          validationErrors.password ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                        }`}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-full px-2 sm:px-3 py-2 hover:bg-accent text-muted-foreground hover:text-accent-foreground"
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         )}
                       </Button>
                     </div>
                     {validationErrors.password && (
-                      <p className="text-sm text-red-500">{validationErrors.password}</p>
+                      <p className="text-xs sm:text-sm text-destructive">{validationErrors.password}</p>
                     )}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password_confirmation">Confirm New Password *</Label>
+                    <Label htmlFor="password_confirmation" className="text-sm sm:text-base font-medium text-foreground">Confirm New Password *</Label>
                     <div className="relative">
                       <Input
                         id="password_confirmation"
@@ -417,24 +427,26 @@ const EditUserPage: React.FC = () => {
                         value={formData.password_confirmation}
                         onChange={handleInputChange}
                         placeholder="Confirm new password"
-                        className={validationErrors.password_confirmation ? 'border-red-500' : ''}
+                        className={`h-9 sm:h-10 md:h-11 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground focus:border-ring focus:ring-ring pr-10 ${
+                          validationErrors.password_confirmation ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                        }`}
                       />
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                        className="absolute right-0 top-0 h-full px-2 sm:px-3 py-2 hover:bg-accent text-muted-foreground hover:text-accent-foreground"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? (
-                          <EyeOff className="h-4 w-4" />
+                          <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" />
                         ) : (
-                          <Eye className="h-4 w-4" />
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
                         )}
                       </Button>
                     </div>
                     {validationErrors.password_confirmation && (
-                      <p className="text-sm text-red-500">{validationErrors.password_confirmation}</p>
+                      <p className="text-xs sm:text-sm text-destructive">{validationErrors.password_confirmation}</p>
                     )}
                   </div>
                 </div>
@@ -443,34 +455,35 @@ const EditUserPage: React.FC = () => {
           </Card>
 
           {/* Roles - Updated with linking logic */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Roles</CardTitle>
-              <p className="text-sm text-muted-foreground">
+          <Card className="border-border bg-card shadow-[var(--shadow-realistic)]">
+            <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+              <CardTitle className="text-lg sm:text-xl md:text-2xl text-card-foreground">Roles</CardTitle>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
                 Select roles - their permissions will be automatically included
               </p>
             </CardHeader>
             <CardContent>
               {rolesLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading roles...
+                <div className="flex items-center justify-center py-6 sm:py-8 md:py-10">
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-spin mr-2 text-primary" />
+                  <span className="text-sm sm:text-base text-foreground">Loading roles...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-5">
                   {roles.map((role) => (
-                    <div key={role.id} className="flex items-start space-x-3 space-y-0">
+                    <div key={role.id} className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-md border border-border bg-background hover:bg-accent transition-colors">
                       <Checkbox
                         id={`role-${role.id}`}
                         checked={checkedRoles.has(role.name)}
                         onCheckedChange={(checked) => 
                           handleRoleChange(role.name, checked as boolean)
                         }
+                        className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-0.5"
                       />
-                      <div className="grid gap-1.5 leading-none">
+                      <div className="grid gap-1 sm:gap-1.5 leading-none flex-1">
                         <Label
                           htmlFor={`role-${role.id}`}
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          className="text-xs sm:text-sm md:text-base font-medium leading-none cursor-pointer text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                         >
                           {role.name}
                         </Label>
@@ -485,33 +498,33 @@ const EditUserPage: React.FC = () => {
                 </div>
               )}
               {validationErrors.roles && (
-                <p className="text-sm text-red-500 mt-2">{validationErrors.roles}</p>
+                <p className="text-xs sm:text-sm text-destructive mt-2">{validationErrors.roles}</p>
               )}
             </CardContent>
           </Card>
 
           {/* Direct Permissions - Updated with locking logic */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Permissions</CardTitle>
-              <p className="text-sm text-muted-foreground">
+          <Card className="border-border bg-card shadow-[var(--shadow-realistic)]">
+            <CardHeader className="pb-3 sm:pb-4 md:pb-6">
+              <CardTitle className="text-lg sm:text-xl md:text-2xl text-card-foreground">Additional Permissions</CardTitle>
+              <p className="text-xs sm:text-sm md:text-base text-muted-foreground mt-1">
                 Grant extra permissions not covered by roles (optional)
               </p>
             </CardHeader>
             <CardContent>
               {permissionsLoading ? (
-                <div className="flex items-center justify-center py-4">
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  Loading permissions...
+                <div className="flex items-center justify-center py-6 sm:py-8 md:py-10">
+                  <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 animate-spin mr-2 text-primary" />
+                  <span className="text-sm sm:text-base text-foreground">Loading permissions...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 max-h-60 sm:max-h-72 md:max-h-80 overflow-y-auto">
                   {permissions.map((permission) => {
                     const isLocked = isPermissionLocked(permission.name);
                     const isChecked = allCheckedPermissions.has(permission.name);
                     
                     return (
-                      <div key={permission.id} className="flex items-start space-x-3 space-y-0">
+                      <div key={permission.id} className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 rounded-md border border-border bg-background hover:bg-accent transition-colors">
                         <Checkbox
                           id={`permission-${permission.id}`}
                           checked={isChecked}
@@ -519,17 +532,18 @@ const EditUserPage: React.FC = () => {
                           onCheckedChange={(checked) => 
                             handlePermissionChange(permission.name, checked as boolean)
                           }
+                          className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary disabled:opacity-50 mt-0.5"
                         />
-                        <div className="grid gap-1.5 leading-none">
+                        <div className="grid gap-1 sm:gap-1.5 leading-none flex-1">
                           <Label
                             htmlFor={`permission-${permission.id}`}
-                            className={`text-sm font-medium leading-none ${
+                            className={`text-xs sm:text-sm md:text-base font-medium leading-none cursor-pointer ${
                               isLocked 
                                 ? 'text-muted-foreground cursor-not-allowed' 
-                                : 'peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                                : 'text-foreground peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                             }`}
                           >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 sm:gap-2">
                               {permission.name}
                               {isLocked && (
                                 <Lock className="h-3 w-3 text-muted-foreground" />
@@ -548,34 +562,39 @@ const EditUserPage: React.FC = () => {
                 </div>
               )}
               {validationErrors.permissions && (
-                <p className="text-sm text-red-500 mt-2">{validationErrors.permissions}</p>
+                <p className="text-xs sm:text-sm text-destructive mt-2">{validationErrors.permissions}</p>
               )}
             </CardContent>
           </Card>
 
-          {/* Form Actions */}
-          <div className="flex items-center justify-end space-x-4 pt-4">
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 pt-4 sm:pt-6 md:pt-8">
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1 h-10 sm:h-11 md:h-12 text-sm sm:text-base bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                  <span className="text-sm sm:text-base">Updating User...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">Update User</span>
+                </>
+              )}
+            </Button>
+            
             <Button
               type="button"
               variant="outline"
               onClick={handleBack}
-              disabled={isSubmitting}
+              className="flex-1 sm:flex-none h-10 sm:h-11 md:h-12 text-sm sm:text-base border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-200"
             >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting || loading}
-              className="min-w-[120px]"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Updating...
-                </>
-              ) : (
-                'Update User'
-              )}
+              <ArrowLeft className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-sm sm:text-base">Cancel</span>
             </Button>
           </div>
         </form>

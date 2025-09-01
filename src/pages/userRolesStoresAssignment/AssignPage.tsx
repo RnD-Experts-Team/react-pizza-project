@@ -341,38 +341,46 @@ export const AssignPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 md:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Role Assignment</h1>
-            <p className="text-muted-foreground mt-2">
+      <div className="flex flex-col space-y-3 sm:space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
+              Role Assignment
+            </h1>
+            <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
               Assign roles to users across different stores with an intuitive interface
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button
               variant="outline"
               onClick={handleClearSelection}
               disabled={!canAssign}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2"
             >
-              <X className="h-4 w-4" />
-              Clear Selection
+              <X className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Clear Selection</span>
+              <span className="sm:hidden">Clear</span>
             </Button>
             <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
               <DialogTrigger asChild>
                 <Button
                   disabled={!canAssign || isActuallyAssigning}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                   {isActuallyAssigning ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
                   ) : (
-                    <UserCheck className="h-4 w-4" />
+                    <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
                   )}
-                  {isActuallyAssigning ? 'Assigning...' : 'Assign Roles'}
+                  <span className="hidden sm:inline">
+                    {isActuallyAssigning ? 'Assigning...' : 'Assign Roles'}
+                  </span>
+                  <span className="sm:hidden">
+                    {isActuallyAssigning ? 'Assigning...' : 'Assign'}
+                  </span>
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -401,29 +409,30 @@ export const AssignPage: React.FC = () => {
         </div>
 
         {/* Progress Indicator */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Assignment Progress</span>
-                <span className="text-sm text-muted-foreground">
+        <Card className="bg-card border-border shadow-sm">
+          <CardContent className="pt-4 sm:pt-6 p-3 sm:p-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <span className="text-xs sm:text-sm font-medium text-card-foreground">Assignment Progress</span>
+                <span className="text-xs sm:text-sm text-muted-foreground">
                   {completedSteps} of {assignmentSteps.length} steps completed
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
-              <div className="flex justify-between">
+              <Progress value={progressPercentage} className="h-1.5 sm:h-2 bg-secondary" />
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-4">
                 {assignmentSteps.map((step, index) => (
-                  <div key={step.id} className="flex items-center gap-2">
+                  <div key={step.id} className="flex items-center gap-1.5 sm:gap-2">
                     {step.completed ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" style={{color: '#10b981'}} />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-muted" />
+                      <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-muted bg-background" />
                     )}
-                    <span className={`text-xs ${step.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
-                      {step.title}
+                    <span className={`text-xs sm:text-sm ${step.completed ? 'font-medium' : 'text-muted-foreground'}`} style={{color: step.completed ? '#059669' : undefined}}>
+                      <span className="hidden sm:inline">{step.title}</span>
+                      <span className="sm:hidden">{step.title.split(' ')[1] || step.title}</span>
                     </span>
                     {index < assignmentSteps.length - 1 && (
-                      <ArrowRight className="h-3 w-3 text-muted-foreground ml-2" />
+                      <ArrowRight className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-muted-foreground ml-1 sm:ml-2 hidden sm:block" />
                     )}
                   </div>
                 ))}
@@ -434,13 +443,18 @@ export const AssignPage: React.FC = () => {
 
         {/* Assignment Result */}
         {assignmentResult && (
-          <Alert className={assignmentResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+          <Alert className={`border-2 ${assignmentResult.success ? 'bg-background' : 'bg-background'}`} style={{
+            borderColor: assignmentResult.success ? '#10b981' : '#ef4444',
+            backgroundColor: assignmentResult.success ? 'color-mix(in srgb, #10b981 8%, var(--background))' : 'color-mix(in srgb, #ef4444 8%, var(--background))'
+          }}>
             {assignmentResult.success ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4" style={{color: '#059669'}} />
             ) : (
-              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertCircle className="h-4 w-4" style={{color: '#dc2626'}} />
             )}
-            <AlertDescription className={assignmentResult.success ? 'text-green-800' : 'text-red-800'}>
+            <AlertDescription className="text-sm sm:text-base" style={{
+              color: assignmentResult.success ? '#065f46' : '#7f1d1d'
+            }}>
               {assignmentResult.message}
             </AlertDescription>
           </Alert>
@@ -449,73 +463,79 @@ export const AssignPage: React.FC = () => {
 
       {/* Selection Summary */}
       {(assignmentData.selectedUsers.length > 0 || assignmentData.selectedRoles.length > 0 || assignmentData.selectedStores.length > 0) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+        <Card className="bg-card border-border shadow-sm">
+          <CardHeader className="pb-3 sm:pb-6">
+            <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+              <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Selection Summary
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
+          <CardContent className="pt-0 p-3 sm:p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">Selected Users ({assignmentData.selectedUsers.length})</span>
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="font-medium text-xs sm:text-sm text-card-foreground">
+                    Selected Users ({assignmentData.selectedUsers.length})
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {assignmentData.selectedUsers.slice(0, 3).map(userId => {
                     const user = users.find(u => u.id === userId);
                     return user ? (
-                      <Badge key={userId} variant="secondary" className="text-xs">
+                      <Badge key={userId} variant="secondary" className="text-xs bg-secondary text-secondary-foreground border-border">
                         {user.name}
                       </Badge>
                     ) : null;
                   })}
                   {assignmentData.selectedUsers.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                       +{assignmentData.selectedUsers.length - 3} more
                     </Badge>
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  <span className="font-medium">Selected Roles ({assignmentData.selectedRoles.length})</span>
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="font-medium text-xs sm:text-sm text-card-foreground">
+                    Selected Roles ({assignmentData.selectedRoles.length})
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {assignmentData.selectedRoles.slice(0, 3).map(roleId => {
                     const role = roles.find(r => r.id === roleId);
                     return role ? (
-                      <Badge key={roleId} variant="secondary" className="text-xs">
+                      <Badge key={roleId} variant="secondary" className="text-xs bg-secondary text-secondary-foreground border-border">
                         {role.name}
                       </Badge>
                     ) : null;
                   })}
                   {assignmentData.selectedRoles.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                       +{assignmentData.selectedRoles.length - 3} more
                     </Badge>
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
-                  <Store className="h-4 w-4" />
-                  <span className="font-medium">Selected Stores ({assignmentData.selectedStores.length})</span>
+                  <Store className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                  <span className="font-medium text-xs sm:text-sm text-card-foreground">
+                    Selected Stores ({assignmentData.selectedStores.length})
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
                   {assignmentData.selectedStores.slice(0, 3).map(storeId => {
                     const store = stores.find(s => s.id === storeId);
                     return store ? (
-                      <Badge key={storeId} variant="secondary" className="text-xs">
+                      <Badge key={storeId} variant="secondary" className="text-xs bg-secondary text-secondary-foreground border-border">
                         {store.name}
                       </Badge>
                     ) : null;
                   })}
                   {assignmentData.selectedStores.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                       +{assignmentData.selectedStores.length - 3} more
                     </Badge>
                   )}
@@ -527,99 +547,127 @@ export const AssignPage: React.FC = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Users ({assignmentData.selectedUsers.length})
+      <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-muted p-1 rounded-md">
+          <TabsTrigger 
+            value="users" 
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Users ({assignmentData.selectedUsers.length})</span>
+            <span className="sm:hidden">Users</span>
           </TabsTrigger>
-          <TabsTrigger value="roles" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Roles ({assignmentData.selectedRoles.length})
+          <TabsTrigger 
+            value="roles" 
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Roles ({assignmentData.selectedRoles.length})</span>
+            <span className="sm:hidden">Roles</span>
           </TabsTrigger>
-          <TabsTrigger value="stores" className="flex items-center gap-2">
-            <Store className="h-4 w-4" />
-            Stores ({assignmentData.selectedStores.length})
+          <TabsTrigger 
+            value="stores" 
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
+          >
+            <Store className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="hidden sm:inline">Stores ({assignmentData.selectedStores.length})</span>
+            <span className="sm:hidden">Stores</span>
           </TabsTrigger>
         </TabsList>
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select Users</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search users..."
-                      value={userSearch}
-                      onChange={(e) => setUserSearch(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
-                    />
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  Select Users
+                </CardTitle>
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search users..."
+                        value={userSearch}
+                        onChange={(e) => setUserSearch(e.target.value)}
+                        className="pl-8 sm:pl-10 text-xs sm:text-sm bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring"
+                      />
+                    </div>
+                    <Select value={userFilter} onValueChange={(value: any) => setUserFilter(value)}>
+                      <SelectTrigger className="w-full sm:w-40 text-xs sm:text-sm bg-background border-input text-foreground">
+                        <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border">
+                        <SelectItem value="all" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          All Users
+                        </SelectItem>
+                        <SelectItem value="with-roles" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          With Roles
+                        </SelectItem>
+                        <SelectItem value="without-roles" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          Without Roles
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Select value={userFilter} onValueChange={(value: any) => setUserFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-40">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Users</SelectItem>
-                      <SelectItem value="with-roles">With Roles</SelectItem>
-                      <SelectItem value="without-roles">Without Roles</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    variant="outline"
-                    onClick={handleSelectAllUsers}
-                    className="whitespace-nowrap"
-                  >
-                    {assignmentData.selectedUsers.length === displayUsers.length ? 'Deselect All' : 'Select All'}
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleSelectAllUsers}
+                      className="text-xs sm:text-sm bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                    >
+                      {assignmentData.selectedUsers.length === displayUsers.length ? 'Deselect All' : 'Select All'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 p-3 sm:p-6">
               {usersError ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Error loading users: {usersError}</AlertDescription>
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <AlertDescription className="text-xs sm:text-sm">
+                    Error loading users: {usersError}
+                  </AlertDescription>
                 </Alert>
               ) : usersLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading users...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
+                  <span className="ml-2 text-xs sm:text-sm text-muted-foreground">Loading users...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {displayUsers.map((user) => (
                     <div
                       key={user.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                      className={`p-2 sm:p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                         assignmentData.selectedUsers.includes(user.id)
                           ? 'border-primary bg-primary/5'
                           : 'border-border'
                       }`}
                       onClick={() => handleUserToggle(user.id)}
                     >
-                      <div className="flex items-start space-x-3">
+                      <div className="flex items-start space-x-2 sm:space-x-3">
                         <Checkbox
                           checked={assignmentData.selectedUsers.includes(user.id)}
                           onChange={() => handleUserToggle(user.id)}
+                          className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-1"
                         />
-                        <Avatar className="h-10 w-10">
-                          <div className="h-full w-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                        <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+                          <div className="h-full w-full bg-primary/10 flex items-center justify-center text-xs sm:text-sm font-medium text-primary">
                             {getInitials(user.name)}
                           </div>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{user.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">{user.email}</p>
-                          <div className="flex flex-wrap gap-1 mt-2">
+                          <p className="font-medium truncate text-xs sm:text-sm text-card-foreground">{user.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                          <div className="flex flex-wrap gap-1 mt-1 sm:mt-2">
                             {user.roles && user.roles.length > 0 ? (
                               user.roles.slice(0, 2).map((role) => (
-                                <Badge key={role.id} variant="outline" className="text-xs">
+                                <Badge key={role.id} variant="outline" className="text-xs border-border text-muted-foreground">
                                   {role.name}
                                 </Badge>
                               ))
@@ -627,7 +675,7 @@ export const AssignPage: React.FC = () => {
                               <span className="text-xs text-muted-foreground">No roles</span>
                             )}
                             {user.roles && user.roles.length > 2 && (
-                              <Badge variant="outline" className="text-xs">
+                              <Badge variant="outline" className="text-xs border-border text-muted-foreground">
                                 +{user.roles.length - 2}
                               </Badge>
                             )}
@@ -644,71 +692,77 @@ export const AssignPage: React.FC = () => {
 
         {/* Roles Tab */}
         <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select Roles</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  Select Roles
+                </CardTitle>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
                     <Input
                       placeholder="Search roles..."
                       value={roleSearch}
                       onChange={(e) => setRoleSearch(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
+                      className="pl-8 sm:pl-10 text-xs sm:text-sm bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring"
                     />
                   </div>
                   <Button
                     variant="outline"
                     onClick={handleSelectAllRoles}
-                    className="whitespace-nowrap"
+                    className="text-xs sm:text-sm bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                   >
                     {assignmentData.selectedRoles.length === displayRoles.length ? 'Deselect All' : 'Select All'}
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 p-3 sm:p-6">
               {rolesError ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Error loading roles: {rolesError}</AlertDescription>
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <AlertDescription className="text-xs sm:text-sm">
+                    Error loading roles: {rolesError}
+                  </AlertDescription>
                 </Alert>
               ) : rolesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading roles...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
+                  <span className="ml-2 text-xs sm:text-sm text-muted-foreground">Loading roles...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4">
                   {displayRoles.map((role) => (
                     <div
                       key={role.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                      className={`p-2 sm:p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                         assignmentData.selectedRoles.includes(role.id)
                           ? 'border-primary bg-primary/5'
-                          : 'border-border'
+                          : 'border-border hover:border-primary/50'
                       }`}
                       onClick={() => handleRoleToggle(role.id)}
                     >
-                      <div className="flex items-start space-x-3">
+                      <div className="flex items-start space-x-2 sm:space-x-3">
                         <Checkbox
                           checked={assignmentData.selectedRoles.includes(role.id)}
                           onChange={() => handleRoleToggle(role.id)}
+                          className="border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary mt-1"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <Shield className="h-4 w-4 text-primary" />
-                            <p className="font-medium">{role.name}</p>
+                            <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
+                            <p className="font-medium text-xs sm:text-sm text-card-foreground truncate">{role.name}</p>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
                             Guard: {role.guard_name}
                           </p>
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-xs text-muted-foreground mt-1 truncate">
                             Created: {formatDate(role.created_at)}
                           </p>
                           {role.permissions && role.permissions.length > 0 && (
-                            <div className="mt-2">
+                            <div className="mt-1 sm:mt-2">
                               <span className="text-xs text-muted-foreground">
                                 {role.permissions.length} permissions
                               </span>
@@ -718,6 +772,11 @@ export const AssignPage: React.FC = () => {
                       </div>
                     </div>
                   ))}
+                  {displayRoles.length === 0 && (
+                    <div className="col-span-full text-center py-6 sm:py-8 text-muted-foreground text-xs sm:text-sm">
+                      No roles found.
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
@@ -726,90 +785,104 @@ export const AssignPage: React.FC = () => {
 
         {/* Stores Tab */}
         <TabsContent value="stores">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select Stores</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search stores..."
-                      value={storeSearch}
-                      onChange={(e) => setStoreSearch(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
-                    />
+          <Card className="bg-card border-border shadow-sm">
+            <CardHeader className="pb-3 sm:pb-6">
+              <div className="flex flex-col gap-3 sm:gap-4">
+                <CardTitle className="flex items-center gap-2 text-card-foreground text-base sm:text-lg">
+                  <Store className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                  Select Stores
+                </CardTitle>
+                <div className="flex flex-col gap-2 sm:gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search stores..."
+                        value={storeSearch}
+                        onChange={(e) => setStoreSearch(e.target.value)}
+                        className="pl-8 sm:pl-10 text-xs sm:text-sm bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring"
+                      />
+                    </div>
+                    <Select value={storeFilter} onValueChange={(value: any) => setStoreFilter(value)}>
+                      <SelectTrigger className="w-full sm:w-32 text-xs sm:text-sm bg-background border-input text-foreground">
+                        <Filter className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover border-border">
+                        <SelectItem value="all" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          All Stores
+                        </SelectItem>
+                        <SelectItem value="active" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          Active
+                        </SelectItem>
+                        <SelectItem value="inactive" className="text-popover-foreground hover:bg-accent hover:text-accent-foreground">
+                          Inactive
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                  <Select value={storeFilter} onValueChange={(value: any) => setStoreFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-32">
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Stores</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                    </SelectContent>
-                  </Select>
                   <Button
                     variant="outline"
                     onClick={handleSelectAllStores}
-                    className="whitespace-nowrap"
+                    className="text-xs sm:text-sm bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
                   >
                     {assignmentData.selectedStores.length === displayStores.length ? 'Deselect All' : 'Select All'}
                   </Button>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 p-3 sm:p-6">
               {storesError ? (
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>Error loading stores: {storesError}</AlertDescription>
+                <Alert variant="destructive" className="bg-destructive/10 border-destructive/20 text-destructive">
+                  <AlertCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <AlertDescription className="text-xs sm:text-sm">
+                    Error loading stores: {storesError}
+                  </AlertDescription>
                 </Alert>
               ) : storesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
                   <span className="ml-2">Loading stores...</span>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                   {displayStores.map((store) => (
                     <div
                       key={store.id}
-                      className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                      className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md bg-card ${
                         assignmentData.selectedStores.includes(store.id)
                           ? 'border-primary bg-primary/5'
                           : 'border-border'
                       }`}
                       onClick={() => handleStoreToggle(store.id)}
                     >
-                      <div className="flex items-start space-x-3">
+                      <div className="flex items-start space-x-2 sm:space-x-3">
                         <Checkbox
                           checked={assignmentData.selectedStores.includes(store.id)}
                           onChange={() => handleStoreToggle(store.id)}
+                          className="mt-0.5"
                         />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <Store className="h-4 w-4 text-primary" />
-                            <p className="font-medium">{store.name}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                            <Store className="h-3 w-3 sm:h-4 sm:w-4 text-primary flex-shrink-0" />
+                            <p className="font-medium text-sm sm:text-base text-card-foreground truncate">{store.name}</p>
                             <Badge
                               variant={store.is_active ? 'default' : 'secondary'}
-                              className="text-xs"
+                              className="text-xs flex-shrink-0"
                             >
                               {store.is_active ? 'Active' : 'Inactive'}
                             </Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground mt-1 font-mono">
+                          <p className="text-xs sm:text-sm text-muted-foreground mt-1 font-mono truncate">
                             {store.id}
                           </p>
                           {store.metadata.address && (
-                            <p className="text-xs text-muted-foreground mt-1 truncate">
+                            <p className="text-xs text-muted-foreground mt-1 truncate" title={store.metadata.address}>
                               {store.metadata.address}
                             </p>
                           )}
                           {store.metadata.phone && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-muted-foreground truncate">
                               {store.metadata.phone}
                             </p>
                           )}

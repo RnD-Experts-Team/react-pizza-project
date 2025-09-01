@@ -293,28 +293,28 @@ export const SingleAssignPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+      <div className="flex flex-col space-y-4 sm:space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
             <Button
               variant="outline"
               size="sm"
               onClick={handleGoBack}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-fit"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Single Role Assignment</h1>
-              <p className="text-muted-foreground mt-2">
+            <div className="space-y-1 sm:space-y-2">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-[var(--foreground)]">Single Role Assignment</h1>
+              <p className="text-sm sm:text-base text-[var(--muted-foreground)]">
                 Assign a single role to a user for a specific store
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <Button
               variant="outline"
               onClick={handleClearSelection}
@@ -362,29 +362,29 @@ export const SingleAssignPage: React.FC = () => {
         </div>
 
         {/* Progress Indicator */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Assignment Progress</span>
-                <span className="text-sm text-muted-foreground">
+        <Card className="bg-[var(--card)] border-[var(--border)]">
+          <CardContent className="pt-4 sm:pt-6 px-4 sm:px-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
+                <span className="text-sm sm:text-base font-medium text-[var(--card-foreground)]">Assignment Progress</span>
+                <span className="text-xs sm:text-sm text-[var(--muted-foreground)]">
                   {completedSteps} of {assignmentSteps.length} steps completed
                 </span>
               </div>
-              <Progress value={progressPercentage} className="h-2" />
-              <div className="flex justify-between">
+              <Progress value={progressPercentage} className="h-2 sm:h-3" />
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-2">
                 {assignmentSteps.map((step, index) => (
-                  <div key={step.id} className="flex items-center gap-2">
+                  <div key={step.id} className="flex items-center gap-2 sm:gap-1 lg:gap-2">
                     {step.completed ? (
-                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <CheckCircle className="h-4 w-4 sm:h-3 sm:w-3 lg:h-4 lg:w-4 text-[#10b981] flex-shrink-0" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border-2 border-muted" />
+                      <div className="h-4 w-4 sm:h-3 sm:w-3 lg:h-4 lg:w-4 rounded-full border-2 border-[var(--muted)] flex-shrink-0" />
                     )}
-                    <span className={`text-xs ${step.completed ? 'text-green-600' : 'text-muted-foreground'}`}>
+                    <span className={`text-xs sm:text-[10px] lg:text-xs ${step.completed ? 'text-[#059669]' : 'text-[var(--muted-foreground)]'} truncate`}>
                       {step.title}
                     </span>
                     {index < assignmentSteps.length - 1 && (
-                      <ArrowRight className="h-3 w-3 text-muted-foreground ml-2" />
+                      <ArrowRight className="h-3 w-3 sm:h-2 sm:w-2 lg:h-3 lg:w-3 text-[var(--muted-foreground)] ml-1 sm:ml-0 lg:ml-2 hidden sm:block flex-shrink-0" />
                     )}
                   </div>
                 ))}
@@ -395,13 +395,13 @@ export const SingleAssignPage: React.FC = () => {
 
         {/* Assignment Result */}
         {assignmentResult && (
-          <Alert className={assignmentResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+          <Alert className={`px-4 sm:px-6 py-3 sm:py-4 ${assignmentResult.success ? 'border-[#10b981] bg-[#dcfce7]' : 'border-[#ef4444] bg-[#fef2f2]'} dark:${assignmentResult.success ? 'border-[#059669] bg-[#064e3b]' : 'border-[#dc2626] bg-[#7f1d1d]'}`}>
             {assignmentResult.success ? (
-              <CheckCircle className="h-4 w-4 text-green-600" />
+              <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[#059669] flex-shrink-0" />
             ) : (
-              <AlertCircle className="h-4 w-4 text-red-600" />
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-[#dc2626] flex-shrink-0" />
             )}
-            <AlertDescription className={assignmentResult.success ? 'text-green-800' : 'text-red-800'}>
+            <AlertDescription className={`text-sm sm:text-base ${assignmentResult.success ? 'text-[#065f46]' : 'text-[#991b1b]'} dark:${assignmentResult.success ? 'text-[#10b981]' : 'text-[#f87171]'} ml-2`}>
               {assignmentResult.message}
             </AlertDescription>
           </Alert>
@@ -410,78 +410,78 @@ export const SingleAssignPage: React.FC = () => {
 
       {/* Selection Summary */}
       {(assignmentData.selectedUser || assignmentData.selectedRole || assignmentData.selectedStore) && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+        <Card className="bg-[var(--card)] border-[var(--border)]">
+          <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-[var(--card-foreground)]">
+              <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-[var(--primary)]" />
               Current Selection
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  <span className="font-medium">Selected User</span>
+                  <Users className="h-4 w-4 text-[var(--primary)] flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base text-[var(--card-foreground)]">Selected User</span>
                 </div>
                 <div>
                   {assignmentData.selectedUser ? (
                     (() => {
                       const user = users.find(u => u.id === assignmentData.selectedUser);
                       return user ? (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs sm:text-sm bg-[var(--secondary)] text-[var(--secondary-foreground)] border-[var(--border)]">
                           {user.name}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground text-sm">User not found</span>
+                        <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">User not found</span>
                       );
                     })()
                   ) : (
-                    <span className="text-muted-foreground text-sm">No user selected</span>
+                    <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">No user selected</span>
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  <span className="font-medium">Selected Role</span>
+                  <Shield className="h-4 w-4 text-[var(--primary)] flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base text-[var(--card-foreground)]">Selected Role</span>
                 </div>
                 <div>
                   {assignmentData.selectedRole ? (
                     (() => {
                       const role = roles.find(r => r.id === assignmentData.selectedRole);
                       return role ? (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs sm:text-sm bg-[var(--secondary)] text-[var(--secondary-foreground)] border-[var(--border)]">
                           {role.name}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground text-sm">Role not found</span>
+                        <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">Role not found</span>
                       );
                     })()
                   ) : (
-                    <span className="text-muted-foreground text-sm">No role selected</span>
+                    <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">No role selected</span>
                   )}
                 </div>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3 sm:col-span-2 lg:col-span-1">
                 <div className="flex items-center gap-2">
-                  <Store className="h-4 w-4" />
-                  <span className="font-medium">Selected Store</span>
+                  <Store className="h-4 w-4 text-[var(--primary)] flex-shrink-0" />
+                  <span className="font-medium text-sm sm:text-base text-[var(--card-foreground)]">Selected Store</span>
                 </div>
                 <div>
                   {assignmentData.selectedStore ? (
                     (() => {
                       const store = stores.find(s => s.id === assignmentData.selectedStore);
                       return store ? (
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="secondary" className="text-xs sm:text-sm bg-[var(--secondary)] text-[var(--secondary-foreground)] border-[var(--border)]">
                           {store.name}
                         </Badge>
                       ) : (
-                        <span className="text-muted-foreground text-sm">Store not found</span>
+                        <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">Store not found</span>
                       );
                     })()
                   ) : (
-                    <span className="text-muted-foreground text-sm">No store selected</span>
+                    <span className="text-[var(--muted-foreground)] text-xs sm:text-sm">No store selected</span>
                   )}
                 </div>
               </div>
@@ -491,105 +491,111 @@ export const SingleAssignPage: React.FC = () => {
       )}
 
       {/* Main Content Tabs */}
-      <Tabs defaultValue="users" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Users {assignmentData.selectedUser && '(1 selected)'}
+      <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
+        <TabsList className="grid w-full grid-cols-3 bg-[var(--muted)] p-1 rounded-lg">
+          <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+            <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Users</span>
+            <span className="sm:hidden">U</span>
+            {assignmentData.selectedUser && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
           </TabsTrigger>
-          <TabsTrigger value="roles" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Roles {assignmentData.selectedRole && '(1 selected)'}
+          <TabsTrigger value="roles" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+            <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Roles</span>
+            <span className="sm:hidden">R</span>
+            {assignmentData.selectedRole && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
           </TabsTrigger>
-          <TabsTrigger value="stores" className="flex items-center gap-2">
-            <Store className="h-4 w-4" />
-            Stores {assignmentData.selectedStore && '(1 selected)'}
+          <TabsTrigger value="stores" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+            <Store className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+            <span className="hidden sm:inline">Stores</span>
+            <span className="sm:hidden">S</span>
+            {assignmentData.selectedStore && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
           </TabsTrigger>
         </TabsList>
 
         {/* Users Tab */}
-        <TabsContent value="users">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select User</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2">
+        <TabsContent value="users" className="space-y-4 sm:space-y-6">
+          <Card className="bg-[var(--card)] border-[var(--border)]">
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-3 sm:gap-4">
+                <CardTitle className="text-base sm:text-lg text-[var(--card-foreground)]">Select User</CardTitle>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
                     <Input
                       placeholder="Search users..."
                       value={userSearch}
                       onChange={(e) => setUserSearch(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
+                      className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
                     />
                   </div>
                   <Select value={userFilter} onValueChange={(value: any) => setUserFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-40">
-                      <Filter className="h-4 w-4 mr-2" />
+                    <SelectTrigger className="w-full sm:w-40 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] text-sm sm:text-base">
+                      <Filter className="h-4 w-4 mr-2 text-[var(--muted-foreground)]" />
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Users</SelectItem>
-                      <SelectItem value="with-roles">With Roles</SelectItem>
-                      <SelectItem value="without-roles">Without Roles</SelectItem>
+                    <SelectContent className="bg-[var(--popover)] border-[var(--border)]">
+                      <SelectItem value="all" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">All Users</SelectItem>
+                      <SelectItem value="with-roles" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">With Roles</SelectItem>
+                      <SelectItem value="without-roles" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">Without Roles</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               {usersError ? (
-                <div className="text-red-500 text-center py-4">
+                <div className="text-[#dc2626] dark:text-[#f87171] text-center py-4 text-sm sm:text-base">
                   Error loading users: {usersError}
                 </div>
               ) : usersLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading users...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-[var(--primary)]" />
+                  <span className="ml-2 text-sm sm:text-base text-[var(--muted-foreground)]">Loading users...</span>
                 </div>
               ) : (
                 <RadioGroup
                   value={assignmentData.selectedUser?.toString() || ''}
                   onValueChange={handleUserSelect}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
                   {displayUsers.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-6 sm:py-8 text-[var(--muted-foreground)] text-sm sm:text-base">
                       {userSearch ? 'No users found matching your search' : 'No users found'}
                     </div>
                   ) : (
                     displayUsers.map((user) => (
-                      <div key={user.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value={user.id.toString()} id={`user-${user.id}`} />
+                      <div key={user.id} className="flex items-center space-x-3 p-3 sm:p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--muted)]/50 transition-colors">
+                        <RadioGroupItem value={user.id.toString()} id={`user-${user.id}`} className="text-[var(--primary)] border-[var(--border)]" />
                         <Label htmlFor={`user-${user.id}`} className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                             <div className="flex items-center gap-3">
-                              <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+                              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-[var(--primary)]/10 flex items-center justify-center text-xs sm:text-sm font-medium text-[var(--primary)] flex-shrink-0">
                                 {getInitials(user.name)}
                               </div>
-                              <div>
-                                <div className="font-medium">{user.name}</div>
-                                <div className="text-sm text-muted-foreground">{user.email}</div>
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm sm:text-base text-[var(--card-foreground)] truncate">{user.name}</div>
+                                <div className="text-xs sm:text-sm text-[var(--muted-foreground)] truncate">{user.email}</div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
+                            <div className="flex flex-col items-start sm:items-end gap-2 sm:gap-1">
                               <div className="flex flex-wrap gap-1">
                                 {user.roles && user.roles.length > 0 ? (
                                   user.roles.slice(0, 2).map((role) => (
-                                    <Badge key={role.id} variant="outline" className="text-xs">
+                                    <Badge key={role.id} variant="outline" className="text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border-[var(--border)]">
                                       {role.name}
                                     </Badge>
                                   ))
                                 ) : (
-                                  <span className="text-muted-foreground text-xs">No roles</span>
+                                  <span className="text-[var(--muted-foreground)] text-xs">No roles</span>
                                 )}
                                 {user.roles && user.roles.length > 2 && (
-                                  <Badge variant="outline" className="text-xs">
+                                  <Badge variant="outline" className="text-xs bg-[var(--secondary)] text-[var(--secondary-foreground)] border-[var(--border)]">
                                     +{user.roles.length - 2}
                                   </Badge>
                                 )}
                               </div>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-[var(--muted-foreground)]">
                                 {formatDate(user.created_at)}
                               </div>
                             </div>
@@ -605,59 +611,59 @@ export const SingleAssignPage: React.FC = () => {
         </TabsContent>
 
         {/* Roles Tab */}
-        <TabsContent value="roles">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select Role</CardTitle>
+        <TabsContent value="roles" className="space-y-4 sm:space-y-6">
+          <Card className="bg-[var(--card)] border-[var(--border)]">
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-3 sm:gap-4">
+                <CardTitle className="text-base sm:text-lg text-[var(--card-foreground)]">Select Role</CardTitle>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
                   <Input
                     placeholder="Search roles..."
                     value={roleSearch}
                     onChange={(e) => setRoleSearch(e.target.value)}
-                    className="pl-10 w-full sm:w-64"
+                    className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
                   />
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               {rolesError ? (
-                <div className="text-red-500 text-center py-4">
+                <div className="text-[#dc2626] dark:text-[#f87171] text-center py-4 text-sm sm:text-base">
                   Error loading roles: {rolesError}
                 </div>
               ) : rolesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading roles...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-[var(--primary)]" />
+                  <span className="ml-2 text-sm sm:text-base text-[var(--muted-foreground)]">Loading roles...</span>
                 </div>
               ) : (
                 <RadioGroup
                   value={assignmentData.selectedRole?.toString() || ''}
                   onValueChange={handleRoleSelect}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
                   {displayRoles.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-6 sm:py-8 text-[var(--muted-foreground)] text-sm sm:text-base">
                       {roleSearch ? 'No roles found matching your search' : 'No roles found'}
                     </div>
                   ) : (
                     displayRoles.map((role) => (
-                      <div key={role.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value={role.id.toString()} id={`role-${role.id}`} />
+                      <div key={role.id} className="flex items-center space-x-3 p-3 sm:p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--muted)]/50 transition-colors">
+                        <RadioGroupItem value={role.id.toString()} id={`role-${role.id}`} className="text-[var(--primary)] border-[var(--border)]" />
                         <Label htmlFor={`role-${role.id}`} className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-between">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                             <div className="flex items-center gap-3">
-                              <Shield className="h-5 w-5 text-primary" />
-                              <div>
-                                <div className="font-medium">{role.name}</div>
+                              <Shield className="h-5 w-5 text-[var(--primary)] flex-shrink-0" />
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm sm:text-base text-[var(--card-foreground)] truncate">{role.name}</div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <Badge variant="default">
+                            <div className="flex flex-col items-start sm:items-end gap-2 sm:gap-1">
+                              <Badge variant="default" className="bg-[var(--primary)] text-[var(--primary-foreground)] text-xs">
                                 Active
                               </Badge>
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-[var(--muted-foreground)]">
                                 {formatDate(role.created_at)}
                               </div>
                             </div>
@@ -673,83 +679,83 @@ export const SingleAssignPage: React.FC = () => {
         </TabsContent>
 
         {/* Stores Tab */}
-        <TabsContent value="stores">
-          <Card>
-            <CardHeader>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                <CardTitle>Select Store</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2">
+        <TabsContent value="stores" className="space-y-4 sm:space-y-6">
+          <Card className="bg-[var(--card)] border-[var(--border)]">
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-3 sm:gap-4">
+                <CardTitle className="text-base sm:text-lg text-[var(--card-foreground)]">Select Store</CardTitle>
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
                     <Input
                       placeholder="Search stores..."
                       value={storeSearch}
                       onChange={(e) => setStoreSearch(e.target.value)}
-                      className="pl-10 w-full sm:w-64"
+                      className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
                     />
                   </div>
                   <Select value={storeFilter} onValueChange={(value: any) => setStoreFilter(value)}>
-                    <SelectTrigger className="w-full sm:w-40">
-                      <Filter className="h-4 w-4 mr-2" />
+                    <SelectTrigger className="w-full sm:w-40 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] text-sm sm:text-base">
+                      <Filter className="h-4 w-4 mr-2 text-[var(--muted-foreground)]" />
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Stores</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectContent className="bg-[var(--popover)] border-[var(--border)]">
+                      <SelectItem value="all" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">All Stores</SelectItem>
+                      <SelectItem value="active" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">Active</SelectItem>
+                      <SelectItem value="inactive" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">Inactive</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               {storesError ? (
-                <div className="text-red-500 text-center py-4">
+                <div className="text-[#dc2626] dark:text-[#f87171] text-center py-4 text-sm sm:text-base">
                   Error loading stores: {storesError}
                 </div>
               ) : storesLoading ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <span className="ml-2">Loading stores...</span>
+                <div className="flex items-center justify-center py-6 sm:py-8">
+                  <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-[var(--primary)]" />
+                  <span className="ml-2 text-sm sm:text-base text-[var(--muted-foreground)]">Loading stores...</span>
                 </div>
               ) : (
                 <RadioGroup
                   value={assignmentData.selectedStore || ''}
                   onValueChange={handleStoreSelect}
-                  className="space-y-4"
+                  className="space-y-3 sm:space-y-4"
                 >
                   {displayStores.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
+                    <div className="text-center py-6 sm:py-8 text-[var(--muted-foreground)] text-sm sm:text-base">
                       {storeSearch ? 'No stores found matching your search' : 'No stores found'}
                     </div>
                   ) : (
                     displayStores.map((store) => (
-                      <div key={store.id} className="flex items-center space-x-3 p-4 border rounded-lg hover:bg-muted/50">
-                        <RadioGroupItem value={store.id} id={`store-${store.id}`} />
+                      <div key={store.id} className="flex items-center space-x-3 p-3 sm:p-4 border border-[var(--border)] rounded-lg hover:bg-[var(--muted)]/50 transition-colors">
+                        <RadioGroupItem value={store.id} id={`store-${store.id}`} className="text-[var(--primary)] border-[var(--border)]" />
                         <Label htmlFor={`store-${store.id}`} className="flex-1 cursor-pointer">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <Store className="h-5 w-5 text-primary" />
-                              <div>
-                                <div className="font-medium">{store.name}</div>
-                                <div className="text-sm text-muted-foreground font-mono">{store.id}</div>
+                          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-4">
+                            <div className="flex items-start gap-3">
+                              <Store className="h-5 w-5 text-[var(--primary)] flex-shrink-0 mt-0.5" />
+                              <div className="min-w-0 flex-1">
+                                <div className="font-medium text-sm sm:text-base text-[var(--card-foreground)] truncate">{store.name}</div>
+                                <div className="text-xs sm:text-sm text-[var(--muted-foreground)] font-mono truncate">{store.id}</div>
                                 {store.metadata.address && (
-                                  <div className="text-sm text-muted-foreground max-w-[300px] truncate">
+                                  <div className="text-xs sm:text-sm text-[var(--muted-foreground)] max-w-[250px] sm:max-w-[300px] truncate">
                                     {store.metadata.address}
                                   </div>
                                 )}
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2">
-                              <Badge variant={store.is_active ? 'default' : 'secondary'}>
+                            <div className="flex flex-col items-start lg:items-end gap-1 sm:gap-2">
+                              <Badge variant={store.is_active ? 'default' : 'secondary'} className={`text-xs ${store.is_active ? 'bg-[var(--primary)] text-[var(--primary-foreground)]' : 'bg-[var(--secondary)] text-[var(--secondary-foreground)]'}`}>
                                 {store.is_active ? 'Active' : 'Inactive'}
                               </Badge>
                               {store.metadata.phone && (
-                                <div className="text-xs text-muted-foreground">
+                                <div className="text-xs text-[var(--muted-foreground)]">
                                   {store.metadata.phone}
                                 </div>
                               )}
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-xs text-[var(--muted-foreground)]">
                                 {formatDate(store.created_at)}
                               </div>
                             </div>
