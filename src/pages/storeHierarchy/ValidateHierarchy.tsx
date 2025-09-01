@@ -46,7 +46,7 @@ const ValidateHierarchyPage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const handleBack = () => {
-    navigate(`/stores-hierarchy/${storeId}`);
+    navigate(`/stores-hierarchy/view/${storeId}`);
   };
 
   const handleRoleChange = (field: 'higher_role_id' | 'lower_role_id', value: string) => {
@@ -159,7 +159,7 @@ const ValidateHierarchyPage: React.FC = () => {
   };
 
   const handleCreateHierarchy = () => {
-    navigate(`/stores-hierarchy/${storeId}/create-hierarchy`, {
+    navigate(`/stores-hierarchy/create/${storeId}`, {
       state: {
         preselectedHigherRole: formData.higher_role_id,
         preselectedLowerRole: formData.lower_role_id
@@ -169,7 +169,7 @@ const ValidateHierarchyPage: React.FC = () => {
 
   const handleRemoveHierarchy = () => {
     // Navigate to delete confirmation page with the validated hierarchy data
-    navigate(`/stores-hierarchy/${storeId}/delete-confirmation`, {
+    navigate(`/stores-hierarchy/delete/${storeId}`, {
       state: {
         preselectedHigherRole: formData.higher_role_id,
         preselectedLowerRole: formData.lower_role_id,

@@ -31,7 +31,7 @@ export const StoresHierarchyPage: React.FC = () => {
   } = useStores(true);
 
   const handleViewHierarchy = (storeId: string) => {
-    navigate(`/stores-hierarchy/${storeId}`);
+    navigate(`/stores-hierarchy/view/${storeId}`);
   };
 
   const handleRefresh = () => {

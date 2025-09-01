@@ -60,11 +60,11 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
   };
 
   const handleViewUserAssignments = (userId: number) => {
-    navigate(`/user-role-store-assignment/users/${userId}`);
+    navigate(`/user-role-store-assignment/view/user/${userId}`);
   };
 
   const handleViewStoreAssignments = (storeId: string) => {
-    navigate(`/user-role-store-assignment/stores/${storeId}`);
+    navigate(`/user-role-store-assignment/view/store/${storeId}`);
   };
 
   const formatDate = (dateString: string) => {

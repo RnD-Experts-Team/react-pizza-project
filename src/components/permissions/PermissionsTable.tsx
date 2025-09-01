@@ -32,7 +32,7 @@ export const PermissionsTable: React.FC = () => {
   const { permissions, loading, error, refetch } = usePermissions();
 
   const handleCreatePermission = () => {
-    navigate('/user-management/create-permission');
+    navigate('/user-management/create/permission');
   };
 
   if (error) {

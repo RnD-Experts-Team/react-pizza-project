@@ -111,9 +111,9 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         loading={loading}
         onBack={handleBack}
         onRefresh={() => refetch(storeId!)}
-        onCreateHierarchy={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}
-        onDeleteHierarchy={() => navigate(`/stores-hierarchy/${storeId}/delete-confirmation`)}
-        onValidateHierarchy={() => navigate(`/stores-hierarchy/${storeId}/validate`)}
+        onCreateHierarchy={() => navigate(`/stores-hierarchy/create/${storeId}`)}
+        onDeleteHierarchy={() => navigate(`/stores-hierarchy/delete/${storeId}`)}
+        onValidateHierarchy={() => navigate(`/stores-hierarchy/validate/${storeId}`)}
       />
 
       {/* Error State */}
@@ -172,7 +172,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
                 </ScrollArea>
               ) : (
                 <EmptyHierarchyState
-                  onCreateHierarchy={() => navigate(`/stores-hierarchy/${storeId}/create-hierarchy`)}
+                  onCreateHierarchy={() => navigate(`/stores-hierarchy/create/${storeId}`)}
                 />
               )}
             </CardContent>

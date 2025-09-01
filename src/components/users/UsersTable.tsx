@@ -48,11 +48,11 @@ export const UsersTable: React.FC = () => {
   const [userToDelete, setUserToDelete] = useState<{ id: number; name: string } | null>(null);
 
   const handleView = (userId: number) => {
-    navigate(`/user-management/user-detail/${userId}`);
+    navigate(`/user-management/view/user/${userId}`);
   };
 
   const handleUpdate = (userId: number) => {
-    navigate(`/user-management/edit-user/${userId}`);
+    navigate(`/user-management/edit/user/${userId}`);
   };
 
   const handleDeleteClick = (user: { id: number; name: string }) => {
@@ -75,7 +75,7 @@ export const UsersTable: React.FC = () => {
   };
 
   const handleCreate = () => {
-    navigate('/user-management/create-user');
+    navigate('/user-management/create/user');
   };
 
   if (error) {

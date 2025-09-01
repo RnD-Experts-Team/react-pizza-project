@@ -28,8 +28,6 @@ import Dashboard from './pages/Dashboard';
 import TermsOfService from './pages/settings-and-abouts/TermsOfService';
 import PrivacyPolicy from './pages/settings-and-abouts/PrivacyPolicy';
 import Settings from './pages/settings-and-abouts/Settings';
-import AuthRulesManagement from './pages/authorizationRules/AuthRulesManagement';
-import CreateAuthRule from './pages/authorizationRules/CreateAuthRule';
 
 // User Management Pages
 import UserManagement from './pages/users/UserManagement';
@@ -40,17 +38,18 @@ import CreateRole from './pages/roles/CreateRole';
 import AssignPermissionsPage from './pages/roles/AssignPermissions';
 import CreatePermission from './pages/permissions/CreatePermission';
 
+//Service Client Management Pages
+import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
+
+//Auth Roles
+import AuthRulesManagement from './pages/authorizationRules/AuthRulesManagement';
+import CreateAuthRule from './pages/authorizationRules/CreateAuthRule';
+
 // Stores Management Routes
 import StoresListPage from './pages/stores/StoresListPage';
 import CreateStorePage from './pages/stores/CreateStorePage';
 import EditStorePage from './pages/stores/EditStorePage';
 import StoreDetailsPage from './pages/stores/StoreDetailsPage';
-import StoresHierarchyPage from './pages/storeHierarchy/StoresHierarchyPage';
-import StoreHierarchyDetailPage from './pages/storeHierarchy/StoreHierarchyDetailPage';
-import CreateHierarchyPage from './pages/storeHierarchy/CreateHierarchy';
-import ValidateHierarchyPage from './pages/storeHierarchy/ValidateHierarchy';
-import DeleteHierarchyConfirmationPage from './pages/storeHierarchy/DeleteHierarchyConfirmationPage'; //Service Client Management Pages
-import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
 
 // User Role Store Assignment Pages
 import UserRoleStoreAssignmentPage from './pages/userRolesStoresAssignment/UserRoleStoreAssignmentPage';
@@ -59,13 +58,20 @@ import StoreAssignmentsPage from './pages/userRolesStoresAssignment/StoreAssignm
 import AssignPage from './pages/userRolesStoresAssignment/AssignPage';
 import SingleAssignPage from './pages/userRolesStoresAssignment/SingleAssignPage';
 
+//Store Hierarchy management pages
+import StoresHierarchyPage from './pages/storeHierarchy/StoresHierarchyPage';
+import StoreHierarchyDetailPage from './pages/storeHierarchy/StoreHierarchyDetailPage';
+import CreateHierarchyPage from './pages/storeHierarchy/CreateHierarchy';
+import ValidateHierarchyPage from './pages/storeHierarchy/ValidateHierarchy';
+import DeleteHierarchyConfirmationPage from './pages/storeHierarchy/DeleteHierarchyConfirmationPage';
+
 function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
       {/* <AuthProvider> */}
-        <AuthInitializer>
-          <Router>
-            <div className="min-h-screen bg-background text-foreground transition-colors">
+      <AuthInitializer>
+        <Router>
+          <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>
               {/* Public Routes (Auth Pages) */}
               <Route
@@ -160,28 +166,8 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/auth-rules"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <AuthRulesManagement />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/auth-rules/create"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <CreateAuthRule />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
 
-              {/* User Management Routes */}
+               {/* User Management Routes */}
               <Route
                 path="/user-management"
                 element={
@@ -193,7 +179,7 @@ function App() {
                 }
               />
               <Route
-                path="/user-management/create-user"
+                path="/user-management/create/user"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -203,7 +189,7 @@ function App() {
                 }
               />
               <Route
-                path="/user-management/edit-user/:id"
+                path="/user-management/edit/user/:id"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -213,7 +199,7 @@ function App() {
                 }
               />
               <Route
-                path="/user-management/user-detail/:id"
+                path="/user-management/view/user/:id"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -223,7 +209,7 @@ function App() {
                 }
               />
               <Route
-                path="/user-management/create-role"
+                path="/user-management/create/role"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -233,7 +219,7 @@ function App() {
                 }
               />
               <Route
-                path="/user-management/assign-permissions"
+                path="/user-management/roles/assign-permissions"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -244,7 +230,7 @@ function App() {
               />
 
               <Route
-                path="/user-management/create-permission"
+                path="/user-management/create/permission"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -266,53 +252,23 @@ function App() {
                 }
               />
 
-              {/* User Role Store Assignment Routes */}
+              {/* Auth Rules Management Routes */}
               <Route
-                path="/user-role-store-assignment"
+                path="/auth-rules"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <UserRoleStoreAssignmentPage />
+                      <AuthRulesManagement />
                     </MainLayout>
                   </ProtectedRoute>
                 }
               />
               <Route
-                path="/user-role-store-assignment/bulk"
+                path="/auth-rules/create"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
-                      <AssignPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/user-role-store-assignment/assign"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <SingleAssignPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/user-role-store-assignment/users/:userId"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <UserAssignmentsPage />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/user-role-store-assignment/stores/:storeId"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <StoreAssignmentsPage />
+                      <CreateAuthRule />
                     </MainLayout>
                   </ProtectedRoute>
                 }
@@ -359,6 +315,60 @@ function App() {
                   </ProtectedRoute>
                 }
               />
+
+              {/* User Role Store Assignment Routes */}
+              <Route
+                path="/user-role-store-assignment"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserRoleStoreAssignmentPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-store-assignment/bulk"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <AssignPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-store-assignment/assign"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <SingleAssignPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-store-assignment/view/user/:userId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <UserAssignmentsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/user-role-store-assignment/view/store/:storeId"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <StoreAssignmentsPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Stores Hierarchy Management Routes */}
               <Route
                 path="/stores-hierarchy"
                 element={
@@ -370,7 +380,7 @@ function App() {
                 }
               />
               <Route
-                path="/stores-hierarchy/:storeId"
+                path="/stores-hierarchy/view/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -380,7 +390,7 @@ function App() {
                 }
               />
               <Route
-                path="/stores-hierarchy/:storeId/create-hierarchy"
+                path="/stores-hierarchy/create/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -390,7 +400,7 @@ function App() {
                 }
               />
               <Route
-                path="/stores-hierarchy/:storeId/delete-confirmation"
+                path="/stores-hierarchy/delete/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -400,7 +410,7 @@ function App() {
                 }
               />
               <Route
-                path="/stores-hierarchy/:storeId/validate"
+                path="/stores-hierarchy/validate/:storeId"
                 element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -416,9 +426,9 @@ function App() {
               {/* Catch all route */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
-            </div>
-          </Router>
-        </AuthInitializer>
+          </div>
+        </Router>
+      </AuthInitializer>
       {/* </AuthProvider> */}
     </ThemeProvider>
   );

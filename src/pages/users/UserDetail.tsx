@@ -26,7 +26,7 @@ const ViewUserPage: React.FC = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/user-management/edit-user/${userId}`);
+    navigate(`/user-management/edit/user${userId}`);
   };
 
   if (loading) {

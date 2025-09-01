@@ -104,7 +104,7 @@ export const DeleteHierarchyConfirmationPage: React.FC = () => {
   };
 
   const handleBack = () => {
-    navigate(`/stores-hierarchy/${storeId}`);
+    navigate(`/stores-hierarchy/view/${storeId}`);
   };
 
   // Auto-select hierarchy if coming from validate page

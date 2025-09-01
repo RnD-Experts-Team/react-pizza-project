@@ -45,7 +45,7 @@ const CreateHierarchyPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleBack = () => {
-    navigate(`/stores-hierarchy/${storeId}`);
+    navigate(`/stores-hierarchy/view/${storeId}`);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -115,7 +115,7 @@ const CreateHierarchyPage: React.FC = () => {
       await createHierarchy(hierarchyRequest);
       
       // Success - navigate back to store hierarchy detail page
-      navigate(`/stores-hierarchy/${storeId}`);
+      navigate(`/stores-hierarchy/view/${storeId}`);
     } catch (err) {
       console.error('Failed to create hierarchy:', err);
       setValidationErrors({ general: 'Failed to create hierarchy. Please try again.' });

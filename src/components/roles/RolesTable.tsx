@@ -32,11 +32,11 @@ export const RolesTable: React.FC = () => {
   const { roles, loading, error, refetch } = useRoles();
 
   const handleAssignPermissions = () => {
-    navigate('/user-management/assign-permissions');
+    navigate('/user-management/roles/assign-permissions');
   };
 
   const handleCreate = () => {
-    navigate('/user-management/create-role');
+    navigate('/user-management/create/role');
   };
 
   if (error) {

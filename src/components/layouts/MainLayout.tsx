@@ -70,6 +70,18 @@ const stores = [
   { id: 5, name: 'University Campus', address: '100 College St' },
 ];
 
+// Helper function to check if a menu item should be active
+function isMenuItemActive(currentPath: string, menuUrl: string): boolean {
+  // Exact match for dashboard and settings
+  if (menuUrl === '/dashboard' || menuUrl === '/settings') {
+    return currentPath === menuUrl;
+  }
+  
+  // For other routes, check if current path starts with menu URL
+  // This enables hierarchical navigation (e.g., /stores/create activates /stores)
+  return currentPath === menuUrl || currentPath.startsWith(menuUrl + '/');
+}
+
 // App Sidebar Component
 function AppSidebar() {
   const location = useLocation();
@@ -204,7 +216,7 @@ function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    isActive={location.pathname === item.url}
+                    isActive={isMenuItemActive(location.pathname, item.url)}
                     className="mx-1 sm:mx-2 px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent data-[active=true]:bg-sidebar-accent"
                   >
                     <Link
@@ -227,43 +239,118 @@ function AppSidebar() {
 
 // Helper function to generate breadcrumbs
 function generateBreadcrumbs(pathname: string) {
-  const pathSegments = pathname.split('/').filter(Boolean);
+  // Define all valid routes from App.tsx
+  const validRoutes = [
+    '/dashboard',
+    '/settings',
+    '/terms',
+    '/privacy',
+    '/user-management',
+    '/user-management/create/user',
+    '/user-management/edit/user/:id',
+    '/user-management/view/user/:id',
+    '/user-management/create/role',
+    '/user-management/roles/assign-permissions',
+    '/user-management/create/permission',
+    '/service-client-management',
+    '/auth-rules',
+    '/auth-rules/create',
+    '/stores',
+    '/stores/create',
+    '/stores/edit/:storeId',
+    '/stores/view/:id',
+    '/user-role-store-assignment',
+    '/user-role-store-assignment/bulk',
+    '/user-role-store-assignment/assign',
+    '/user-role-store-assignment/view/user/:userId',
+    '/user-role-store-assignment/view/store/:storeId',
+    '/stores-hierarchy',
+    '/stores-hierarchy/view/:storeId',
+    '/stores-hierarchy/create/:storeId',
+    '/stores-hierarchy/delete/:storeId',
+    '/stores-hierarchy/validate/:storeId'
+  ];
 
+  // Function to check if a path matches a route pattern
+  const matchesRoute = (path: string, pattern: string): boolean => {
+    const pathParts = path.split('/').filter(Boolean);
+    const patternParts = pattern.split('/').filter(Boolean);
+    
+    if (pathParts.length !== patternParts.length) return false;
+    
+    return patternParts.every((part, index) => {
+      return part.startsWith(':') || part === pathParts[index];
+    });
+  };
+
+  // Function to format segment labels
+  const formatLabel = (segment: string): string => {
+    // Handle special cases for better readability
+    const labelMap: { [key: string]: string } = {
+      'user-management': 'User Management',
+      'service-client-management': 'Service Client Management',
+      'user-role-store-assignment': 'User Role Store Assignment',
+      'stores-hierarchy': 'Stores Hierarchy',
+      'auth-rules': 'Authorization Rules',
+      'create': 'Create',
+      'edit': 'Edit',
+      'view': 'View',
+      'user': 'User',
+      'role': 'Role',
+      'permission': 'Permission',
+      'store': 'Store',
+      'stores': 'Stores',
+      'bulk': 'Bulk Assignment',
+      'assign': 'Assign',
+      'assign-permissions': 'Assign Permissions',
+      'roles': 'Roles',
+      'delete': 'Delete',
+      'validate': 'Validate',
+      'terms': 'Terms of Service',
+      'privacy': 'Privacy Policy',
+      'settings': 'Settings',
+      'dashboard': 'Dashboard'
+    };
+
+    // If it's a known label, return the formatted version
+    if (labelMap[segment]) {
+      return labelMap[segment];
+    }
+
+    // If it looks like an ID (all digits), return as is
+    if (/^\d+$/.test(segment)) {
+      return segment;
+    }
+
+    // Otherwise, capitalize first letter
+    return segment.charAt(0).toUpperCase() + segment.slice(1);
+  };
+
+  const pathSegments = pathname.split('/').filter(Boolean);
   const breadcrumbs = [
     { label: 'Home', href: '/dashboard', isActive: pathname === '/dashboard' },
   ];
 
-  if (
-    pathSegments.length > 1 ||
-    (pathSegments.length === 1 && pathSegments[0] !== 'dashboard')
-  ) {
-    pathSegments.forEach((segment, index) => {
-      if (segment === 'dashboard') return;
+  // Build breadcrumbs by checking each progressive path segment
+  for (let i = 0; i < pathSegments.length; i++) {
+    const currentPath = '/' + pathSegments.slice(0, i + 1).join('/');
+    
+    // Check if this path or a pattern matches any valid route
+    const isValidPath = validRoutes.some(route => 
+      currentPath === route || matchesRoute(currentPath, route)
+    );
 
-      const href = '/' + pathSegments.slice(0, index + 1).join('/');
-      let label = segment.charAt(0).toUpperCase() + segment.slice(1);
-
-      // Handle special cases for better readability
-      if (segment === 'user-management') {
-        label = 'User Management';
-      } else if (segment === 'service-client-management') {
-        label = 'Service Client Management';
-      } else if (segment === 'create-user') {
-        label = 'Create User';
-      } else if (segment === 'edit-user') {
-        label = 'Edit User';
-      } else if (segment === 'create-role') {
-        label = 'Create Role';
-      } else if (segment === 'create-permission') {
-        label = 'Create Permission';
-      } else if (segment === 'auth-rules') {
-        label = 'Authorization Rules';
-      }
-
-      const isActive = index === pathSegments.length - 1;
-
-      breadcrumbs.push({ label, href, isActive });
-    });
+    if (isValidPath) {
+      const segment = pathSegments[i];
+      const label = formatLabel(segment);
+      const isActive = i === pathSegments.length - 1;
+      
+      breadcrumbs.push({ 
+        label, 
+        href: currentPath, 
+        isActive 
+      });
+    }
   }
 
   return breadcrumbs;
