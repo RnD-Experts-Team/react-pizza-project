@@ -373,12 +373,22 @@ export const useAuthRules = (options: {
   const updateFiltersAction = useCallback((newFilters: Partial<typeof filters>) => {
     dispatch(updateFilters(newFilters));
     
-    // Auto-fetch with new filters after debounce
+    // If page change, fetch immediately (no debounce)
+    if (newFilters.currentPage !== undefined) {
+      dispatch(fetchAuthRules({
+        service: newFilters.service ?? filters.service,
+        search: newFilters.search ?? filters.search,
+        page: newFilters.currentPage,
+      }));
+      return;
+    }
+    
+    // Auto-fetch with new filters after debounce for search/service
     if (newFilters.search !== undefined || newFilters.service !== undefined) {
       const timer = setTimeout(() => {
         dispatch(fetchAuthRules({
-          service: newFilters.service || filters.service,
-          search: newFilters.search || filters.search,
+          service: newFilters.service ?? filters.service,
+          search: newFilters.search ?? filters.search,
           page: 1, // Reset to first page on new search/filter
         }));
       }, debounceMs);
