@@ -1,4 +1,4 @@
-// src/features/serviceClients/components/ServiceClientsPage.tsx
+// src/pages/serviceClients/ServiceClientManagement.tsx
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,12 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Plus, Server, Copy, Eye, EyeOff } from 'lucide-react';
+import { Server, Copy, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useServiceClients } from '../../features/serviceClients/hooks/useServiceClients';
-import { CreateServiceClientDialog } from '../../components/serviceClients/CreateServiceClientDialog';
 import { RotateTokenDialog } from '../../components/serviceClients/RotateTokenDialog';
 import { ServiceClientsTable } from '../../components/serviceClients/ServiceClientsTable';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import type { ServiceClient } from '../../features/serviceClients/types';
 
 const ServiceClientsPage: React.FC = () => {
@@ -19,7 +19,6 @@ const ServiceClientsPage: React.FC = () => {
   const { fetchClients, pagination } = useServiceClients();
   
   // Dialog states
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
   const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<ServiceClient | null>(null);
@@ -73,22 +72,10 @@ const ServiceClientsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 lg:p-6 max-w-7xl">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 sm:mb-6">
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Service Client Management</h1>
-          <p className="text-muted-foreground mt-1 sm:mt-2 text-sm sm:text-base">
-            Manage API service clients and their authentication tokens
-          </p>
-        </div>
-        <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Create Service Client</span>
-          <span className="sm:hidden">Create Client</span>
-        </Button>
-      </div>
-
+    <ManageLayout
+      title="Service Client Management"
+      subtitle="Manage API service clients and their authentication tokens"
+    >
       {/* Main Content */}
       <Card>
         <CardHeader>
@@ -101,7 +88,10 @@ const ServiceClientsPage: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <ServiceClientsTable onRotateToken={handleRotateToken} />
+          <ServiceClientsTable 
+            onRotateToken={handleRotateToken}
+            onCreateSuccess={handleCreateSuccess}
+          />
           
           {/* Pagination */}
           {pagination && pagination.total > perPage && (
@@ -131,13 +121,6 @@ const ServiceClientsPage: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      {/* Create Dialog */}
-      <CreateServiceClientDialog
-        open={createDialogOpen}
-        onOpenChange={setCreateDialogOpen}
-        onSuccess={handleCreateSuccess}
-      />
 
       {/* Rotate Token Dialog */}
       <RotateTokenDialog
@@ -200,7 +183,7 @@ const ServiceClientsPage: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </ManageLayout>
   );
 };
 

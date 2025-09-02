@@ -1,21 +1,25 @@
-// src/features/serviceClients/components/ServiceClientsTable.tsx
+// src/components/serviceClients/ServiceClientsTable.tsx
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { RotateCcw, Power } from 'lucide-react';
+import { RotateCcw, Power, Plus } from 'lucide-react';
 import { useServiceClients } from '../../features/serviceClients/hooks/useServiceClients';
+import { CreateServiceClientDialog } from './CreateServiceClientDialog';
 import type { ServiceClient } from '../../features/serviceClients/types';
 
 interface ServiceClientsTableProps {
   onRotateToken: (client: ServiceClient) => void;
+  onCreateSuccess: (token: string) => void;
 }
 
 export const ServiceClientsTable: React.FC<ServiceClientsTableProps> = ({
   onRotateToken,
+  onCreateSuccess,
 }) => {
   const { clients, loading, toggleStatus } = useServiceClients();
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Never expires';
@@ -29,6 +33,11 @@ export const ServiceClientsTable: React.FC<ServiceClientsTableProps> = ({
 
   const handleToggleStatus = async (client: ServiceClient) => {
     await toggleStatus(client.id);
+  };
+
+  const handleCreateSuccess = (token: string) => {
+    setCreateDialogOpen(false);
+    onCreateSuccess(token);
   };
 
   if (loading.fetching) {
@@ -48,8 +57,18 @@ export const ServiceClientsTable: React.FC<ServiceClientsTableProps> = ({
   }
 
   return (
-    <div className="rounded-md border overflow-hidden">
-      <div className="overflow-x-auto">
+    <>
+      {/* Create Button */}
+      <div className="flex justify-end mb-4">
+        <Button onClick={() => setCreateDialogOpen(true)} className="w-full sm:w-auto">
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Create Service Client</span>
+          <span className="sm:hidden">Create Client</span>
+        </Button>
+      </div>
+
+      <div className="rounded-md border overflow-hidden">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -116,7 +135,15 @@ export const ServiceClientsTable: React.FC<ServiceClientsTableProps> = ({
             ))}
           </TableBody>
         </Table>
+        </div>
       </div>
-    </div>
+
+      {/* Create Dialog */}
+      <CreateServiceClientDialog
+        open={createDialogOpen}
+        onOpenChange={setCreateDialogOpen}
+        onSuccess={handleCreateSuccess}
+      />
+    </>
   );
 };

@@ -11,20 +11,17 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, AlertCircle, Shield } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useAuthRules } from '../../features/authorizationRules/hooks/useAuthRules';
 import { CreateAuthRuleForm } from '../../components/authorizationRules/CreateAuthRuleForm';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 const CreateAuthRulePage: React.FC = () => {
   const navigate = useNavigate();
   const { error, helpers } = useAuthRules({ autoFetch: false, showToasts: true });
 
-  // Handle navigation back to rules list
-  const handleBack = () => {
-    navigate('/auth-rules');
-  };
+
 
   // Handle successful rule creation
   const handleCreateSuccess = () => {
@@ -38,39 +35,14 @@ const CreateAuthRulePage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
-      <div className="mx-auto space-y-4 sm:space-y-5 lg:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-2 self-start sm:self-auto">
-            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
-          <div className="flex items-start sm:items-center gap-3 w-full">
-            <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg flex-shrink-0">
-              <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight break-words">
-                Create Authorization Rule
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">
-                Define a new access control rule for your application
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Breadcrumb */}
-        <nav className="flex items-center space-x-1.5 sm:space-x-2 text-xs sm:text-sm text-muted-foreground overflow-x-auto">
-          <button 
-            onClick={handleBack}
-            className="hover:text-foreground transition-colors whitespace-nowrap"
-          >
-            Authorization Rules
-          </button>
-          <span className="flex-shrink-0">/</span>
-          <span className="text-foreground whitespace-nowrap">Create New Rule</span>
-        </nav>
+    <ManageLayout
+      title="Create Authorization Rule"
+      subtitle="Define a new access control rule for your application"
+      backButton={{
+        show: true,
+      }}
+    >
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
 
         {/* Global Error Alert */}
         {error && helpers.isNetworkError() && (
@@ -146,7 +118,7 @@ const CreateAuthRulePage: React.FC = () => {
           </ul>
         </div>
       </div>
-    </div>
+    </ManageLayout>
   );
 };
 

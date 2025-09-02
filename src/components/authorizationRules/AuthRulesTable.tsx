@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -19,11 +20,13 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Loader2, Plus } from 'lucide-react';
 import { useAuthRules } from '../../features/authorizationRules/hooks/useAuthRules';
 import { AuthRuleStatusBadge } from './AuthRulesStatusBadge';
 
 export const AuthRulesTable: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     rules, 
     loading, 
@@ -32,6 +35,10 @@ export const AuthRulesTable: React.FC = () => {
 
   const handleToggleStatus = async (ruleId: number) => {
     await actions.toggleRuleStatus(ruleId);
+  };
+
+  const handleCreateRule = () => {
+    navigate('/auth-rules/create');
   };
 
   if (loading.fetching) {
@@ -73,6 +80,34 @@ export const AuthRulesTable: React.FC = () => {
         backgroundColor: 'var(--card)'
       }}
     >
+      {/* Table Header with Create Button */}
+      <div 
+        className="flex items-center justify-between p-4 border-b"
+        style={{
+          backgroundColor: 'var(--muted)',
+          borderColor: 'var(--border)'
+        }}
+      >
+        <h3 
+          className="text-lg font-semibold"
+          style={{ color: 'var(--foreground)' }}
+        >
+          Rules List
+        </h3>
+        <Button 
+          onClick={handleCreateRule}
+          className="flex items-center justify-center gap-2 text-sm"
+          style={{
+            backgroundColor: 'var(--primary)',
+            color: 'var(--primary-foreground)',
+            boxShadow: 'var(--shadow-sm)'
+          }}
+        >
+          <Plus className="h-4 w-4" />
+          <span className="hidden xs:inline">Create Rule</span>
+          <span className="xs:hidden">Create</span>
+        </Button>
+      </div>
       <div className="overflow-x-auto">
         <Table className="min-w-full">
           <TableHeader 
