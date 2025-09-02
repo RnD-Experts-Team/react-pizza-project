@@ -2,11 +2,12 @@
  * Create User Page - Refactored with smaller components
  * 
  * When a role is checked, all its permissions are automatically checked and locked
- * Fully responsive design with CSS variables for light/dark mode compatibility
+ * Fully responsive design with ManageLayout for consistent header and navigation
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import { useCreateUser } from '../../features/users/hooks/useUsers';
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { usePermissions } from '../../features/permissions/hooks/usePermissions';
@@ -14,7 +15,6 @@ import type { UserFormData } from '../../features/users/types';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import {
-  CreateUserHeader,
   BasicInformation,
   RoleSelection,
   PermissionSelection,
@@ -45,9 +45,7 @@ const CreateUserPage: React.FC = () => {
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBack = () => {
-    navigate('/user-management');
-  };
+
 
   // Calculate all permissions that should be checked (from roles + manual)
   const allCheckedPermissions = useMemo(() => {
@@ -186,21 +184,24 @@ const CreateUserPage: React.FC = () => {
   }, [formData]);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <CreateUserHeader onBack={handleBack} />
+    <ManageLayout
+      title="Create New User"
+      subtitle="Add a new user to the system with roles and permissions"
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Error Alert */}
+      {error && (
+        <Alert className="mb-6" style={{ borderColor: 'var(--destructive)', backgroundColor: 'var(--destructive/10)' }}>
+          <AlertCircle className="h-4 w-4" style={{ color: 'var(--destructive)' }} />
+          <AlertDescription style={{ color: 'var(--destructive)' }}>
+            {error}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Error Alert */}
-        {error && (
-          <Alert className="mb-6" style={{ borderColor: 'var(--destructive)', backgroundColor: 'var(--destructive/10)' }}>
-            <AlertCircle className="h-4 w-4" style={{ color: 'var(--destructive)' }} />
-            <AlertDescription style={{ color: 'var(--destructive)' }}>
-              {error}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8 max-w-full  ">
           <BasicInformation
             formData={formData}
             validationErrors={validationErrors}
@@ -228,9 +229,8 @@ const CreateUserPage: React.FC = () => {
             loading={rolesLoading || permissionsLoading}
             onCancel={() => navigate('/user-management')}
           />
-        </form>
-      </div>
-    </div>
+      </form>
+    </ManageLayout>
   );
 };
 

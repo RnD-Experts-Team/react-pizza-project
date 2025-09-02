@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import LoadingState from '../../components/users/editUser/LoadingState';
 import ErrorState from '../../components/users/editUser/ErrorState';
-import PageHeader from '../../components/users/editUser/PageHeader';
+import ManageLayout from '../../components/layouts/ManageLayout';
 import BasicInformationSection from '../../components/users/editUser/BasicInformationSection';
 import PasswordSection from '../../components/users/editUser/PasswordSection';
 import RolesSection from '../../components/users/editUser/RolesSection';
@@ -256,71 +256,74 @@ const EditUserPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 md:py-8 lg:py-10 xl:py-12">
-      <div className="max-w-4xl mx-auto space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8">
-        <PageHeader userName={user.name} onBack={handleBack} />
+    <ManageLayout
+      title="Edit User"
+      subtitle={user?.name ? `Update ${user.name}'s information` : 'Update user information'}
+      backButton={{
+        show: true,
+      }}
+    
+    >
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">{error}</AlertDescription>
+        </Alert>
+      )}
 
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive" className="border-destructive bg-destructive/10">
-            <AlertCircle className="h-4 w-4 text-destructive" />
-            <AlertDescription className="text-destructive">{error}</AlertDescription>
-          </Alert>
-        )}
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
+        <BasicInformationSection
+          formData={formData}
+          validationErrors={validationErrors}
+          onInputChange={handleInputChange}
+        />
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
-          <BasicInformationSection
-            formData={formData}
-            validationErrors={validationErrors}
-            onInputChange={handleInputChange}
-          />
+        <PasswordSection
+          formData={formData}
+          includePassword={includePassword}
+          showPassword={showPassword}
+          showConfirmPassword={showConfirmPassword}
+          validationErrors={validationErrors}
+          onInputChange={handleInputChange}
+          onIncludePasswordChange={(checked) => {
+            setIncludePassword(checked as boolean);
+            if (!checked) {
+              setFormData(prev => ({
+                ...prev,
+                password: '',
+                password_confirmation: '',
+              }));
+            }
+          }}
+          onShowPasswordToggle={() => setShowPassword(!showPassword)}
+          onShowConfirmPasswordToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+        />
 
-          <PasswordSection
-            formData={formData}
-            includePassword={includePassword}
-            showPassword={showPassword}
-            showConfirmPassword={showConfirmPassword}
-            validationErrors={validationErrors}
-            onInputChange={handleInputChange}
-            onIncludePasswordChange={(checked) => {
-              setIncludePassword(checked as boolean);
-              if (!checked) {
-                setFormData(prev => ({
-                  ...prev,
-                  password: '',
-                  password_confirmation: '',
-                }));
-              }
-            }}
-            onShowPasswordToggle={() => setShowPassword(!showPassword)}
-            onShowConfirmPasswordToggle={() => setShowConfirmPassword(!showConfirmPassword)}
-          />
+        <RolesSection
+          roles={roles}
+          rolesLoading={rolesLoading}
+          checkedRoles={checkedRoles}
+          validationErrors={validationErrors}
+          onRoleChange={handleRoleChange}
+        />
 
-          <RolesSection
-            roles={roles}
-            rolesLoading={rolesLoading}
-            checkedRoles={checkedRoles}
-            validationErrors={validationErrors}
-            onRoleChange={handleRoleChange}
-          />
+        <PermissionsSection
+          permissions={permissions}
+          permissionsLoading={permissionsLoading}
+          allCheckedPermissions={allCheckedPermissions}
+          validationErrors={validationErrors}
+          onPermissionChange={handlePermissionChange}
+          isPermissionLocked={isPermissionLocked}
+        />
 
-          <PermissionsSection
-            permissions={permissions}
-            permissionsLoading={permissionsLoading}
-            allCheckedPermissions={allCheckedPermissions}
-            validationErrors={validationErrors}
-            onPermissionChange={handlePermissionChange}
-            isPermissionLocked={isPermissionLocked}
-          />
-
-          <ActionButtons
-            isSubmitting={isSubmitting}
-            onCancel={handleBack}
-          />
-        </form>
-      </div>
-    </div>
+        <ActionButtons
+          isSubmitting={isSubmitting}
+          onCancel={handleBack}
+        />
+      </form>
+    </ManageLayout>
   );
 };
 

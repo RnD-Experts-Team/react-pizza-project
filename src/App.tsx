@@ -58,12 +58,15 @@ import StoreAssignmentsPage from './pages/userRolesStoresAssignment/StoreAssignm
 import AssignPage from './pages/userRolesStoresAssignment/AssignPage';
 import SingleAssignPage from './pages/userRolesStoresAssignment/SingleAssignPage';
 
-//Store Hierarchy management pages
+// Stores Hierarchy Management Routes
 import StoresHierarchyPage from './pages/storeHierarchy/StoresHierarchyPage';
 import StoreHierarchyDetailPage from './pages/storeHierarchy/StoreHierarchyDetailPage';
 import CreateHierarchyPage from './pages/storeHierarchy/CreateHierarchy';
 import ValidateHierarchyPage from './pages/storeHierarchy/ValidateHierarchy';
 import DeleteHierarchyConfirmationPage from './pages/storeHierarchy/DeleteHierarchyConfirmationPage';
+
+// Example Pages
+import ManageLayoutExample from './pages/examples/ManageLayoutExample';
 
 function App() {
   return (
@@ -415,6 +418,18 @@ function App() {
                   <ProtectedRoute>
                     <MainLayout>
                       <ValidateHierarchyPage />
+                    </MainLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Example Pages */}
+              <Route
+                path="/examples/manage-layout"
+                element={
+                  <ProtectedRoute>
+                    <MainLayout>
+                      <ManageLayoutExample />
                     </MainLayout>
                   </ProtectedRoute>
                 }
