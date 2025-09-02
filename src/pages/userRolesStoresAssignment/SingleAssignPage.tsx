@@ -6,17 +6,27 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { useStores } from '../../features/stores/hooks/useStores';
 import { useAssignmentOperations } from '../../features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
 import type { AssignUserRoleRequest } from '../../features/userRolesStoresAssignment/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
-import { Users, Shield, Store } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog';
+import { Users, Shield, Store, Loader2, X, UserCheck } from 'lucide-react';
 
-// Import extracted components
-import { PageHeader } from '../../components/userRolesStoresAssignment/singleAssignPage/PageHeader';
+// Import layout and components
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import { ProgressIndicator } from '../../components/userRolesStoresAssignment/singleAssignPage/ProgressIndicator';
 import { AssignmentResult } from '../../components/userRolesStoresAssignment/singleAssignPage/AssignmentResult';
 import { SelectionSummary } from '../../components/userRolesStoresAssignment/singleAssignPage/SelectionSummary';
@@ -38,7 +48,6 @@ interface AssignmentStep {
 }
 
 export const SingleAssignPage: React.FC = () => {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   
   // Get pre-selected values from URL params
@@ -258,34 +267,70 @@ export const SingleAssignPage: React.FC = () => {
       .slice(0, 2);
   };
 
-  const handleGoBack = () => {
-    navigate('/user-role-store-assignment');
-  };
-
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
-      <PageHeader
-          onGoBack={handleGoBack}
-          onClearSelection={handleClearSelection}
-          onConfirmAssignment={handleAssignment}
-          canAssign={canAssign}
-          isAssigning={isAssigning}
-          showConfirmDialog={showConfirmDialog}
-          setShowConfirmDialog={setShowConfirmDialog}
-        />
-
-      <div className="flex flex-col space-y-4 sm:space-y-6">
-
-        <ProgressIndicator
-          assignmentSteps={assignmentSteps}
-          completedSteps={completedSteps}
-          progressPercentage={progressPercentage}
-        />
-
-        {assignmentResult && (
-          <AssignmentResult result={assignmentResult} />
-        )}
+    <ManageLayout
+      title="Single Role Assignment"
+      subtitle="Assign a single role to a user for a specific store"
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-6">
+        <Button
+          variant="outline"
+          onClick={handleClearSelection}
+          disabled={!canAssign}
+          className="flex items-center gap-2"
+        >
+          <X className="h-4 w-4" />
+          Clear Selection
+        </Button>
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogTrigger asChild>
+            <Button
+              disabled={!canAssign || isAssigning}
+              className="flex items-center gap-2"
+            >
+              {isAssigning ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <UserCheck className="h-4 w-4" />
+              )}
+              {isAssigning ? 'Assigning...' : 'Assign Role'}
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Role Assignment</DialogTitle>
+              <DialogDescription>
+                You are about to assign a role to the selected user for the selected store.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAssignment}>
+                Confirm Assignment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
+
+      <ProgressIndicator
+        assignmentSteps={assignmentSteps}
+        completedSteps={completedSteps}
+        progressPercentage={progressPercentage}
+      />
+
+      {assignmentResult && (
+        <AssignmentResult result={assignmentResult} />
+      )}
 
       {(assignmentData.selectedUser || assignmentData.selectedRole || assignmentData.selectedStore) && (
         <SelectionSummary
@@ -367,7 +412,7 @@ export const SingleAssignPage: React.FC = () => {
           />
         </TabsContent>
       </Tabs>
-    </div>
+    </ManageLayout>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
+import { Button } from '../../ui/button';
 import {
   Table,
   TableBody,
@@ -8,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../ui/table';
-import { User, Loader2 } from 'lucide-react';
+import { User, Loader2, Plus } from 'lucide-react';
 import { AssignmentTableRow } from './AssignmentTableRow';
 import type { Assignment } from '../../../features/userRolesStoresAssignment/types';
 
@@ -22,6 +23,7 @@ interface AssignmentsTableProps {
   onDelete: (assignment: Assignment) => void;
   updatingAssignments: Set<number>;
   formatDate: (dateString: string) => string;
+  onAssignRole: () => void;
 }
 
 export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
@@ -34,13 +36,20 @@ export const AssignmentsTable: React.FC<AssignmentsTableProps> = ({
   onDelete,
   updatingAssignments,
   formatDate,
+  onAssignRole,
 }) => {
   return (
     <Card className="w-full">
       <CardHeader className="px-4 sm:px-6">
-        <div className="flex items-center space-x-2">
-          <User className="h-4 w-4 sm:h-5 sm:w-5" />
-          <CardTitle className="text-lg sm:text-xl">Role Assignments</CardTitle>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <User className="h-4 w-4 sm:h-5 sm:w-5" />
+            <CardTitle className="text-lg sm:text-xl">Role Assignments</CardTitle>
+          </div>
+          <Button onClick={onAssignRole} className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Assign Role</span>
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="px-0 sm:px-6">

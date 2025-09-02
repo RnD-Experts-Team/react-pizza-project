@@ -10,8 +10,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useUserRolesStoresAssignment } from '../../features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useRoles } from '../../features/roles/hooks/useRoles';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import {
-  PageHeader,
   AssignmentsCard,
   DeleteConfirmationDialog,
 } from '../../components/userRolesStoresAssignment/storeAssignmentsPage';
@@ -134,9 +134,14 @@ export const StoreAssignmentsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-4 space-y-4 sm:px-6 sm:py-6 sm:space-y-6 lg:px-8 lg:py-8 lg:space-y-8">
-      <PageHeader storeId={storeId || ''} onBack={handleBack} />
-
+    <ManageLayout
+      title="Store Role Assignments"
+      subtitle={`View all role assignments for Store ID: ${storeId || ''}`}
+      backButton={{
+        show: true,
+        onClick: handleBack
+      }}
+    >
       <AssignmentsCard
         assignments={assignments}
         loading={loading}
@@ -158,7 +163,7 @@ export const StoreAssignmentsPage: React.FC = () => {
         getRoleName={getRoleName}
         onConfirm={handleDeleteConfirm}
       />
-    </div>
+    </ManageLayout>
   );
 };
 

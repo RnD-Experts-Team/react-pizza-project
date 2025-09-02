@@ -11,10 +11,10 @@ import { useUserRolesStoresAssignment } from '../../features/userRolesStoresAssi
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { useStores } from '../../features/stores/hooks/useStores';
 import {
-  UserAssignmentsPageHeader,
   AssignmentsTable,
   DeleteAssignmentDialog,
 } from '../../components/userRolesStoresAssignment/userAssignmentsPage';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import type { Assignment } from '../../features/userRolesStoresAssignment/types';
 
 export const UserAssignmentsPage: React.FC = () => {
@@ -126,13 +126,14 @@ export const UserAssignmentsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6 lg:space-y-8">
-      <UserAssignmentsPageHeader
-        userId={userId!}
-        onBack={handleBack}
-        onAssignRole={handleAssignRole}
-      />
-
+    <ManageLayout
+      title="User Role Assignments"
+      subtitle={`View all role assignments for User ID: ${userId}`}
+      backButton={{
+        show: true,
+        onClick: handleBack
+      }}
+    >
       <AssignmentsTable
         assignments={assignments}
         loading={loading}
@@ -143,6 +144,7 @@ export const UserAssignmentsPage: React.FC = () => {
         onDelete={handleDeleteClick}
         updatingAssignments={updatingAssignments}
         formatDate={formatDate}
+        onAssignRole={handleAssignRole}
       />
 
       <DeleteAssignmentDialog
@@ -153,7 +155,7 @@ export const UserAssignmentsPage: React.FC = () => {
         getRoleName={getRoleName}
         getStoreName={getStoreName}
       />
-    </div>
+    </ManageLayout>
   );
 };
 

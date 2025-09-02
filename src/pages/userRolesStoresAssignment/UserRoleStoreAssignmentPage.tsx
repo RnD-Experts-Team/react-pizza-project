@@ -10,10 +10,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useStores } from '../../features/stores/hooks/useStores';
-import { Separator } from '../../components/ui/separator';
+import { Button } from '../../components/ui/button';
+import { Users, ShoppingBag } from 'lucide-react';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import {
-  PageHeader,
-  ActionButtons,
   UsersTable,
   StoresTable,
 } from '../../components/userRolesStoresAssignment/userRoleStoreAssignmentPage';
@@ -75,16 +75,34 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
     });
   };
 
-  return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 space-y-6 sm:space-y-8">
-      <PageHeader />
-      
-      <ActionButtons 
-        onAssignRoles={handleAssignRoles}
-        onBulkAssign={handleBulkAssign}
-      />
+  const mainButtons = (
+    <Button 
+      onClick={handleAssignRoles} 
+      className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base"
+    >
+      <Users className="h-4 w-4 sm:h-5 sm:w-5" />
+      Assign Roles
+    </Button>
+  );
 
-      <Separator />
+  const subButtons = (
+    <Button 
+      onClick={handleBulkAssign} 
+      variant="outline" 
+      className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base"
+    >
+      <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
+      Bulk Assign
+    </Button>
+  );
+
+  return (
+    <ManageLayout
+      title="User Role Store Assignment"
+      subtitle="Manage user role assignments across different stores. Search and assign roles to users and stores."
+      mainButtons={mainButtons}
+      subButtons={subButtons}
+    >
 
       <UsersTable
          users={filteredUsers}
@@ -107,7 +125,7 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
         onViewAssignments={handleViewStoreAssignments}
         formatDate={formatDate}
       />
-    </div>
+    </ManageLayout>
   );
 };
 

@@ -7,12 +7,22 @@
 
 import React, { useState, useMemo } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../components/ui/tabs';
+import { Button } from '../../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../../components/ui/dialog';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useRoles } from '../../features/roles/hooks/useRoles';
 import { useStores } from '../../features/stores/hooks/useStores';
 import { useAssignmentOperations } from '../../features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
 import type { BulkAssignUserRolesRequest, BulkAssignmentItem } from '../../features/userRolesStoresAssignment/types';
-import { BulkPageHeader } from '../../components/userRolesStoresAssignment/assignPage/BulkPageHeader';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import { BulkProgressIndicator } from '../../components/userRolesStoresAssignment/assignPage/BulkProgressIndicator';
 import { BulkSelectionSummary } from '../../components/userRolesStoresAssignment/assignPage/BulkSelectionSummary';
 import { BulkUserSelectionTab } from '../../components/userRolesStoresAssignment/assignPage/BulkUserSelectionTab';
@@ -23,6 +33,9 @@ import {
   Users,
   Shield,
   Store,
+  X,
+  UserCheck,
+  Loader2,
 } from 'lucide-react';
 
 interface AssignmentData {
@@ -305,19 +318,65 @@ export const AssignPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-6 md:space-y-8">
-      {/* Page Header */}
-      <BulkPageHeader
-        selectedUsersCount={assignmentData.selectedUsers.length}
-        selectedRolesCount={assignmentData.selectedRoles.length}
-        selectedStoresCount={assignmentData.selectedStores.length}
-        canAssign={canAssign}
-        isAssigning={isActuallyAssigning}
-        showConfirmDialog={showConfirmDialog}
-        onClearSelection={handleClearSelection}
-        onConfirmAssignment={handleAssignment}
-        setShowConfirmDialog={setShowConfirmDialog}
-      />
+    <ManageLayout
+      title="Role Assignment"
+      subtitle="Assign roles to users across different stores with an intuitive interface"
+      backButton={{ show: true }}
+    >
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end mb-4">
+        <Button
+          variant="outline"
+          onClick={handleClearSelection}
+          disabled={!canAssign}
+          className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2"
+        >
+          <X className="h-3 w-3 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">Clear Selection</span>
+          <span className="sm:hidden">Clear</span>
+        </Button>
+        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+          <DialogTrigger asChild>
+            <Button
+              disabled={!canAssign || isActuallyAssigning}
+              className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+            >
+              {isActuallyAssigning ? (
+                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+              ) : (
+                <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+              )}
+              <span className="hidden sm:inline">
+                {isActuallyAssigning ? 'Assigning...' : 'Assign Roles'}
+              </span>
+              <span className="sm:hidden">
+                {isActuallyAssigning ? 'Assigning...' : 'Assign'}
+              </span>
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Confirm Role Assignment</DialogTitle>
+              <DialogDescription>
+                You are about to assign {assignmentData.selectedRoles.length} roles to{' '}
+                {assignmentData.selectedUsers.length} users across{' '}
+                {assignmentData.selectedStores.length} stores.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAssignment}>
+                Confirm Assignment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Progress Indicator */}
       <BulkProgressIndicator
@@ -419,7 +478,7 @@ export const AssignPage: React.FC = () => {
           />
         </TabsContent>
       </Tabs>
-    </div>
+    </ManageLayout>
   );
 };
 
