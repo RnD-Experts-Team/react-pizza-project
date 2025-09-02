@@ -1,12 +1,9 @@
-// src/pages/serviceClients/ServiceClientManagement.tsx
-
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Server, Copy, Eye, EyeOff } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Copy, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useServiceClients } from '../../features/serviceClients/hooks/useServiceClients';
 import { RotateTokenDialog } from '../../components/serviceClients/RotateTokenDialog';
@@ -16,7 +13,7 @@ import type { ServiceClient } from '../../features/serviceClients/types';
 
 const ServiceClientsPage: React.FC = () => {
   const { toast } = useToast();
-  const { fetchClients, pagination } = useServiceClients();
+  const { fetchClients } = useServiceClients();
   
   // Dialog states
   const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
@@ -27,7 +24,7 @@ const ServiceClientsPage: React.FC = () => {
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const perPage = 10;
+  const perPage = 3;
 
   useEffect(() => {
     fetchClients({ per_page: perPage, page: currentPage });
@@ -40,6 +37,8 @@ const ServiceClientsPage: React.FC = () => {
       title: "Success",
       description: "Service client created successfully!",
     });
+    // Refresh the current page
+    fetchClients({ per_page: perPage, page: currentPage });
   };
 
   const handleRotateSuccess = (token: string) => {
@@ -55,6 +54,14 @@ const ServiceClientsPage: React.FC = () => {
   const handleRotateToken = (client: ServiceClient) => {
     setSelectedClient(client);
     setRotateDialogOpen(true);
+  };
+
+  const handleRefresh = () => {
+    fetchClients({ per_page: perPage, page: currentPage });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   const copyToClipboard = (text: string) => {
@@ -77,50 +84,12 @@ const ServiceClientsPage: React.FC = () => {
       subtitle="Manage API service clients and their authentication tokens"
     >
       {/* Main Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Server className="h-5 w-5" />
-            Service Clients
-          </CardTitle>
-          <CardDescription>
-            Manage your API service clients and their access tokens
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ServiceClientsTable 
-            onRotateToken={handleRotateToken}
-            onCreateSuccess={handleCreateSuccess}
-          />
-          
-          {/* Pagination */}
-          {pagination && pagination.total > perPage && (
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(currentPage - 1)}
-                className="w-full sm:w-auto"
-              >
-                Previous
-              </Button>
-              <span className="flex items-center px-2 sm:px-4 text-sm sm:text-base order-first sm:order-none">
-                Page {currentPage} of {pagination.last_page}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={currentPage === pagination.last_page}
-                onClick={() => setCurrentPage(currentPage + 1)}
-                className="w-full sm:w-auto"
-              >
-                Next
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <ServiceClientsTable 
+        onRotateToken={handleRotateToken}
+        onCreateSuccess={handleCreateSuccess}
+        onRefresh={handleRefresh}
+        onPageChange={handlePageChange}
+      />
 
       {/* Rotate Token Dialog */}
       <RotateTokenDialog

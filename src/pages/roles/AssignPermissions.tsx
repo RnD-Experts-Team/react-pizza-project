@@ -23,7 +23,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
-import { ArrowLeft, Loader2, AlertCircle, Shield, Lock } from 'lucide-react';
+import { Loader2, AlertCircle, Shield, Lock } from 'lucide-react';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 interface FormErrors {
   role?: string;
@@ -163,38 +164,30 @@ const AssignPermissionsPage: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
-      <div className=" mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Assign Permissions</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Assign permissions to roles - users with these roles will inherit the permissions
-            </p>
-          </div>
-        </div>
+    <ManageLayout
+      title="Assign Permissions"
+      subtitle="Assign permissions to roles - users with these roles will inherit the permissions"
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Success Alert */}
+      {successMessage && (
+        <Alert className="border-primary/20 bg-primary/10">
+          <Shield className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-primary">
+            {successMessage}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Success Alert */}
-        {successMessage && (
-          <Alert className="border-primary/20 bg-primary/10">
-            <Shield className="h-4 w-4 text-primary" />
-            <AlertDescription className="text-primary">
-              {successMessage}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Error Alert */}
-        {assignError && (
-          <Alert variant="destructive" className="border-destructive bg-destructive/10">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-destructive-foreground">{assignError}</AlertDescription>
-          </Alert>
-        )}
+      {/* Error Alert */}
+      {assignError && (
+        <Alert variant="destructive" className="border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-destructive-foreground">{assignError}</AlertDescription>
+        </Alert>
+      )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -384,8 +377,7 @@ const AssignPermissionsPage: React.FC = () => {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+    </ManageLayout>
   );
 };
 

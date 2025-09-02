@@ -2,10 +2,13 @@
  * StoresTable Component
  * Displays a table of stores with action buttons for view, edit, and delete operations
  * Fully responsive with light/dark mode support using CSS custom properties
+ * Now includes integrated Redux state management and data fetching
+ * Styled to match AuthRulesTable component with Card wrapper and pagination
  */
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useStores } from '../../features/stores/hooks/useStores';
 import {
   Table,
   TableBody,
@@ -16,27 +19,34 @@ import {
 } from '../ui/table';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Eye, Edit, MoreHorizontal, Plus } from 'lucide-react';
-import type { Store } from '../../features/stores/types';
+import { Eye, Edit, MoreHorizontal, Plus, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 
 interface StoresTableProps {
-  stores: Store[];
-  loading?: boolean;
   onCreateStore?: () => void;
 }
 
 export const StoresTable: React.FC<StoresTableProps> = ({
-  stores,
-  loading = false,
   onCreateStore,
 }) => {
   const navigate = useNavigate();
+
+  // Use the custom hook instead of direct Redux selectors
+  const {
+    stores,
+    loading,
+    error,
+    pagination,
+    refetch,
+    changePage,
+  } = useStores();
 
   const handleView = (storeId: string) => {
     navigate(`/stores/view/${storeId}`);
@@ -46,7 +56,22 @@ export const StoresTable: React.FC<StoresTableProps> = ({
     navigate(`/stores/edit/${storeId}`);
   };
 
+  const handleRetry = () => {
+    refetch();
+  };
 
+  const handleCreateStore = () => {
+    if (onCreateStore) {
+      onCreateStore();
+    } else {
+      navigate('/stores/create');
+    }
+  };
+
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    changePage(page);
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -56,433 +81,380 @@ export const StoresTable: React.FC<StoresTableProps> = ({
     });
   };
 
-  if (loading) {
-    return (
-      <div 
-        className="rounded-md overflow-hidden"
-        style={{
-          border: `1px solid var(--border)`,
-          backgroundColor: 'var(--card)',
-        }}
-      >
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow style={{ backgroundColor: 'var(--muted)' }}>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Store ID
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Name
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Phone
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Address
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Status
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Created
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 w-[60px] sm:w-[100px]"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {[...Array(5)].map((_, index) => (
-                <TableRow key={index} style={{ borderColor: 'var(--border)' }}>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                    <div 
-                      className="h-3 sm:h-4 w-16 sm:w-20 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                    <div 
-                      className="h-3 sm:h-4 w-24 sm:w-32 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
-                    <div 
-                      className="h-3 sm:h-4 w-20 sm:w-24 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell">
-                    <div 
-                      className="h-3 sm:h-4 w-32 sm:w-40 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                    <div 
-                      className="h-3 sm:h-4 w-12 sm:w-16 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
-                    <div 
-                      className="h-3 sm:h-4 w-16 sm:w-20 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                  <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                    <div 
-                      className="h-3 sm:h-4 w-6 sm:w-8 animate-pulse rounded"
-                      style={{ backgroundColor: 'var(--muted)' }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  }
-
-  if (stores.length === 0) {
-    return (
-      <div 
-        className="rounded-md overflow-hidden"
-        style={{
-          border: `1px solid var(--border)`,
-          backgroundColor: 'var(--card)',
-        }}
-      >
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow style={{ backgroundColor: 'var(--muted)' }}>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Store ID
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Name
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Phone
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Address
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Status
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Created
-                </TableHead>
-                <TableHead 
-                  className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 w-[60px] sm:w-[100px]"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  Actions
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow style={{ borderColor: 'var(--border)' }}>
-                <TableCell 
-                  colSpan={7} 
-                  className="text-center py-6 sm:py-8 px-4 text-sm sm:text-base"
-                  style={{ color: 'var(--muted-foreground)' }}
-                >
-                  No stores found
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div 
-      className="rounded-md overflow-hidden"
-      style={{
-        border: `1px solid var(--border)`,
-        backgroundColor: 'var(--card)',
-        boxShadow: 'var(--shadow-sm)',
-      }}
-    >
-      <div className="overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow style={{ backgroundColor: 'var(--muted)' }}>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Store ID
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Name
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Phone
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden lg:table-cell"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Address
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Status
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Created
-              </TableHead>
-              <TableHead 
-                className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-2 sm:py-3 w-[60px] sm:w-[100px]"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Actions
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {/* Create Store Row */}
-            {onCreateStore && (
-              <TableRow 
-                className="hover:bg-opacity-50 transition-colors duration-200 border-dashed"
-                style={{ 
-                  borderColor: 'var(--primary)',
-                  backgroundColor: 'color-mix(in srgb, var(--primary) 5%, transparent)',
-                }}
-              >
-                <TableCell 
-                  colSpan={7} 
-                  className="px-2 sm:px-4 py-4 sm:py-6 text-center"
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load stores: {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Stores Table */}
+      <Card
+        className="rounded-sm"
+        style={{
+          backgroundColor: 'var(--card)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-realistic)',
+        }}
+      >
+        <CardHeader
+          className="mb-0"
+          style={{
+            backgroundColor: 'var(--muted)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <CardTitle
+              className="text-lg sm:text-xl"
+              style={{ color: 'var(--card-foreground)' }}
+            >
+              Stores
+            </CardTitle>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              {pagination && (
+                <div
+                  className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1"
+                  style={{ color: 'var(--muted-foreground)' }}
                 >
-                  <Button 
-                    onClick={onCreateStore}
-                    variant="outline"
-                    className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base border-dashed"
-                    style={{
-                      borderColor: 'var(--primary)',
-                      color: 'var(--primary)',
-                      backgroundColor: 'transparent',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'var(--primary)';
-                      e.currentTarget.style.color = 'var(--primary-foreground)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
-                      e.currentTarget.style.color = 'var(--primary)';
-                    }}
-                  >
-                    <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
-                    Create New Store
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )}
-            {stores.map((store) => (
-              <TableRow 
-                key={store.id} 
-                className="hover:bg-opacity-50 transition-colors duration-200"
-                style={{ 
-                  borderColor: 'var(--border)',
-                  backgroundColor: 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'var(--muted)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                <TableCell 
-                  className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm"
-                  style={{ 
-                    fontFamily: 'var(--font-mono)',
-                    color: 'var(--foreground)',
+                  <span className="hidden sm:inline">
+                    Showing {pagination.from}-{pagination.to} of{' '}
+                    {pagination.total} stores
+                  </span>
+                  <span className="sm:hidden">
+                    {pagination.from}-{pagination.to} of {pagination.total}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 order-1 sm:order-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                  style={{
+                    backgroundColor: loading
+                      ? 'var(--muted)'
+                      : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity: loading ? 0.6 : 1,
                   }}
                 >
-                  <span className="block truncate max-w-[80px] sm:max-w-none">
-                    {store.id}
-                  </span>
-                </TableCell>
-                <TableCell 
-                  className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium"
-                  style={{ color: 'var(--foreground)' }}
+                  <RefreshCw
+                    className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                  />
+                  <span className="hidden xs:inline">Refresh</span>
+                </Button>
+                <Button
+                  onClick={handleCreateStore}
+                  className="flex items-center justify-center gap-2 text-sm"
+                  style={{
+                    backgroundColor: 'var(--primary)',
+                    color: 'var(--primary-foreground)',
+                    boxShadow: 'var(--shadow-sm)',
+                  }}
                 >
-                  <span className="block truncate max-w-[100px] sm:max-w-[150px] lg:max-w-none">
-                    {store.name}
-                  </span>
-                </TableCell>
-                <TableCell 
-                  className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm hidden md:table-cell"
-                  style={{ color: 'var(--foreground)' }}
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden xs:inline">Create Store</span>
+                  <span className="xs:hidden">Create</span>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-0" style={{ backgroundColor: 'var(--card)' }}>
+          {loading ? (
+            <div
+              className="flex items-center justify-center h-48 sm:h-64"
+              style={{
+                backgroundColor: 'var(--card)',
+                color: 'var(--muted-foreground)',
+              }}
+            >
+              <Loader2
+                className="h-6 w-6 sm:h-8 sm:w-8 animate-spin"
+                style={{ color: 'var(--primary)' }}
+              />
+              <span
+                className="ml-2 text-sm sm:text-base"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Loading stores...
+              </span>
+            </div>
+          ) : !stores.length ? (
+            <div
+              className="text-center py-6 sm:py-8"
+              style={{ backgroundColor: 'var(--card)' }}
+            >
+              <p
+                className="text-sm sm:text-base text-muted-foreground"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                No stores found.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="min-w-full">
+                <TableHeader
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
+                  }}
                 >
-                  <span className="block truncate max-w-[120px]">
-                    {store.metadata.phone || 'N/A'}
-                  </span>
-                </TableCell>
-                <TableCell 
-                  className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm hidden lg:table-cell"
-                  style={{ color: 'var(--foreground)' }}
+                  <TableRow style={{ borderColor: 'var(--border)' }}>
+                    <TableHead
+                      className="min-w-[6rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Store ID
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[10rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Name
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[10rem] text-xs sm:text-sm hidden md:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Phone
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[12rem] text-xs sm:text-sm hidden lg:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Address
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[5rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Status
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[8rem] text-xs sm:text-sm hidden sm:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Created
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[5rem] text-right text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {stores.map((store) => (
+                    <TableRow
+                      key={store.id}
+                      style={{
+                        borderColor: 'var(--border)',
+                        backgroundColor: 'var(--card)',
+                      }}
+                      className="hover:bg-muted/50"
+                    >
+                      <TableCell
+                        className="font-medium text-xs sm:text-sm p-2 sm:p-4"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <div
+                          className="truncate max-w-[5rem] sm:max-w-none"
+                          title={store.id}
+                        >
+                          {store.id}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="p-2 sm:p-4">
+                        <div
+                          className="text-xs sm:text-sm truncate max-w-[8rem] sm:max-w-none"
+                          style={{ color: 'var(--foreground)' }}
+                          title={store.name}
+                        >
+                          {store.name}
+                        </div>
+                      </TableCell>
+
+                      <TableCell
+                        className="p-2 sm:p-4 text-xs sm:text-sm hidden md:table-cell"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        {store.metadata?.phone || 'N/A'}
+                      </TableCell>
+
+                      <TableCell
+                        className="p-2 sm:p-4 text-xs sm:text-sm hidden lg:table-cell"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <div
+                          className="truncate max-w-[10rem] lg:max-w-none"
+                          title={store.metadata?.address || 'N/A'}
+                        >
+                          {store.metadata?.address || 'N/A'}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="p-2 sm:p-4">
+                        <Badge
+                          variant={store.is_active ? 'default' : 'secondary'}
+                          className="text-xs px-1 py-0.5 sm:px-2 sm:py-1"
+                          style={{
+                            backgroundColor: store.is_active
+                              ? 'var(--primary)'
+                              : 'var(--secondary)',
+                            color: store.is_active
+                              ? 'var(--primary-foreground)'
+                              : 'var(--secondary-foreground)',
+                            borderColor: store.is_active
+                              ? 'var(--primary)'
+                              : 'var(--border)',
+                          }}
+                        >
+                          {store.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell
+                        className="text-xs sm:text-sm p-2 sm:p-4 hidden sm:table-cell"
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        {formatDate(store.created_at)}
+                      </TableCell>
+
+                      <TableCell className="text-right p-2 sm:p-4">
+                        <div className="flex justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                className="h-6 w-6 sm:h-8 sm:w-8 p-0"
+                                style={{
+                                  color: 'var(--muted-foreground)',
+                                  backgroundColor: 'transparent',
+                                }}
+                              >
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="min-w-[140px] sm:min-w-[160px]"
+                              style={{
+                                backgroundColor: 'var(--popover)',
+                                border: '1px solid var(--border)',
+                                boxShadow: 'var(--shadow-md)',
+                              }}
+                            >
+                              <DropdownMenuItem
+                                onClick={() => handleView(store.id)}
+                                className="text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 cursor-pointer"
+                                style={{ color: 'var(--popover-foreground)' }}
+                              >
+                                <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>View Details</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handleEdit(store.id)}
+                                className="text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 cursor-pointer"
+                                style={{ color: 'var(--popover-foreground)' }}
+                              >
+                                <Edit className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                                <span>Edit Store</span>
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+        {pagination && pagination.last_page > 1 && (
+          <CardFooter
+            className="pt-4 sm:pt-5 lg:pt-6"
+            style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
+          >
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.current_page <= 1 || loading}
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
+                  style={{
+                    backgroundColor:
+                      pagination.current_page <= 1 || loading
+                        ? 'var(--muted)'
+                        : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity:
+                      pagination.current_page <= 1 || loading
+                        ? 0.5
+                        : 1,
+                  }}
                 >
-                  <span className="block truncate max-w-[150px] xl:max-w-[200px]">
-                    {store.metadata.address || 'N/A'}
-                  </span>
-                </TableCell>
-                <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                  <Badge 
-                    variant={store.is_active ? 'default' : 'secondary'}
-                    className="text-xs px-2 py-1"
-                    style={{
-                      backgroundColor: store.is_active ? 'var(--primary)' : 'var(--secondary)',
-                      color: store.is_active ? 'var(--primary-foreground)' : 'var(--secondary-foreground)',
-                      border: `1px solid ${store.is_active ? 'var(--primary)' : 'var(--border)'}`,
-                    }}
-                  >
-                    {store.is_active ? 'Active' : 'Inactive'}
-                  </Badge>
-                </TableCell>
-                <TableCell 
-                  className="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm hidden sm:table-cell"
+                  <span className="hidden xs:inline">Previous</span>
+                  <span className="xs:hidden">Prev</span>
+                </Button>
+                <span
+                  className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
-                  <span className="block truncate">
-                    {formatDate(store.created_at)}
+                  <span className="hidden sm:inline">
+                    Page {pagination.current_page} of {pagination.last_page}
                   </span>
-                </TableCell>
-                <TableCell className="px-2 sm:px-4 py-2 sm:py-3">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button 
-                        variant="ghost" 
-                        className="h-6 w-6 sm:h-8 sm:w-8 p-0 hover:bg-opacity-20"
-                        style={{
-                          color: 'var(--muted-foreground)',
-                          backgroundColor: 'transparent',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--accent)';
-                          e.currentTarget.style.color = 'var(--accent-foreground)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = 'var(--muted-foreground)';
-                        }}
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      align="end"
-                      className="min-w-[140px] sm:min-w-[160px]"
-                      style={{
-                        backgroundColor: 'var(--popover)',
-                        border: `1px solid var(--border)`,
-                        boxShadow: 'var(--shadow-md)',
-                      }}
-                    >
-                      <DropdownMenuItem 
-                        onClick={() => handleView(store.id)}
-                        className="text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 cursor-pointer"
-                        style={{
-                          color: 'var(--popover-foreground)',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--accent)';
-                          e.currentTarget.style.color = 'var(--accent-foreground)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = 'var(--popover-foreground)';
-                        }}
-                      >
-                        <Eye className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                        <span>View Details</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem 
-                        onClick={() => handleEdit(store.id)}
-                        className="text-xs sm:text-sm px-2 py-1.5 sm:px-3 sm:py-2 cursor-pointer"
-                        style={{
-                          color: 'var(--popover-foreground)',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'var(--accent)';
-                          e.currentTarget.style.color = 'var(--accent-foreground)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = 'transparent';
-                          e.currentTarget.style.color = 'var(--popover-foreground)';
-                        }}
-                      >
-                        <Edit className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                        <span>Edit Store</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+                  <span className="sm:hidden">
+                    {pagination.current_page}/{pagination.last_page}
+                  </span>
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    pagination.current_page >= pagination.last_page ||
+                    loading
+                  }
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
+                  style={{
+                    backgroundColor:
+                      pagination.current_page >= pagination.last_page ||
+                      loading
+                        ? 'var(--muted)'
+                        : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity:
+                      pagination.current_page >= pagination.last_page ||
+                      loading
+                        ? 0.5
+                        : 1,
+                  }}
+                >
+                  <span className="hidden xs:inline">Next</span>
+                  <span className="xs:hidden">Next</span>
+                </Button>
+              </div>
+            </div>
+          </CardFooter>
+        )}
+      </Card>
     </div>
   );
 };

@@ -35,8 +35,6 @@ interface StoresTableProps {
   stores: StoreData[];
   loading: boolean;
   error: string | null;
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
   onAssignRole: (storeId: string) => void;
   onViewAssignments: (storeId: string) => void;
   formatDate: (dateString: string) => string;
@@ -46,12 +44,12 @@ export const StoresTable: React.FC<StoresTableProps> = ({
   stores,
   loading,
   error,
-  searchTerm,
-  onSearchChange,
   onAssignRole,
   onViewAssignments,
   formatDate,
 }) => {
+  // Local state for search term
+  const [searchTerm, setSearchTerm] = React.useState('');
 
   // Filter stores based on search term
   const filteredStores = stores.filter(store =>
@@ -72,7 +70,7 @@ export const StoresTable: React.FC<StoresTableProps> = ({
             <Input
               placeholder="Search stores by name or ID..."
               value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground"
             />
           </div>

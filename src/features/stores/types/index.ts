@@ -334,6 +334,7 @@ export interface UseStoresReturn {
   loading: boolean;
   error: string | null;
   refetch: (params?: GetStoresParams) => Promise<void>;
+  changePage: (page: number) => void;
 }
 
 /**
@@ -394,7 +395,7 @@ export interface UseStoreRolesReturn {
  */
 export const DEFAULT_PAGINATION = {
   page: 1,
-  perPage: 10,
+  perPage: 5,
 } as const;
 
 /**

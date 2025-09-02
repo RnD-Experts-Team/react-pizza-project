@@ -17,7 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/ca
 import { Checkbox } from '../../components/ui/checkbox';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
-import { ArrowLeft, Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 const CreateRolePage: React.FC = () => {
   const navigate = useNavigate();
@@ -104,28 +105,20 @@ const CreateRolePage: React.FC = () => {
   }, [formData]);
 
   return (
-    <div className="container mx-auto py-4 px-3 sm:py-6 sm:px-4 lg:py-8 lg:px-6">
-      <div className=" mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Button variant="ghost" onClick={handleBack} className="p-1.5 sm:p-2">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Create Role</h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Add a new role to the system
-            </p>
-          </div>
-        </div>
-
-        {/* Error Alert */}
-        {error && (
-          <Alert variant="destructive" className="border-destructive bg-destructive/10">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-destructive-foreground">{error}</AlertDescription>
-          </Alert>
-        )}
+    <ManageLayout
+      title="Create Role"
+      subtitle="Add a new role to the system"
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-destructive-foreground">{error}</AlertDescription>
+        </Alert>
+      )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -258,8 +251,7 @@ const CreateRolePage: React.FC = () => {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+    </ManageLayout>
   );
 };
 

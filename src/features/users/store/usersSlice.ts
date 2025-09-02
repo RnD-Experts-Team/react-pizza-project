@@ -91,7 +91,7 @@ export const createUser = createAsyncThunk<
       const newUser = await usersApi.createUser(userData);
       
       // Optionally refetch users to ensure consistency
-      dispatch(fetchUsers({ per_page: 15 }));
+      dispatch(fetchUsers({ per_page: 5 }));
       
       return newUser;
     } catch (error) {

@@ -6,7 +6,7 @@
  * Fully responsive design with CSS variables for light/dark mode compatibility.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUsers } from '../../features/users/hooks/useUsers';
 import { useStores } from '../../features/stores/hooks/useStores';
@@ -20,26 +20,10 @@ import {
 
 export const UserRoleStoreAssignmentPage: React.FC = () => {
   const navigate = useNavigate();
-  
-  // Local state for search terms
-  const [userSearchTerm, setUserSearchTerm] = useState('');
-  const [storeSearchTerm, setStoreSearchTerm] = useState('');
 
   // Fetch users and stores data
   const { users, loading: usersLoading, error: usersError } = useUsers();
   const { stores, loading: storesLoading, error: storesError } = useStores();
-
-  // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
-  );
-
-  // Filter stores based on search term
-  const filteredStores = stores.filter(store =>
-    store.name.toLowerCase().includes(storeSearchTerm.toLowerCase()) ||
-    store.id.toLowerCase().includes(storeSearchTerm.toLowerCase())
-  );
 
   const handleAssignUserRole = (userId: number) => {
     navigate(`/user-role-store-assignment/assign?userId=${userId}`);
@@ -105,22 +89,17 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
     >
 
       <UsersTable
-         users={filteredUsers}
+         users={users}
          loading={usersLoading}
          error={usersError}
-         userSearchTerm={userSearchTerm}
-         onSearchChange={setUserSearchTerm}
          onAssignRole={handleAssignUserRole}
          onViewAssignments={handleViewUserAssignments}
-         formatDate={formatDate}
        />
 
       <StoresTable
-        stores={filteredStores}
+        stores={stores}
         loading={storesLoading}
         error={storesError}
-        searchTerm={storeSearchTerm}
-        onSearchChange={setStoreSearchTerm}
         onAssignRole={handleAssignStoreRole}
         onViewAssignments={handleViewStoreAssignments}
         formatDate={formatDate}

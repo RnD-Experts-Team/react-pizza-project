@@ -21,6 +21,7 @@ import {
   // Actions
   setSelectedStoreId,
   setSearchQuery,
+  setCurrentPage,
   clearErrors,
   clearError,
   resetPagination,
@@ -173,6 +174,17 @@ export const useStores = (
     };
   }, [dispatch, error]);
 
+  // Change page function
+  const changePage = useCallback(
+    (page: number) => {
+      if (page !== currentPage && page > 0 && (!pagination || page <= pagination.last_page)) {
+        dispatch(setCurrentPage(page));
+        fetchStoresCallback({ page });
+      }
+    },
+    [dispatch, currentPage, pagination, fetchStoresCallback]
+  );
+
   return useMemo(
     () => ({
       stores,
@@ -180,6 +192,7 @@ export const useStores = (
       loading,
       error,
       refetch: fetchStoresCallback,
+      changePage,
       // Enhanced functionality
       searchTerm,
       setSearchTerm,
@@ -194,6 +207,7 @@ export const useStores = (
       loading,
       error,
       fetchStoresCallback,
+      changePage,
       searchTerm,
       setSearchTerm,
       totalStores,

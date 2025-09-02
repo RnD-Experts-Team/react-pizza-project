@@ -293,7 +293,7 @@ export type ServiceClientOperation = typeof SERVICE_CLIENT_OPERATIONS[keyof type
  * Default pagination settings
  */
 export const DEFAULT_PAGINATION = {
-  PER_PAGE: 10,
+  PER_PAGE: 3,
   PAGE: 1,
 } as const;
 

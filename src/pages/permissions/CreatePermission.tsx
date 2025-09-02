@@ -5,8 +5,9 @@ import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Label } from '../../components/ui/label';
 import { Alert, AlertDescription } from '../../components/ui/alert';
-import { ArrowLeft, Key, Plus, Loader2 } from 'lucide-react';
+import { Key, Plus, Loader2 } from 'lucide-react';
 import { Badge } from '../../components/ui/badge';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 interface CreatePermissionForm {
   name: string;
@@ -88,34 +89,19 @@ const CreatePermissionPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <div className="container mx-auto py-4 px-4 sm:py-6 sm:px-6 lg:py-8 lg:px-8">
-        <div className="mx-auto space-y-4 sm:space-y-6">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-            <Button 
-              variant="ghost" 
-              onClick={handleBack} 
-              className="p-2 self-start hover:bg-accent hover:text-accent-foreground transition-colors"
-            >
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-            <div className="space-y-1">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight text-foreground">
-                Create Permission
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground">
-                Add a new permission to the system
-              </p>
-            </div>
-          </div>
-
-          {/* Error Alert */}
-          {error && (
-            <Alert variant="destructive" className="border-destructive bg-destructive/10 text-destructive">
-              <AlertDescription className="text-sm sm:text-base">{error}</AlertDescription>
-            </Alert>
-          )}
+    <ManageLayout
+      title="Create Permission"
+      subtitle="Add a new permission to the system"
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive" className="border-destructive bg-destructive/10 text-destructive">
+          <AlertDescription className="text-sm sm:text-base">{error}</AlertDescription>
+        </Alert>
+      )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -221,9 +207,7 @@ const CreatePermissionPage: React.FC = () => {
               </Button>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+    </ManageLayout>
   );
 };
 

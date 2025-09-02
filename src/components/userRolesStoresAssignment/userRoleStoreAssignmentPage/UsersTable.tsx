@@ -1,15 +1,8 @@
-/**
- * UsersTable Component
- * 
- * Displays a table of users with search functionality and action buttons.
- * Includes responsive design and handles loading, error, and empty states.
- */
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Input } from '../../ui/input';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../../ui/card';
 import { Button } from '../../ui/button';
 import { Badge } from '../../ui/badge';
+import { Alert, AlertDescription } from '../../ui/alert';
 import {
   Table,
   TableBody,
@@ -18,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '../../ui/table';
-import { Loader2, Search, UserPlus, Eye } from 'lucide-react';
+import { Loader2, UserPlus, Eye, AlertCircle, RefreshCw } from 'lucide-react';
 
 interface User {
   id: number;
@@ -29,154 +22,399 @@ interface User {
   stores?: Array<{ store: { id: string; name: string } }>;
 }
 
+interface Pagination {
+  currentPage: number;
+  lastPage: number;
+  from: number;
+  to: number;
+  total: number;
+}
+
 interface UsersTableProps {
   users: User[];
   loading: boolean;
   error: string | null;
-  userSearchTerm: string;
-  onSearchChange: (value: string) => void;
+  pagination?: Pagination;
   onAssignRole: (userId: number) => void;
   onViewAssignments: (userId: number) => void;
-  formatDate: (dateString: string) => string;
+  onPageChange?: (page: number) => void;
+  onRefresh?: () => void;
 }
 
 export const UsersTable: React.FC<UsersTableProps> = ({
   users,
   loading,
   error,
-  userSearchTerm,
-  onSearchChange,
+  pagination,
   onAssignRole,
   onViewAssignments,
-  formatDate,
+  onPageChange,
+  onRefresh,
 }) => {
-  // Filter users based on search term
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
-  );
 
   return (
-    <Card className="shadow-sm border-border">
-      <CardHeader className="pb-4 sm:pb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0 gap-4">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-card-foreground">Users</CardTitle>
-          </div>
-          <div className="relative w-full lg:w-80 xl:w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search users by name or email..."
-              value={userSearchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="px-4 sm:px-6">
-        {error ? (
-          <div className="text-destructive text-center py-6 sm:py-8 text-sm sm:text-base">
-            Error loading users: {error}
-          </div>
-        ) : loading ? (
-          <div className="flex items-center justify-center py-8 sm:py-12">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-            <span className="ml-2 sm:ml-3 text-sm sm:text-base text-muted-foreground">Loading users...</span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:mx-0">
-            <div className="inline-block min-w-full align-middle">
-              <Table className="min-w-full">
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4">Name</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">Email</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4">Roles</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">Stores</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">Created</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredUsers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 sm:py-12 text-muted-foreground text-sm sm:text-base">
-                        {userSearchTerm ? 'No users found matching your search' : 'No users found'}
-                      </TableCell>
+    <>
+      <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Error loading users: {error}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Users Table */}
+        <Card
+          className="rounded-sm"
+          style={{
+            backgroundColor: 'var(--card)',
+            border: '1px solid var(--border)',
+            boxShadow: 'var(--shadow-realistic)',
+          }}
+        >
+          <CardHeader
+            className="mb-0"
+            style={{
+              backgroundColor: 'var(--muted)',
+              borderBottom: '1px solid var(--border)',
+            }}
+          >
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+              <CardTitle
+                className="text-lg sm:text-xl"
+                style={{ color: 'var(--card-foreground)' }}
+              >
+                Users
+              </CardTitle>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                {pagination && (
+                  <div
+                    className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    <span className="hidden sm:inline">
+                      Showing {pagination.from} to {pagination.to} of {pagination.total} users
+                    </span>
+                    <span className="sm:hidden">
+                      {pagination.from}-{pagination.to} of {pagination.total}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 order-1 sm:order-2">
+                  {onRefresh && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={onRefresh}
+                      disabled={loading}
+                      className="flex items-center gap-2"
+                      style={{
+                        backgroundColor: loading
+                          ? 'var(--muted)'
+                          : 'var(--secondary)',
+                        color: 'var(--secondary-foreground)',
+                        borderColor: 'var(--border)',
+                        opacity: loading ? 0.6 : 1,
+                      }}
+                    >
+                      <RefreshCw
+                        className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                      />
+                      <span className="hidden xs:inline">Refresh</span>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0" style={{ backgroundColor: 'var(--card)' }}>
+            {loading ? (
+              <div
+                className="flex items-center justify-center h-48 sm:h-64"
+                style={{
+                  backgroundColor: 'var(--card)',
+                  color: 'var(--muted-foreground)',
+                }}
+              >
+                <Loader2
+                  className="h-6 w-6 sm:h-8 sm:w-8 animate-spin"
+                  style={{ color: 'var(--primary)' }}
+                />
+                <span
+                  className="ml-2 text-sm sm:text-base"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  Loading users...
+                </span>
+              </div>
+            ) : !users.length ? (
+              <div
+                className="text-center py-6 sm:py-8"
+                style={{ backgroundColor: 'var(--card)' }}
+              >
+                <p
+                  className="text-sm sm:text-base text-muted-foreground"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  No users found.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table className="min-w-full">
+                  <TableHeader
+                    style={{
+                      backgroundColor: 'var(--muted)',
+                      borderBottom: '1px solid var(--border)',
+                    }}
+                  >
+                    <TableRow style={{ borderColor: 'var(--border)' }}>
+                      <TableHead
+                        className="min-w-[10rem] text-xs sm:text-sm"
+                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                      >
+                        Name
+                      </TableHead>
+                      <TableHead
+                        className="min-w-[8rem] text-xs sm:text-sm hidden sm:table-cell"
+                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                      >
+                        Email
+                      </TableHead>
+                      <TableHead
+                        className="min-w-[8rem] text-xs sm:text-sm hidden md:table-cell"
+                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                      >
+                        Roles
+                      </TableHead>
+                      <TableHead
+                        className="min-w-[8rem] text-xs sm:text-sm hidden lg:table-cell"
+                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                      >
+                        Stores
+                      </TableHead>
+                      <TableHead
+                        className="w-[6rem] text-xs sm:text-sm text-right"
+                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                      >
+                        Actions
+                      </TableHead>
                     </TableRow>
-                  ) : (
-                    filteredUsers.map((user) => (
-                      <TableRow key={user.id} className="border-border hover:bg-muted/50 transition-colors">
-                        <TableCell className="font-medium px-3 sm:px-4 py-3 sm:py-4">
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user) => (
+                      <TableRow
+                        key={user.id}
+                        style={{
+                          borderColor: 'var(--border)',
+                          backgroundColor: 'var(--card)',
+                        }}
+                        className="hover:bg-muted/50"
+                      >
+                        <TableCell
+                          className="font-medium text-xs sm:text-sm p-2 sm:p-4"
+                          style={{ color: 'var(--foreground)' }}
+                        >
                           <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs sm:text-sm font-medium text-primary">
+                            <div
+                              className="h-6 w-6 sm:h-8 sm:w-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium"
+                              style={{
+                                backgroundColor: 'var(--primary)',
+                                color: 'var(--primary-foreground)',
+                              }}
+                            >
                               {user.name.charAt(0).toUpperCase()}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <div className="text-xs sm:text-sm font-medium text-foreground truncate">{user.name}</div>
-                              <div className="text-xs text-muted-foreground sm:hidden truncate">{user.email}</div>
+                              <div
+                                className="text-xs sm:text-sm font-medium truncate"
+                                style={{ color: 'var(--foreground)' }}
+                                title={user.name}
+                              >
+                                {user.name}
+                              </div>
+                              {/* Mobile: Show email, roles and stores inline */}
+                              <div className="sm:hidden mt-1 space-y-1">
+                                <div
+                                  className="text-xs truncate"
+                                  style={{ color: 'var(--muted-foreground)' }}
+                                  title={user.email}
+                                >
+                                  {user.email}
+                                </div>
+                                {user.roles && user.roles.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {user.roles.slice(0, 2).map((role) => (
+                                      <Badge
+                                        key={role.id}
+                                        variant="secondary"
+                                        className="text-xs px-1 py-0"
+                                        style={{
+                                          backgroundColor: 'var(--secondary)',
+                                          color: 'var(--secondary-foreground)',
+                                        }}
+                                      >
+                                        {role.name}
+                                      </Badge>
+                                    ))}
+                                    {user.roles.length > 2 && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs px-1 py-0"
+                                        style={{
+                                          borderColor: 'var(--border)',
+                                          color: 'var(--muted-foreground)',
+                                        }}
+                                      >
+                                        +{user.roles.length - 2}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                                {user.stores && user.stores.length > 0 && (
+                                  <div className="flex flex-wrap gap-1">
+                                    {user.stores.slice(0, 2).map((storeAssignment) => (
+                                      <Badge
+                                        key={storeAssignment.store.id}
+                                        variant="outline"
+                                        className="text-xs px-1 py-0"
+                                        style={{
+                                          borderColor: 'var(--border)',
+                                          color: 'var(--foreground)',
+                                        }}
+                                      >
+                                        {storeAssignment.store.name}
+                                      </Badge>
+                                    ))}
+                                    {user.stores.length > 2 && (
+                                      <Badge
+                                        variant="outline"
+                                        className="text-xs px-1 py-0"
+                                        style={{
+                                          borderColor: 'var(--border)',
+                                          color: 'var(--muted-foreground)',
+                                        }}
+                                      >
+                                        +{user.stores.length - 2}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">
-                          <div className="text-xs sm:text-sm truncate max-w-[200px]">{user.email}</div>
+                        <TableCell
+                          className="text-xs sm:text-sm p-2 sm:p-4 hidden sm:table-cell"
+                          style={{ color: 'var(--muted-foreground)' }}
+                        >
+                          <div className="truncate" title={user.email}>
+                            {user.email}
+                          </div>
                         </TableCell>
-                        <TableCell className="px-3 sm:px-4 py-3 sm:py-4">
-                          <div className="flex flex-wrap gap-1">
-                            {user.roles && user.roles.length > 0 ? (
-                              user.roles.slice(0, 2).map((role) => (
-                                <Badge key={role.id} variant="outline" className="text-xs px-2 py-1 bg-background border-border text-foreground">
+                        <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden md:table-cell">
+                          {user.roles && user.roles.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {user.roles.slice(0, 2).map((role) => (
+                                <Badge
+                                  key={role.id}
+                                  variant="secondary"
+                                  className="text-xs"
+                                  style={{
+                                    backgroundColor: 'var(--secondary)',
+                                    color: 'var(--secondary-foreground)',
+                                  }}
+                                >
                                   {role.name}
                                 </Badge>
-                              ))
-                            ) : (
-                              <span className="text-muted-foreground text-xs sm:text-sm">No roles</span>
-                            )}
-                            {user.roles && user.roles.length > 2 && (
-                              <Badge variant="outline" className="text-xs px-2 py-1 bg-muted text-muted-foreground">
-                                +{user.roles.length - 2}
-                              </Badge>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
-                          <div className="flex flex-wrap gap-1">
-                            {user.stores && user.stores.length > 0 ? (
-                              user.stores.slice(0, 2).map((userStore) => (
-                                <Badge key={userStore.store.id} variant="secondary" className="text-xs px-2 py-1 bg-secondary text-secondary-foreground">
-                                  {userStore.store.name}
+                              ))}
+                              {user.roles.length > 2 && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs"
+                                  style={{
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--muted-foreground)',
+                                  }}
+                                >
+                                  +{user.roles.length - 2}
                                 </Badge>
-                              ))
-                            ) : (
-                              <span className="text-muted-foreground text-xs sm:text-sm">No stores</span>
-                            )}
-                            {user.stores && user.stores.length > 2 && (
-                              <Badge variant="secondary" className="text-xs px-2 py-1 bg-muted text-muted-foreground">
-                                +{user.stores.length - 2}
-                              </Badge>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span
+                              className="text-xs"
+                              style={{ color: 'var(--muted-foreground)' }}
+                            >
+                              No roles
+                            </span>
+                          )}
                         </TableCell>
-                        <TableCell className="text-xs sm:text-sm text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">
-                          {formatDate(user.created_at)}
+                        <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden lg:table-cell">
+                          {user.stores && user.stores.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {user.stores.slice(0, 2).map((storeAssignment) => (
+                                <Badge
+                                  key={storeAssignment.store.id}
+                                  variant="outline"
+                                  className="text-xs"
+                                  style={{
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--foreground)',
+                                  }}
+                                >
+                                  {storeAssignment.store.name}
+                                </Badge>
+                              ))}
+                              {user.stores.length > 2 && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-xs"
+                                  style={{
+                                    borderColor: 'var(--border)',
+                                    color: 'var(--muted-foreground)',
+                                  }}
+                                >
+                                  +{user.stores.length - 2}
+                                </Badge>
+                              )}
+                            </div>
+                          ) : (
+                            <span
+                              className="text-xs"
+                              style={{ color: 'var(--muted-foreground)' }}
+                            >
+                              No stores
+                            </span>
+                          )}
                         </TableCell>
-                        <TableCell className="text-right px-3 sm:px-4 py-3 sm:py-4">
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-end">
+                        <TableCell className="text-right p-2 sm:p-4">
+                          <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => onAssignRole(user.id)}
-                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
+                              style={{
+                                backgroundColor: 'var(--secondary)',
+                                color: 'var(--secondary-foreground)',
+                                borderColor: 'var(--border)',
+                              }}
                             >
-                              Assign
+                              <UserPlus className="h-3 w-3 sm:mr-1" />
+                              <span className="hidden sm:inline">Assign</span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => onViewAssignments(user.id)}
-                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
+                              style={{
+                                color: 'var(--muted-foreground)',
+                                backgroundColor: 'transparent',
+                              }}
                             >
                               <Eye className="h-3 w-3 sm:mr-1" />
                               <span className="hidden sm:inline">View</span>
@@ -184,15 +422,85 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+          
+          {pagination && pagination.lastPage > 1 && (
+            <CardFooter
+              className="pt-4 sm:pt-5 lg:pt-6"
+              style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
+            >
+              <div className="flex flex-col items-center justify-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pagination.currentPage <= 1 || loading}
+                    onClick={() => onPageChange?.(pagination.currentPage - 1)}
+                    style={{
+                      backgroundColor:
+                        pagination.currentPage <= 1 || loading
+                          ? 'var(--muted)'
+                          : 'var(--secondary)',
+                      color: 'var(--secondary-foreground)',
+                      borderColor: 'var(--border)',
+                      opacity:
+                        pagination.currentPage <= 1 || loading
+                          ? 0.5
+                          : 1,
+                    }}
+                  >
+                    <span className="hidden xs:inline">Previous</span>
+                    <span className="xs:hidden">Prev</span>
+                  </Button>
+                  <span
+                    className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap"
+                    style={{ color: 'var(--muted-foreground)' }}
+                  >
+                    <span className="hidden sm:inline">
+                      Page {pagination.currentPage} of {pagination.lastPage}
+                    </span>
+                    <span className="sm:hidden">
+                      {pagination.currentPage}/{pagination.lastPage}
+                    </span>
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={
+                      pagination.currentPage >= pagination.lastPage ||
+                      loading
+                    }
+                    onClick={() => onPageChange?.(pagination.currentPage + 1)}
+                    style={{
+                      backgroundColor:
+                        pagination.currentPage >= pagination.lastPage ||
+                        loading
+                          ? 'var(--muted)'
+                          : 'var(--secondary)',
+                      color: 'var(--secondary-foreground)',
+                      borderColor: 'var(--border)',
+                      opacity:
+                        pagination.currentPage >= pagination.lastPage ||
+                        loading
+                          ? 0.5
+                          : 1,
+                    }}
+                  >
+                    <span className="hidden xs:inline">Next</span>
+                    <span className="xs:hidden">Next</span>
+                  </Button>
+                </div>
+              </div>
+            </CardFooter>
+          )}
+        </Card>
+      </div>
+    </>
   );
 };
 
