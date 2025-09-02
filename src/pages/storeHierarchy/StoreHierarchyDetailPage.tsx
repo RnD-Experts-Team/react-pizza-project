@@ -9,15 +9,17 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHierarchyTree } from '../../features/storeHierarchy/hooks/UseRoleHierarchy';
 import { Card, CardContent } from '../../components/ui/card';
+import { Button } from '../../components/ui/button';
 import { Skeleton } from '../../components/ui/skeleton';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { ScrollArea } from '../../components/ui/scroll-area';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Link, Trash2, CheckCircle, RefreshCw } from 'lucide-react';
+import { cn } from '../../lib/utils';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import {
   RoleNode,
   RoleDetailPanel,
   HierarchyTreeHeader,
-  PageHeader,
   EmptyHierarchyState,
   EmptyRoleDetailState
 } from '../../components/storeHierarchy/storeHierarchyDetailPage';
@@ -86,10 +88,6 @@ export const StoreHierarchyDetailPage: React.FC = () => {
     setExpandedNodes(new Set());
   };
 
-  const handleBack = () => {
-    navigate('/stores-hierarchy');
-  };
-
   if (!storeId) {
     return (
       <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
@@ -103,19 +101,61 @@ export const StoreHierarchyDetailPage: React.FC = () => {
     );
   }
 
-  return (
-    <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 space-y-4 sm:space-y-6">
-      {/* Header */}
-      <PageHeader
-        storeId={storeId}
-        loading={loading}
-        onBack={handleBack}
-        onRefresh={() => refetch(storeId!)}
-        onCreateHierarchy={() => navigate(`/stores-hierarchy/create/${storeId}`)}
-        onDeleteHierarchy={() => navigate(`/stores-hierarchy/delete/${storeId}`)}
-        onValidateHierarchy={() => navigate(`/stores-hierarchy/validate/${storeId}`)}
-      />
+  const secondaryButtons = (
+    <>
+      <Button
+        onClick={() => navigate(`/stores-hierarchy/create/${storeId}`)}
+        variant="outline"
+        size="sm"
+        className="hover:bg-accent text-xs sm:text-sm"
+      >
+        <Link className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+        <span className="hidden sm:inline">Create Hierarchy</span>
+        <span className="sm:hidden">Create</span>
+      </Button>
+      <Button
+        onClick={() => navigate(`/stores-hierarchy/delete/${storeId}`)}
+        variant="outline"
+        size="sm"
+        className="hover:bg-accent text-xs sm:text-sm"
+      >
+        <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+        <span className="hidden sm:inline">Remove Hierarchy</span>
+        <span className="sm:hidden">Remove</span>
+      </Button>
+      <Button
+        onClick={() => navigate(`/stores-hierarchy/validate/${storeId}`)}
+        variant="outline"
+        size="sm"
+        className="hover:bg-accent text-xs sm:text-sm"
+      >
+        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+        <span className="hidden sm:inline">Validate Hierarchy</span>
+        <span className="sm:hidden">Validate</span>
+      </Button>
+      <Button
+        onClick={() => refetch(storeId!)}
+        variant="outline"
+        size="sm"
+        disabled={loading}
+        className="hover:bg-accent text-xs sm:text-sm"
+      >
+        <RefreshCw className={cn("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2", loading && "animate-spin")} />
+        <span className="hidden sm:inline">Refresh</span>
+        <span className="sm:hidden">↻</span>
+      </Button>
+    </>
+  );
 
+  return (
+    <ManageLayout
+      title="Store Hierarchy"
+      subtitle={`Role hierarchy for store: ${storeId}`}
+      backButton={{
+        show: true,
+      }}
+      subButtons={secondaryButtons}
+    >
       {/* Error State */}
       {error && (
         <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
@@ -191,7 +231,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </ManageLayout>
   );
 };
 

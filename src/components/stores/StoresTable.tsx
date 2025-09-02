@@ -22,17 +22,19 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { Eye, Edit, MoreHorizontal, Plus } from 'lucide-react';
 import type { Store } from '../../features/stores/types';
 
 interface StoresTableProps {
   stores: Store[];
   loading?: boolean;
+  onCreateStore?: () => void;
 }
 
 export const StoresTable: React.FC<StoresTableProps> = ({
   stores,
   loading = false,
+  onCreateStore,
 }) => {
   const navigate = useNavigate();
 
@@ -297,6 +299,43 @@ export const StoresTable: React.FC<StoresTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
+            {/* Create Store Row */}
+            {onCreateStore && (
+              <TableRow 
+                className="hover:bg-opacity-50 transition-colors duration-200 border-dashed"
+                style={{ 
+                  borderColor: 'var(--primary)',
+                  backgroundColor: 'color-mix(in srgb, var(--primary) 5%, transparent)',
+                }}
+              >
+                <TableCell 
+                  colSpan={7} 
+                  className="px-2 sm:px-4 py-4 sm:py-6 text-center"
+                >
+                  <Button 
+                    onClick={onCreateStore}
+                    variant="outline"
+                    className="w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base border-dashed"
+                    style={{
+                      borderColor: 'var(--primary)',
+                      color: 'var(--primary)',
+                      backgroundColor: 'transparent',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'var(--primary)';
+                      e.currentTarget.style.color = 'var(--primary-foreground)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = 'var(--primary)';
+                    }}
+                  >
+                    <Plus className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                    Create New Store
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )}
             {stores.map((store) => (
               <TableRow 
                 key={store.id} 

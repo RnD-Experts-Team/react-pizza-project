@@ -12,7 +12,8 @@ import { useRoles } from '../../features/roles/hooks/useRoles';
 import type { CreateHierarchyRequest } from '../../features/storeHierarchy/types';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
-import { Header, CreateHierarchyForm } from '../../components/storeHierarchy/createHierarchy';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
+import { CreateHierarchyForm } from '../../components/storeHierarchy/createHierarchy';
 
 const CreateHierarchyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -133,48 +134,53 @@ const CreateHierarchyPage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <ManageLayout
+        title="Create Hierarchy"
+        subtitle="Store ID is required to create hierarchy"
+        backButton={{ show: true }}
+      >
         <Alert variant="destructive" className="border-destructive/50 text-destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-sm sm:text-base">
             Store ID is required to create hierarchy.
           </AlertDescription>
         </Alert>
-      </div>
+      </ManageLayout>
     );
   }
 
   return (
-    <div className="container mx-auto py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-      <div className=" mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <Header storeId={storeId} onBack={handleBack} />
+    <ManageLayout
+      title="Create Hierarchy"
+      subtitle={`Create a new role hierarchy for store: ${storeId}`}
+      backButton={{
+        show: true,
+      }}
+    >
+      {/* Error Alert */}
+      {(error || validationErrors.general) && (
+        <Alert variant="destructive" className="border-destructive/50 text-destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription className="text-sm sm:text-base">
+            {error?.message || validationErrors.general}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Error Alert */}
-        {(error || validationErrors.general) && (
-          <Alert variant="destructive" className="border-destructive/50 text-destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-sm sm:text-base">
-              {error?.message || validationErrors.general}
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Form */}
-        <CreateHierarchyForm
-          formData={formData}
-          roles={roles}
-          rolesLoading={rolesLoading}
-          isSubmitting={isSubmitting}
-          isLoading={isLoading}
-          validationErrors={validationErrors}
-          onSubmit={handleSubmit}
-          onInputChange={handleInputChange}
-          onRoleChange={handleRoleChange}
-          onCancel={handleBack}
-        />
-      </div>
-    </div>
+      {/* Form */}
+      <CreateHierarchyForm
+        formData={formData}
+        roles={roles}
+        rolesLoading={rolesLoading}
+        isSubmitting={isSubmitting}
+        isLoading={isLoading}
+        validationErrors={validationErrors}
+        onSubmit={handleSubmit}
+        onInputChange={handleInputChange}
+        onRoleChange={handleRoleChange}
+        onCancel={handleBack}
+      />
+    </ManageLayout>
   );
 };
 

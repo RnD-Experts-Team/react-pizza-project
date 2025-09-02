@@ -13,10 +13,10 @@ import { useStoreHierarchy, useHierarchyTree } from '../../features/storeHierarc
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import {  AlertCircle } from 'lucide-react';
 import { 
-  ValidateHierarchyHeader,
   RoleSelection,
   ValidationSection
 } from '../../components/storeHierarchy/validateHierarchy';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 const ValidateHierarchyPage: React.FC = () => {
   const navigate = useNavigate();
@@ -45,9 +45,7 @@ const ValidateHierarchyPage: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleBack = () => {
-    navigate(`/stores-hierarchy/view/${storeId}`);
-  };
+  
 
   const handleRoleChange = (field: 'higher_role_id' | 'lower_role_id', value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -191,26 +189,31 @@ const ValidateHierarchyPage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <ManageLayout
+        title="Validate Hierarchy"
+        subtitle="Store ID is required to validate hierarchy"
+        backButton={{
+          show: true
+        }}
+      >
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
             Store ID is required to validate hierarchy.
           </AlertDescription>
         </Alert>
-      </div>
+      </ManageLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 ">
-      <div className=" mx-auto space-y-6">
-        {/* Header */}
-        <ValidateHierarchyHeader
-          storeId={storeId}
-          hierarchiesCount={hierarchies.length}
-          onBack={handleBack}
-        />
+    <ManageLayout
+      title="Validate Hierarchy"
+      subtitle={`Check if a role hierarchy exists for store: ${storeId}${hierarchies.length > 0 ? ` (${hierarchies.length} existing hierarchies loaded)` : ''}`}
+      backButton={{
+        show: true,
+      }}
+    >
 
         {/* Error Alerts */}
         {validationErrors.general && (
@@ -280,10 +283,7 @@ const ValidateHierarchyPage: React.FC = () => {
             onRemoveHierarchy={handleRemoveHierarchy}
           />
         </div>
-
-        
-      </div>
-    </div>
+    </ManageLayout>
   );
 };
 

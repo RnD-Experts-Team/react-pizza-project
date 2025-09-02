@@ -11,9 +11,9 @@ import { useStoreHierarchy, useRemoveHierarchy } from '../../features/storeHiera
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import type { RoleHierarchy, RemoveHierarchyRequest } from '../../features/storeHierarchy/types';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 
 // Extracted components
-import { PageHeader } from '../../components/storeHierarchy/deleteHierarchyConfirmationPage/PageHeader';
 import { SelectionControls } from '../../components/storeHierarchy/deleteHierarchyConfirmationPage/SelectionControls';
 import { HierarchyList } from '../../components/storeHierarchy/deleteHierarchyConfirmationPage/HierarchyList';
 import { DeleteConfirmationDialog } from '../../components/storeHierarchy/deleteHierarchyConfirmationPage/DeleteConfirmationDialog';
@@ -129,27 +129,31 @@ export const DeleteHierarchyConfirmationPage: React.FC = () => {
 
   if (!storeId) {
     return (
-      <div className="container mx-auto p-4 sm:p-6 lg:p-8">
+      <ManageLayout
+        title="Delete Store Hierarchy"
+        subtitle="Manage role hierarchies for your store"
+        backButton={{
+          show: true,
+        }}
+      >
         <Alert variant="destructive" className="border-destructive/50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-destructive text-sm sm:text-base">
             Store ID is required to view hierarchy.
           </AlertDescription>
         </Alert>
-      </div>
+      </ManageLayout>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 lg:p-8 space-y-4 sm:space-y-6">
-      {/* Header */}
-      <PageHeader
-        storeId={storeId}
-        onBack={handleBack}
-        onRefresh={() => refetch(storeId!)}
-        loading={loading}
-      />
-
+    <ManageLayout
+      title={`Delete Store Hierarchy - Store ${storeId}`}
+      subtitle="Select and remove role hierarchies from your store"
+      backButton={{
+        show: true,
+      }}
+    >
       {/* Error State */}
       {error && (
         <Alert variant="destructive" className="border-destructive/50">
@@ -189,7 +193,7 @@ export const DeleteHierarchyConfirmationPage: React.FC = () => {
         isDeleting={isDeleting}
         open={showConfirmDialog}
       />
-    </div>
+    </ManageLayout>
   );
 };
 

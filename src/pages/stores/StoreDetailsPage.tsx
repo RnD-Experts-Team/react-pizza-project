@@ -14,10 +14,9 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Separator } from '../../components/ui/separator';
 import { StoreUsersSection } from '../../components/stores/StoreUsersSection';
 import { StoreRolesSection } from '../../components/stores/StoreRolesSection';
+import { ManageLayout } from '../../components/layouts/ManageLayout';
 import {
-  ArrowLeft,
   Edit,
-  Store,
   Phone,
   MapPin,
   Calendar,
@@ -65,64 +64,57 @@ export const StoreDetailsPage: React.FC = () => {
   };
 
   const renderLoadingSkeleton = () => (
-    <div className="space-y-4 sm:space-y-6">
-      {/* Header skeleton */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          <Skeleton className="h-8 w-8 sm:h-10 sm:w-10" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-32 sm:h-8 sm:w-48" />
-            <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
-          </div>
-        </div>
-        <Skeleton className="h-8 w-20 sm:h-10 sm:w-24" />
-      </div>
-      
-      {/* Content skeleton */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        <Card>
-          <CardHeader className="pb-3 sm:pb-6">
-            <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
-          </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex justify-between">
-                <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
-                <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-3 sm:pb-6">
-            <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
-          </CardHeader>
-          <CardContent className="space-y-3 sm:space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex justify-between">
-                <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
-                <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+      <Card>
+        <CardHeader className="pb-3 sm:pb-6">
+          <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
+        </CardHeader>
+        <CardContent className="space-y-3 sm:space-y-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="flex justify-between">
+              <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+              <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-3 sm:pb-6">
+          <Skeleton className="h-5 w-28 sm:h-6 sm:w-32" />
+        </CardHeader>
+        <CardContent className="space-y-3 sm:space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="flex justify-between">
+              <Skeleton className="h-3 w-20 sm:h-4 sm:w-24" />
+              <Skeleton className="h-3 w-24 sm:h-4 sm:w-32" />
+            </div>
+          ))}
+        </CardContent>
+      </Card>
     </div>
   );
 
   if (loading) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
-        <div className="max-w-7xl mx-auto">
+      <ManageLayout
+        title="Loading..."
+        subtitle="Please wait while we load the store details"
+        backButton={{ show: true, to: '/stores' }}
+      >
+        
           {renderLoadingSkeleton()}
-        </div>
-      </div>
+        
+      </ManageLayout>
     );
   }
 
   if (error) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <ManageLayout
+        title="Error"
+        subtitle="Failed to load store details"
+        backButton={{ show: true}}
+      >
         <div className="max-w-7xl mx-auto">
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -130,20 +122,18 @@ export const StoreDetailsPage: React.FC = () => {
               Failed to load store details: {error}
             </AlertDescription>
           </Alert>
-          <div className="mt-3 sm:mt-4">
-            <Button onClick={() => navigate('/stores')} variant="outline" size="sm" className="sm:size-default">
-              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="text-sm sm:text-base">Back to Stores</span>
-            </Button>
-          </div>
         </div>
-      </div>
+      </ManageLayout>
     );
   }
 
   if (!store) {
     return (
-      <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+      <ManageLayout
+        title="Store Not Found"
+        subtitle="The store may have been deleted or the ID is invalid"
+        backButton={{ show: true }}
+      >
         <div className="max-w-7xl mx-auto">
           <Alert>
             <AlertCircle className="h-4 w-4" />
@@ -151,47 +141,25 @@ export const StoreDetailsPage: React.FC = () => {
               Store not found. The store may have been deleted or the ID is invalid.
             </AlertDescription>
           </Alert>
-          <div className="mt-3 sm:mt-4">
-            <Button onClick={() => navigate('/stores')} variant="outline" size="sm" className="sm:size-default">
-              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="text-sm sm:text-base">Back to Stores</span>
-            </Button>
-          </div>
         </div>
-      </div>
+      </ManageLayout>
     );
   }
 
   return (
-    <div className="container mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8">
+    <ManageLayout
+      title={store.name}
+      subtitle={`Store ID: ${store.id}`}
+      backButton={{ show: true }}
+      mainButtons={
+        <Button onClick={handleEditStore}>
+          <Edit className="mr-2 h-4 w-4" />
+          Edit Store
+        </Button>
+      }
+      
+    >
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
-            <Button
-              onClick={() => navigate('/stores')}
-              variant="ghost"
-              size="sm"
-              className="shrink-0"
-            >
-              <ArrowLeft className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="text-sm sm:text-base">Back</span>
-            </Button>
-            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold truncate">{store.name}</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground truncate">Store ID: {store.id}</p>
-              </div>
-            </div>
-          </div>
-          <Button onClick={handleEditStore} size="sm" className="sm:size-default w-full sm:w-auto">
-            <Edit className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="text-sm sm:text-base">Edit Store</span>
-          </Button>
-        </div>
 
         {/* Store Information Cards */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
@@ -285,7 +253,7 @@ export const StoreDetailsPage: React.FC = () => {
           />
         </div>
       </div>
-    </div>
+    </ManageLayout>
   );
 };
 
