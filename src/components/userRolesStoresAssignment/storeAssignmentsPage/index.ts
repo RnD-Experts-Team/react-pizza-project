@@ -1,4 +1,3 @@
-export { PageHeader } from './PageHeader';
 export { AssignmentsCard } from './AssignmentsCard';
 export { AssignmentTableRow } from './AssignmentTableRow';
 export { DeleteConfirmationDialog } from './DeleteConfirmationDialog';
