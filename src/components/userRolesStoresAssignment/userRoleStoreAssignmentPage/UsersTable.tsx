@@ -1,56 +1,53 @@
+/**
+ * Users Table Component
+ * 
+ * Features:
+ * - Displays users in a sortable table with Card wrapper
+ * - View and assign user functionality
+ * - Loading states and responsive design
+ * - Pagination functionality
+ * - Error handling and refresh capability
+ * - Light/dark mode compatibility using CSS variables
+ */
+
 import React from 'react';
-import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../../ui/card';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { useUsers } from '../../../features/users/hooks/useUsers';
+import { fetchUsers } from '../../../features/users/store/usersSlice';
+import { userFormatting } from '../../../features/users/utils';
+import type { AppDispatch } from '../../../store';
 import { Button } from '../../ui/button';
-import { Badge } from '../../ui/badge';
-import { Alert, AlertDescription } from '../../ui/alert';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
 } from '../../ui/table';
-import { Loader2, UserPlus, Eye, AlertCircle, RefreshCw } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../../ui/card';
+import { Alert, AlertDescription } from '../../ui/alert';
+import { Badge } from '../../ui/badge';
+import { Eye, UserPlus, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  created_at: string;
-  roles?: Array<{ id: number; name: string }>;
-  stores?: Array<{ store: { id: string; name: string } }>;
-}
+export const UsersTable: React.FC = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const { users, loading, error, pagination, refetch } = useUsers();
 
-interface Pagination {
-  currentPage: number;
-  lastPage: number;
-  from: number;
-  to: number;
-  total: number;
-}
+  const handleView = (userId: number) => {
+    navigate(`/user-role-store-assignment/view/user/${userId}`);
+  };
 
-interface UsersTableProps {
-  users: User[];
-  loading: boolean;
-  error: string | null;
-  pagination?: Pagination;
-  onAssignRole: (userId: number) => void;
-  onViewAssignments: (userId: number) => void;
-  onPageChange?: (page: number) => void;
-  onRefresh?: () => void;
-}
+  const handleAssign = (userId: number) => {
+    navigate(`/user-role-store-assignment/assign?userId=${userId}`);
+  };
 
-export const UsersTable: React.FC<UsersTableProps> = ({
-  users,
-  loading,
-  error,
-  pagination,
-  onAssignRole,
-  onViewAssignments,
-  onPageChange,
-  onRefresh,
-}) => {
+  // Handle pagination by dispatching fetchUsers with the new page
+  const handlePageChange = (page: number) => {
+    dispatch(fetchUsers({ page }));
+  };
 
   return (
     <>
@@ -95,7 +92,8 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                     style={{ color: 'var(--muted-foreground)' }}
                   >
                     <span className="hidden sm:inline">
-                      Showing {pagination.from} to {pagination.to} of {pagination.total} users
+                      Showing {pagination.from}-{pagination.to} of{' '}
+                      {pagination.total} users
                     </span>
                     <span className="sm:hidden">
                       {pagination.from}-{pagination.to} of {pagination.total}
@@ -103,28 +101,26 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                   </div>
                 )}
                 <div className="flex items-center gap-2 order-1 sm:order-2">
-                  {onRefresh && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={onRefresh}
-                      disabled={loading}
-                      className="flex items-center gap-2"
-                      style={{
-                        backgroundColor: loading
-                          ? 'var(--muted)'
-                          : 'var(--secondary)',
-                        color: 'var(--secondary-foreground)',
-                        borderColor: 'var(--border)',
-                        opacity: loading ? 0.6 : 1,
-                      }}
-                    >
-                      <RefreshCw
-                        className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
-                      />
-                      <span className="hidden xs:inline">Refresh</span>
-                    </Button>
-                  )}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => refetch()}
+                    disabled={loading}
+                    className="flex items-center gap-2"
+                    style={{
+                      backgroundColor: loading
+                        ? 'var(--muted)'
+                        : 'var(--secondary)',
+                      color: 'var(--secondary-foreground)',
+                      borderColor: 'var(--border)',
+                      opacity: loading ? 0.6 : 1,
+                    }}
+                  >
+                    <RefreshCw
+                      className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                    />
+                    <span className="hidden xs:inline">Refresh</span>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -181,22 +177,16 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                         className="min-w-[8rem] text-xs sm:text-sm hidden sm:table-cell"
                         style={{ color: 'var(--foreground)', fontWeight: '600' }}
                       >
-                        Email
+                        Roles
                       </TableHead>
                       <TableHead
                         className="min-w-[8rem] text-xs sm:text-sm hidden md:table-cell"
                         style={{ color: 'var(--foreground)', fontWeight: '600' }}
                       >
-                        Roles
-                      </TableHead>
-                      <TableHead
-                        className="min-w-[8rem] text-xs sm:text-sm hidden lg:table-cell"
-                        style={{ color: 'var(--foreground)', fontWeight: '600' }}
-                      >
                         Stores
                       </TableHead>
                       <TableHead
-                        className="w-[6rem] text-xs sm:text-sm text-right"
+                        className="min-w-[6rem] text-xs sm:text-sm text-right"
                         style={{ color: 'var(--foreground)', fontWeight: '600' }}
                       >
                         Actions
@@ -225,80 +215,67 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                                 color: 'var(--primary-foreground)',
                               }}
                             >
-                              {user.name.charAt(0).toUpperCase()}
+                              {userFormatting.formatInitials(user.name)}
                             </div>
                             <div className="min-w-0 flex-1">
                               <div
                                 className="text-xs sm:text-sm font-medium truncate"
                                 style={{ color: 'var(--foreground)' }}
-                                title={user.name}
+                                title={userFormatting.formatDisplayName(user.name)}
                               >
-                                {user.name}
+                                {userFormatting.formatDisplayName(user.name)}
                               </div>
-                              {/* Mobile: Show email, roles and stores inline */}
+                              {/* Mobile: Show roles and stores inline */}
                               <div className="sm:hidden mt-1 space-y-1">
-                                <div
-                                  className="text-xs truncate"
-                                  style={{ color: 'var(--muted-foreground)' }}
-                                  title={user.email}
-                                >
-                                  {user.email}
-                                </div>
                                 {user.roles && user.roles.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
                                     {user.roles.slice(0, 2).map((role) => (
                                       <Badge
                                         key={role.id}
-                                        variant="secondary"
-                                        className="text-xs px-1 py-0"
+                                        variant="outline"
+                                        className="text-xs px-1 py-0.5"
                                         style={{
                                           backgroundColor: 'var(--secondary)',
                                           color: 'var(--secondary-foreground)',
+                                          borderColor: 'var(--border)',
                                         }}
                                       >
                                         {role.name}
                                       </Badge>
                                     ))}
                                     {user.roles.length > 2 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs px-1 py-0"
-                                        style={{
-                                          borderColor: 'var(--border)',
-                                          color: 'var(--muted-foreground)',
-                                        }}
+                                      <span
+                                        className="text-xs"
+                                        style={{ color: 'var(--muted-foreground)' }}
                                       >
                                         +{user.roles.length - 2}
-                                      </Badge>
+                                      </span>
                                     )}
                                   </div>
                                 )}
                                 {user.stores && user.stores.length > 0 && (
                                   <div className="flex flex-wrap gap-1">
-                                    {user.stores.slice(0, 2).map((storeAssignment) => (
+                                    {user.stores.slice(0, 2).map((userStore) => (
                                       <Badge
-                                        key={storeAssignment.store.id}
-                                        variant="outline"
-                                        className="text-xs px-1 py-0"
+                                        key={userStore.store.id}
+                                        variant="secondary"
+                                        className="text-xs px-1 py-0.5"
                                         style={{
+                                          backgroundColor: 'var(--accent)',
+                                          color: 'var(--accent-foreground)',
                                           borderColor: 'var(--border)',
-                                          color: 'var(--foreground)',
                                         }}
                                       >
-                                        {storeAssignment.store.name}
+                                        {userStore.store.name}
                                       </Badge>
                                     ))}
                                     {user.stores.length > 2 && (
-                                      <Badge
-                                        variant="outline"
-                                        className="text-xs px-1 py-0"
-                                        style={{
-                                          borderColor: 'var(--border)',
-                                          color: 'var(--muted-foreground)',
-                                        }}
+                                      <span
+                                        className="text-xs"
+                                        style={{ color: 'var(--muted-foreground)' }}
                                       >
                                         +{user.stores.length - 2}
-                                      </Badge>
+                                      </span>
                                     )}
                                   </div>
                                 )}
@@ -306,96 +283,99 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell
-                          className="text-xs sm:text-sm p-2 sm:p-4 hidden sm:table-cell"
-                          style={{ color: 'var(--muted-foreground)' }}
-                        >
-                          <div className="truncate" title={user.email}>
-                            {user.email}
+
+                        <TableCell className="p-2 sm:p-4 hidden sm:table-cell">
+                          <div className="space-y-1 max-w-[8rem] lg:max-w-none">
+                            {user.roles && user.roles.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {user.roles.slice(0, 2).map((role) => (
+                                  <Badge
+                                    key={role.id}
+                                    variant="outline"
+                                    className="text-xs px-1 py-0.5"
+                                    style={{
+                                      backgroundColor: 'var(--secondary)',
+                                      color: 'var(--secondary-foreground)',
+                                      borderColor: 'var(--border)',
+                                    }}
+                                  >
+                                    <span
+                                      className="truncate max-w-[3rem]"
+                                      title={role.name}
+                                    >
+                                      {role.name}
+                                    </span>
+                                  </Badge>
+                                ))}
+                                {user.roles.length > 2 && (
+                                  <span
+                                    className="text-xs"
+                                    style={{ color: 'var(--muted-foreground)' }}
+                                  >
+                                    +{user.roles.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span
+                                className="text-xs sm:text-sm"
+                                style={{ color: 'var(--muted-foreground)' }}
+                              >
+                                No roles
+                              </span>
+                            )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden md:table-cell">
-                          {user.roles && user.roles.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {user.roles.slice(0, 2).map((role) => (
-                                <Badge
-                                  key={role.id}
-                                  variant="secondary"
-                                  className="text-xs"
-                                  style={{
-                                    backgroundColor: 'var(--secondary)',
-                                    color: 'var(--secondary-foreground)',
-                                  }}
-                                >
-                                  {role.name}
-                                </Badge>
-                              ))}
-                              {user.roles.length > 2 && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs"
-                                  style={{
-                                    borderColor: 'var(--border)',
-                                    color: 'var(--muted-foreground)',
-                                  }}
-                                >
-                                  +{user.roles.length - 2}
-                                </Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <span
-                              className="text-xs"
-                              style={{ color: 'var(--muted-foreground)' }}
-                            >
-                              No roles
-                            </span>
-                          )}
+
+                        <TableCell className="p-2 sm:p-4 hidden md:table-cell">
+                          <div className="space-y-1 max-w-[8rem] lg:max-w-none">
+                            {user.stores && user.stores.length > 0 ? (
+                              <div className="flex flex-wrap gap-1">
+                                {user.stores.slice(0, 2).map((userStore) => (
+                                  <Badge
+                                    key={userStore.store.id}
+                                    variant="secondary"
+                                    className="text-xs px-1 py-0.5"
+                                    style={{
+                                      backgroundColor: 'var(--accent)',
+                                      color: 'var(--accent-foreground)',
+                                      borderColor: 'var(--border)',
+                                    }}
+                                  >
+                                    <span
+                                      className="truncate max-w-[3rem]"
+                                      title={userStore.store.name}
+                                    >
+                                      {userStore.store.name}
+                                    </span>
+                                  </Badge>
+                                ))}
+                                {user.stores.length > 2 && (
+                                  <span
+                                    className="text-xs"
+                                    style={{ color: 'var(--muted-foreground)' }}
+                                  >
+                                    +{user.stores.length - 2}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (
+                              <span
+                                className="text-xs sm:text-sm"
+                                style={{ color: 'var(--muted-foreground)' }}
+                              >
+                                No stores
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-xs sm:text-sm p-2 sm:p-4 hidden lg:table-cell">
-                          {user.stores && user.stores.length > 0 ? (
-                            <div className="flex flex-wrap gap-1">
-                              {user.stores.slice(0, 2).map((storeAssignment) => (
-                                <Badge
-                                  key={storeAssignment.store.id}
-                                  variant="outline"
-                                  className="text-xs"
-                                  style={{
-                                    borderColor: 'var(--border)',
-                                    color: 'var(--foreground)',
-                                  }}
-                                >
-                                  {storeAssignment.store.name}
-                                </Badge>
-                              ))}
-                              {user.stores.length > 2 && (
-                                <Badge
-                                  variant="outline"
-                                  className="text-xs"
-                                  style={{
-                                    borderColor: 'var(--border)',
-                                    color: 'var(--muted-foreground)',
-                                  }}
-                                >
-                                  +{user.stores.length - 2}
-                                </Badge>
-                              )}
-                            </div>
-                          ) : (
-                            <span
-                              className="text-xs"
-                              style={{ color: 'var(--muted-foreground)' }}
-                            >
-                              No stores
-                            </span>
-                          )}
-                        </TableCell>
+
                         <TableCell className="text-right p-2 sm:p-4">
                           <div className="flex items-center justify-end gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => onAssignRole(user.id)}
+                              onClick={() => handleAssign(user.id)}
                               className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
                               style={{
                                 backgroundColor: 'var(--secondary)',
@@ -409,7 +389,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => onViewAssignments(user.id)}
+                              onClick={() => handleView(user.id)}
                               className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
                               style={{
                                 color: 'var(--muted-foreground)',
@@ -428,7 +408,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({
               </div>
             )}
           </CardContent>
-          
           {pagination && pagination.lastPage > 1 && (
             <CardFooter
               className="pt-4 sm:pt-5 lg:pt-6"
@@ -440,7 +419,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                     variant="outline"
                     size="sm"
                     disabled={pagination.currentPage <= 1 || loading}
-                    onClick={() => onPageChange?.(pagination.currentPage - 1)}
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
                     style={{
                       backgroundColor:
                         pagination.currentPage <= 1 || loading
@@ -475,7 +454,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({
                       pagination.currentPage >= pagination.lastPage ||
                       loading
                     }
-                    onClick={() => onPageChange?.(pagination.currentPage + 1)}
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
                     style={{
                       backgroundColor:
                         pagination.currentPage >= pagination.lastPage ||
@@ -503,5 +482,3 @@ export const UsersTable: React.FC<UsersTableProps> = ({
     </>
   );
 };
-
-export default UsersTable;

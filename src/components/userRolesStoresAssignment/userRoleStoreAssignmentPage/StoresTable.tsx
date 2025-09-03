@@ -1,15 +1,14 @@
 /**
  * StoresTable Component
- * 
- * Displays a table of stores with search functionality and action buttons.
- * Includes responsive design and handles loading, error, and empty states.
+ * Displays a table of stores with action buttons for view and assign operations
+ * Fully responsive with light/dark mode support using CSS custom properties
+ * Now includes integrated Redux state management and data fetching
+ * Styled to match AuthRulesTable component with Card wrapper and pagination
  */
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '../../ui/card';
-import { Input } from '../../ui/input';
-import { Button } from '../../ui/button';
-import { Badge } from '../../ui/badge';
+import { useNavigate } from 'react-router-dom';
+import { useStores } from '../../../features/stores/hooks/useStores';
 import {
   Table,
   TableBody,
@@ -18,168 +17,398 @@ import {
   TableHeader,
   TableRow,
 } from '../../ui/table';
-import { Loader2, Search, Store, Eye } from 'lucide-react';
+import { Button } from '../../ui/button';
+import { Badge } from '../../ui/badge';
+import { Alert, AlertDescription } from '../../ui/alert';
+import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '../../ui/card';
+import { Eye, UserPlus, AlertCircle, RefreshCw, Loader2 } from 'lucide-react';
 
-interface StoreData {
-  id: string;
-  name: string;
-  is_active: boolean;
-  created_at: string;
-  metadata: {
-    phone?: string;
-    address?: string;
+export const StoresTable: React.FC = () => {
+  const navigate = useNavigate();
+
+  // Use the custom hook instead of direct Redux selectors
+  const {
+    stores,
+    loading,
+    error,
+    pagination,
+    refetch,
+    changePage,
+  } = useStores();
+
+  const handleView = (storeId: string) => {
+    navigate(`/user-role-store-assignment/view/store/${storeId}`);
   };
-}
 
-interface StoresTableProps {
-  stores: StoreData[];
-  loading: boolean;
-  error: string | null;
-  onAssignRole: (storeId: string) => void;
-  onViewAssignments: (storeId: string) => void;
-  formatDate: (dateString: string) => string;
-}
+  const handleAssign = (storeId: string) => {
+    navigate(`/user-role-store-assignment/assign?storeId=${storeId}`);
+  };
 
-export const StoresTable: React.FC<StoresTableProps> = ({
-  stores,
-  loading,
-  error,
-  onAssignRole,
-  onViewAssignments,
-  formatDate,
-}) => {
-  // Local state for search term
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const handleRetry = () => {
+    refetch();
+  };
 
-  // Filter stores based on search term
-  const filteredStores = stores.filter(store =>
-    store.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    store.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Handle pagination
+  const handlePageChange = (page: number) => {
+    changePage(page);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
 
   return (
-    <Card className="shadow-sm border-border">
-      <CardHeader className="pb-4 sm:pb-6">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0 gap-4">
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <Store className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-card-foreground">Stores</CardTitle>
+    <div className="space-y-4 sm:space-y-5 lg:space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Failed to load stores: {error}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Stores Table */}
+      <Card
+        className="rounded-sm"
+        style={{
+          backgroundColor: 'var(--card)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-realistic)',
+        }}
+      >
+        <CardHeader
+          className="mb-0"
+          style={{
+            backgroundColor: 'var(--muted)',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <CardTitle
+              className="text-lg sm:text-xl"
+              style={{ color: 'var(--card-foreground)' }}
+            >
+              Stores
+            </CardTitle>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
+              {pagination && (
+                <div
+                  className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <span className="hidden sm:inline">
+                    Showing {pagination.from}-{pagination.to} of{' '}
+                    {pagination.total} stores
+                  </span>
+                  <span className="sm:hidden">
+                    {pagination.from}-{pagination.to} of {pagination.total}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center gap-2 order-1 sm:order-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRetry}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                  style={{
+                    backgroundColor: loading
+                      ? 'var(--muted)'
+                      : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity: loading ? 0.6 : 1,
+                  }}
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`}
+                  />
+                  <span className="hidden xs:inline">Refresh</span>
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="relative w-full lg:w-80 xl:w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search stores by name or ID..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 text-sm sm:text-base bg-background border-input text-foreground placeholder:text-muted-foreground"
-            />
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="px-4 sm:px-6">
-        {error ? (
-          <div className="text-destructive text-center py-6 sm:py-8 text-sm sm:text-base">
-            Error loading stores: {error}
-          </div>
-        ) : loading ? (
-          <div className="flex items-center justify-center py-8 sm:py-12">
-            <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-            <span className="ml-2 sm:ml-3 text-sm sm:text-base text-muted-foreground">Loading stores...</span>
-          </div>
-        ) : (
-          <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:mx-0">
-            <div className="inline-block min-w-full align-middle">
+        </CardHeader>
+        <CardContent className="p-0" style={{ backgroundColor: 'var(--card)' }}>
+          {loading ? (
+            <div
+              className="flex items-center justify-center h-48 sm:h-64"
+              style={{
+                backgroundColor: 'var(--card)',
+                color: 'var(--muted-foreground)',
+              }}
+            >
+              <Loader2
+                className="h-6 w-6 sm:h-8 sm:w-8 animate-spin"
+                style={{ color: 'var(--primary)' }}
+              />
+              <span
+                className="ml-2 text-sm sm:text-base"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Loading stores...
+              </span>
+            </div>
+          ) : !stores.length ? (
+            <div
+              className="text-center py-6 sm:py-8"
+              style={{ backgroundColor: 'var(--card)' }}
+            >
+              <p
+                className="text-sm sm:text-base text-muted-foreground"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                No stores found.
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table className="min-w-full">
-                <TableHeader>
-                  <TableRow className="border-border">
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4">Store ID</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4">Name</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">Phone</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">Address</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4">Status</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">Created</TableHead>
-                    <TableHead className="text-xs sm:text-sm font-medium text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 text-right">Actions</TableHead>
+                <TableHeader
+                  style={{
+                    backgroundColor: 'var(--muted)',
+                    borderBottom: '1px solid var(--border)',
+                  }}
+                >
+                  <TableRow style={{ borderColor: 'var(--border)' }}>
+                    <TableHead
+                      className="min-w-[6rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Store ID
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[10rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Name
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[10rem] text-xs sm:text-sm hidden md:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Phone
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[12rem] text-xs sm:text-sm hidden lg:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Address
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[5rem] text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Status
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[8rem] text-xs sm:text-sm hidden sm:table-cell"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Created
+                    </TableHead>
+                    <TableHead
+                      className="min-w-[5rem] text-right text-xs sm:text-sm"
+                      style={{ color: 'var(--foreground)', fontWeight: '600' }}
+                    >
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredStores.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 sm:py-12 text-muted-foreground text-sm sm:text-base">
-                        {searchTerm ? 'No stores found matching your search' : 'No stores found'}
+                  {stores.map((store) => (
+                    <TableRow
+                      key={store.id}
+                      style={{
+                        borderColor: 'var(--border)',
+                        backgroundColor: 'var(--card)',
+                      }}
+                      className="hover:bg-muted/50"
+                    >
+                      <TableCell
+                        className="font-medium text-xs sm:text-sm p-2 sm:p-4"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <div
+                          className="truncate max-w-[5rem] sm:max-w-none"
+                          title={store.id}
+                        >
+                          {store.id}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="p-2 sm:p-4">
+                        <div
+                          className="text-xs sm:text-sm truncate max-w-[8rem] sm:max-w-none"
+                          style={{ color: 'var(--foreground)' }}
+                          title={store.name}
+                        >
+                          {store.name}
+                        </div>
+                      </TableCell>
+
+                      <TableCell
+                        className="p-2 sm:p-4 text-xs sm:text-sm hidden md:table-cell"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        {store.metadata?.phone || 'N/A'}
+                      </TableCell>
+
+                      <TableCell
+                        className="p-2 sm:p-4 text-xs sm:text-sm hidden lg:table-cell"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <div
+                          className="truncate max-w-[10rem] lg:max-w-none"
+                          title={store.metadata?.address || 'N/A'}
+                        >
+                          {store.metadata?.address || 'N/A'}
+                        </div>
+                      </TableCell>
+
+                      <TableCell className="p-2 sm:p-4">
+                        <Badge
+                          variant={store.is_active ? 'default' : 'secondary'}
+                          className="text-xs px-1 py-0.5 sm:px-2 sm:py-1"
+                          style={{
+                            backgroundColor: store.is_active
+                              ? 'var(--primary)'
+                              : 'var(--secondary)',
+                            color: store.is_active
+                              ? 'var(--primary-foreground)'
+                              : 'var(--secondary-foreground)',
+                            borderColor: store.is_active
+                              ? 'var(--primary)'
+                              : 'var(--border)',
+                          }}
+                        >
+                          {store.is_active ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </TableCell>
+
+                      <TableCell
+                        className="text-xs sm:text-sm p-2 sm:p-4 hidden sm:table-cell"
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        {formatDate(store.created_at)}
+                      </TableCell>
+
+                      <TableCell className="text-right p-2 sm:p-4">
+                        <div className="flex items-center justify-end gap-1 sm:gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAssign(store.id)}
+                            className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
+                            style={{
+                              backgroundColor: 'var(--secondary)',
+                              color: 'var(--secondary-foreground)',
+                              borderColor: 'var(--border)',
+                            }}
+                          >
+                            <UserPlus className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">Assign</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleView(store.id)}
+                            className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto"
+                            style={{
+                              color: 'var(--muted-foreground)',
+                              backgroundColor: 'transparent',
+                            }}
+                          >
+                            <Eye className="h-3 w-3 sm:mr-1" />
+                            <span className="hidden sm:inline">View</span>
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filteredStores.map((store) => (
-                      <TableRow key={store.id} className="border-border hover:bg-muted/50 transition-colors">
-                        <TableCell className="font-mono text-xs sm:text-sm px-3 sm:px-4 py-3 sm:py-4">
-                          <div className="text-foreground font-medium truncate max-w-[100px] sm:max-w-none">
-                            {store.id}
-                          </div>
-                        </TableCell>
-                        <TableCell className="font-medium px-3 sm:px-4 py-3 sm:py-4">
-                          <div className="text-xs sm:text-sm text-foreground truncate max-w-[120px] sm:max-w-[200px]">
-                            {store.name}
-                          </div>
-                          <div className="text-xs text-muted-foreground md:hidden truncate max-w-[120px]">
-                            {store.metadata.phone || 'No phone'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 sm:px-4 py-3 sm:py-4 hidden md:table-cell">
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate max-w-[150px]">
-                            {store.metadata.phone || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 sm:px-4 py-3 sm:py-4 hidden lg:table-cell">
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate max-w-[200px]" title={store.metadata.address || 'N/A'}>
-                            {store.metadata.address || 'N/A'}
-                          </div>
-                        </TableCell>
-                        <TableCell className="px-3 sm:px-4 py-3 sm:py-4">
-                          <Badge 
-                            variant={store.is_active ? 'default' : 'secondary'}
-                            className={`text-xs px-2 py-1 ${
-                              store.is_active 
-                                ? 'bg-primary text-primary-foreground' 
-                                : 'bg-secondary text-secondary-foreground'
-                            }`}
-                          >
-                            {store.is_active ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-xs sm:text-sm text-muted-foreground px-3 sm:px-4 py-3 sm:py-4 hidden sm:table-cell">
-                          {formatDate(store.created_at)}
-                        </TableCell>
-                        <TableCell className="text-right px-3 sm:px-4 py-3 sm:py-4">
-                          <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onAssignRole(store.id)}
-                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto border-border text-foreground hover:bg-accent hover:text-accent-foreground"
-                            >
-                              Assign
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => onViewAssignments(store.id)}
-                              className="text-xs px-2 py-1 sm:px-3 sm:py-2 h-auto text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                            >
-                              <Eye className="h-3 w-3 sm:mr-1" />
-                              <span className="hidden sm:inline">View</span>
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
             </div>
-          </div>
+          )}
+        </CardContent>
+        {pagination && pagination.last_page > 1 && (
+          <CardFooter
+            className="pt-4 sm:pt-5 lg:pt-6"
+            style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
+          >
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={pagination.current_page <= 1 || loading}
+                  onClick={() => handlePageChange(pagination.current_page - 1)}
+                  style={{
+                    backgroundColor:
+                      pagination.current_page <= 1 || loading
+                        ? 'var(--muted)'
+                        : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity:
+                      pagination.current_page <= 1 || loading
+                        ? 0.5
+                        : 1,
+                  }}
+                >
+                  <span className="hidden xs:inline">Previous</span>
+                  <span className="xs:hidden">Prev</span>
+                </Button>
+                <span
+                  className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <span className="hidden sm:inline">
+                    Page {pagination.current_page} of {pagination.last_page}
+                  </span>
+                  <span className="sm:hidden">
+                    {pagination.current_page}/{pagination.last_page}
+                  </span>
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={
+                    pagination.current_page >= pagination.last_page ||
+                    loading
+                  }
+                  onClick={() => handlePageChange(pagination.current_page + 1)}
+                  style={{
+                    backgroundColor:
+                      pagination.current_page >= pagination.last_page ||
+                      loading
+                        ? 'var(--muted)'
+                        : 'var(--secondary)',
+                    color: 'var(--secondary-foreground)',
+                    borderColor: 'var(--border)',
+                    opacity:
+                      pagination.current_page >= pagination.last_page ||
+                      loading
+                        ? 0.5
+                        : 1,
+                  }}
+                >
+                  <span className="hidden xs:inline">Next</span>
+                  <span className="xs:hidden">Next</span>
+                </Button>
+              </div>
+            </div>
+          </CardFooter>
         )}
-      </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 };
 

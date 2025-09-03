@@ -8,8 +8,6 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUsers } from '../../features/users/hooks/useUsers';
-import { useStores } from '../../features/stores/hooks/useStores';
 import { Button } from '../../components/ui/button';
 import { Users, ShoppingBag } from 'lucide-react';
 import { ManageLayout } from '../../components/layouts/ManageLayout';
@@ -21,42 +19,12 @@ import {
 export const UserRoleStoreAssignmentPage: React.FC = () => {
   const navigate = useNavigate();
 
-  // Fetch users and stores data
-  const { users, loading: usersLoading, error: usersError } = useUsers();
-  const { stores, loading: storesLoading, error: storesError } = useStores();
-
-  const handleAssignUserRole = (userId: number) => {
-    navigate(`/user-role-store-assignment/assign?userId=${userId}`);
-  };
-
-  const handleAssignStoreRole = (storeId: string) => {
-    navigate(`/user-role-store-assignment/assign?storeId=${storeId}`);
-  };
-
   const handleAssignRoles = () => {
-    // TODO: Implement assign roles functionality
     navigate(`/user-role-store-assignment/assign`);
   };
 
   const handleBulkAssign = () => {
-    // TODO: Implement bulk assign functionality
     navigate(`/user-role-store-assignment/bulk`);
-  };
-
-  const handleViewUserAssignments = (userId: number) => {
-    navigate(`/user-role-store-assignment/view/user/${userId}`);
-  };
-
-  const handleViewStoreAssignments = (storeId: string) => {
-    navigate(`/user-role-store-assignment/view/store/${storeId}`);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
   };
 
   const mainButtons = (
@@ -87,23 +55,8 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
       mainButtons={mainButtons}
       subButtons={subButtons}
     >
-
-      <UsersTable
-         users={users}
-         loading={usersLoading}
-         error={usersError}
-         onAssignRole={handleAssignUserRole}
-         onViewAssignments={handleViewUserAssignments}
-       />
-
-      <StoresTable
-        stores={stores}
-        loading={storesLoading}
-        error={storesError}
-        onAssignRole={handleAssignStoreRole}
-        onViewAssignments={handleViewStoreAssignments}
-        formatDate={formatDate}
-      />
+      <UsersTable />
+      <StoresTable />
     </ManageLayout>
   );
 };
