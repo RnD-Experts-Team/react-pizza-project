@@ -19,6 +19,7 @@ export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'OPTIONS'
 
 /**
  * Authorization requirement types - determines how permissions/roles are evaluated
+ * @deprecated - Use separate permissions_any and permissions_all arrays instead
  */
 export type AuthorizationType = 'any' | 'all';
 
@@ -89,7 +90,7 @@ export interface FetchAuthRulesParams {
 interface CreateAuthRuleBase {
   service: string;
   method: HttpMethod;
-  priority: number;
+  priority?: number;
   is_active: boolean;
   // Authorization can be roles_any, permissions_any, or permissions_all
   // At least one must be provided
@@ -257,6 +258,7 @@ export interface AuthRulesState {
     service: string;
     search: string;
     currentPage: number;
+    perPage: number;
   };
 }
 
@@ -296,9 +298,9 @@ export interface AuthRuleFormData {
   pathType: 'dsl' | 'route'; // UI helper to toggle between path_dsl and route_name
   path_dsl?: string;
   route_name?: string;
-  authorizationType: AuthorizationType;
   roles: string[];
-  permissions: string[];
+  permissions_any: string[];
+  permissions_all: string[];
   priority: number;
   is_active: boolean;
 }

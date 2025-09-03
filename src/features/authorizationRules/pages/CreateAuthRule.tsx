@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle } from 'lucide-react';
 import { useAuthRules } from '../hooks/useAuthRules';
-import { CreateAuthRuleForm } from '../components/CreateAuthRuleForm';
+import { CreateAuthRuleForm } from '../components/CreateAuthRule/CreateAuthRuleForm';
 import { ManageLayout } from '../../../components/layouts/ManageLayout';
 
 const CreateAuthRulePage: React.FC = () => {
@@ -73,7 +73,7 @@ const CreateAuthRulePage: React.FC = () => {
             <p>• <strong>Roles:</strong> User must have ANY of the specified roles</p>
             <p>• <strong>Permissions (Any):</strong> User needs ANY of these permissions</p>
             <p>• <strong>Permissions (All):</strong> User needs ALL of these permissions</p>
-            <p>• <strong>Priority:</strong> Lower numbers = higher priority (1-1000)</p>
+
           </div>
         </div>
 
@@ -111,7 +111,7 @@ const CreateAuthRulePage: React.FC = () => {
           <h3 className="font-medium text-chart-2 mb-2 text-sm sm:text-base">💡 Pro Tips</h3>
           <ul className="text-xs sm:text-sm text-chart-2/80 space-y-1">
             <li>• Use the <strong>Test</strong> button to validate your Path DSL patterns before saving</li>
-            <li>• Lower priority numbers take precedence (priority 1 beats priority 100)</li>
+
             <li>• Either Path DSL OR Route Name is required, not both</li>
             <li>• At least one role or permission must be specified</li>
             <li>• Inactive rules won't be enforced but are kept for future use</li>

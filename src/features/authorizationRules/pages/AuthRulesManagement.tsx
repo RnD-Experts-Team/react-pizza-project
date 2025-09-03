@@ -13,7 +13,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { TestTube } from 'lucide-react';
-import { AuthRulesTable } from '@/features/authorizationRules/components/AuthRulesTable';
+import { AuthRulesTable } from '@/features/authorizationRules/components/AuthRulesTable/AuthRulesTable';
 import { AuthRuleTestDialog } from '@/features/authorizationRules/components/AuthRuleTestDialog';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 

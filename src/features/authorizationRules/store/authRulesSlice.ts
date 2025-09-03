@@ -51,6 +51,7 @@ const initialState: AuthRulesState = {
     service: '',
     search: '',
     currentPage: 1,
+    perPage: 15,
   },
 };
 
@@ -101,6 +102,7 @@ export const createAuthRule = createAsyncThunk<
         service: filters.service,
         search: filters.search,
         page: filters.currentPage,
+        per_page: filters.perPage,
       }));
       
       return response;

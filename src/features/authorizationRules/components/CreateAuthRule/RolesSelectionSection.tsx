@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo ,useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,6 +23,10 @@ export const RolesSelectionSection: React.FC<RolesSelectionSectionProps> = ({
   onSelectAllRoles,
   onClearAllRoles,
 }) => {
+  const selectedRolesSet = useMemo(() => new Set(selectedRoles), [selectedRoles]);
+  const handleToggleRole = useCallback((roleName: string) => {
+  return () => onToggleRole(roleName);
+}, [onToggleRole]);
   return (
     <div className="space-y-3 sm:space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-center gap-2">
@@ -68,7 +72,7 @@ export const RolesSelectionSection: React.FC<RolesSelectionSectionProps> = ({
               <div key={role.id} className="flex items-start space-x-3">
                 <Checkbox
                   id={`role-${role.id}`}
-                  checked={selectedRoles.includes(role.name)}
+                  checked={selectedRolesSet.has(role.name)}
                   onCheckedChange={() => onToggleRole(role.name)}
                 />
                 <Label
@@ -93,7 +97,7 @@ export const RolesSelectionSection: React.FC<RolesSelectionSectionProps> = ({
                     <span className="truncate max-w-[8rem] sm:max-w-none">{roleName}</span>
                     <X
                       className="h-3 w-3 cursor-pointer hover:text-red-500 flex-shrink-0"
-                      onClick={() => onToggleRole(roleName)}
+                      onClick={handleToggleRole(roleName)}
                     />
                   </Badge>
                 ))}

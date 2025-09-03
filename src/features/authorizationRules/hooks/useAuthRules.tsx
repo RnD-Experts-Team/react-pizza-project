@@ -67,6 +67,7 @@ interface UseAuthRulesReturn {
     service: string;
     search: string;
     currentPage: number;
+    perPage: number;
   };
 
   // Loading states
@@ -97,7 +98,7 @@ interface UseAuthRulesReturn {
     clearError: () => void;
     clearSuccessMessage: () => void;
     clearTestResult: () => void;
-    updateFilters: (filters: Partial<{ service: string; search: string; currentPage: number }>) => void;
+    updateFilters: (filters: Partial<{ service: string; search: string; currentPage: number; perPage: number }>) => void;
     resetFilters: () => void;
     resetState: () => void;
   };
@@ -244,9 +245,10 @@ export const useAuthRules = (options: {
         service: filters.service,
         search: filters.search,
         page: filters.currentPage,
+        per_page: filters.perPage,
       }));
     }
-  }, [autoFetch, dispatch]); // Only run on mount
+  }, [autoFetch, dispatch, filters]); // Only run on mount
 
   // ========================================================================
   // ACTION HANDLERS
@@ -260,6 +262,7 @@ export const useAuthRules = (options: {
       service: filters.service,
       search: filters.search,
       page: filters.currentPage,
+      per_page: filters.perPage,
     };
     
     await dispatch(fetchAuthRules(fetchParams)).unwrap();
@@ -379,6 +382,18 @@ export const useAuthRules = (options: {
         service: newFilters.service ?? filters.service,
         search: newFilters.search ?? filters.search,
         page: newFilters.currentPage,
+        per_page: newFilters.perPage ?? filters.perPage,
+      }));
+      return;
+    }
+    
+    // If perPage change, fetch immediately (no debounce) and reset to page 1
+    if (newFilters.perPage !== undefined) {
+      dispatch(fetchAuthRules({
+        service: newFilters.service ?? filters.service,
+        search: newFilters.search ?? filters.search,
+        page: 1, // Reset to first page when changing perPage
+        per_page: newFilters.perPage,
       }));
       return;
     }
@@ -390,6 +405,7 @@ export const useAuthRules = (options: {
           service: newFilters.service ?? filters.service,
           search: newFilters.search ?? filters.search,
           page: 1, // Reset to first page on new search/filter
+          per_page: filters.perPage,
         }));
       }, debounceMs);
       
@@ -427,12 +443,13 @@ export const useAuthRules = (options: {
 
     // Authorization validation - at least one required
     const hasRoles = formData.roles.length > 0;
-    const hasPermissions = formData.permissions.length > 0;
+    const hasPermissionsAny = formData.permissions_any.length > 0;
+    const hasPermissionsAll = formData.permissions_all.length > 0;
 
-    if (!hasRoles && !hasPermissions) {
+    if (!hasRoles && !hasPermissionsAny && !hasPermissionsAll) {
       errors.push({ 
         field: 'authorization', 
-        messages: ['At least one role or permission is required'] 
+        messages: ['At least one role, permissions_any, or permissions_all is required'] 
       });
     }
 

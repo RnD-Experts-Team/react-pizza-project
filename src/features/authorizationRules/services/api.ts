@@ -273,14 +273,13 @@ export const authRulesService = {
   ): Promise<CreateAuthRuleResponse> {
     try {
       // Validate that at least one authorization method is provided
-      const hasAuthorization =
-        ruleData.roles_any?.length ||
-        ruleData.permissions_any?.length ||
-        ruleData.permissions_all?.length;
+      const hasRoles = ruleData.roles_any?.length && ruleData.roles_any.length > 0;
+      const hasPermissionsAny = ruleData.permissions_any?.length && ruleData.permissions_any.length > 0;
+      const hasPermissionsAll = ruleData.permissions_all?.length && ruleData.permissions_all.length > 0;
 
-      if (!hasAuthorization) {
+      if (!hasRoles && !hasPermissionsAny && !hasPermissionsAll) {
         throw new Error(
-          'At least one authorization requirement must be specified',
+          'At least one authorization requirement must be specified (roles_any, permissions_any, or permissions_all)',
         );
       }
 
