@@ -17,11 +17,11 @@ import AuthLayout from './components/layouts/AuthLayout';
 import MainLayout from './components/layouts/MainLayout';
 
 // Auth Pages
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import VerifyEmail from './pages/auth/VerifyEmail';
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
+import Login from './features/auth/pages/Login';
+import Register from './features/auth/pages/Register';
+import VerifyEmail from './features/auth/pages/VerifyEmail';
+import ForgotPassword from './features/auth/pages/ForgotPassword';
+import ResetPassword from './features/auth/pages/ResetPassword';
 
 // Main Pages
 import Dashboard from './pages/Dashboard';
@@ -30,43 +30,41 @@ import PrivacyPolicy from './pages/settings-and-abouts/PrivacyPolicy';
 import Settings from './pages/settings-and-abouts/Settings';
 
 // User Management Pages
-import UserManagement from './pages/users/UserManagement';
-import CreateUser from './pages/users/CreateUser';
-import EditUser from './pages/users/EditUser';
-import UserDetail from './pages/users/UserDetail';
-import CreateRole from './pages/roles/CreateRole';
-import AssignPermissionsPage from './pages/roles/AssignPermissions';
-import CreatePermission from './pages/permissions/CreatePermission';
+import UserManagement from './features/users/pages/UserManagement';
+import CreateUser from './features/users/pages/CreateUser';
+import EditUser from './features/users/pages/EditUser';
+import UserDetail from './features/users/pages/UserDetail';
+import CreateRole from './features/roles/pages/CreateRole';
+import AssignPermissionsPage from './features/roles/pages/AssignPermissions';
+import CreatePermission from './features/permissions/pages/CreatePermission';
 
 //Service Client Management Pages
-import ServiceClientsPage from './pages/serviceClients/ServiceClientManagement';
+import ServiceClientsPage from './features/serviceClients/pages/ServiceClientManagement';
 
 //Auth Roles
-import AuthRulesManagement from './pages/authorizationRules/AuthRulesManagement';
-import CreateAuthRule from './pages/authorizationRules/CreateAuthRule';
+import AuthRulesManagement from './features/authorizationRules/pages/AuthRulesManagement';
+import CreateAuthRule from './features/authorizationRules/pages/CreateAuthRule';
 
 // Stores Management Routes
-import StoresListPage from './pages/stores/StoresListPage';
-import CreateStorePage from './pages/stores/CreateStorePage';
-import EditStorePage from './pages/stores/EditStorePage';
-import StoreDetailsPage from './pages/stores/StoreDetailsPage';
+import StoresListPage from './features/stores/pages/StoresListPage';
+import CreateStorePage from './features/stores/pages/CreateStorePage';
+import EditStorePage from './features/stores/pages/EditStorePage';
+import StoreDetailsPage from './features/stores/pages/StoreDetailsPage';
 
 // User Role Store Assignment Pages
-import UserRoleStoreAssignmentPage from './pages/userRolesStoresAssignment/UserRoleStoreAssignmentPage';
-import UserAssignmentsPage from './pages/userRolesStoresAssignment/UserAssignmentsPage';
-import StoreAssignmentsPage from './pages/userRolesStoresAssignment/StoreAssignmentsPage';
-import AssignPage from './pages/userRolesStoresAssignment/AssignPage';
-import SingleAssignPage from './pages/userRolesStoresAssignment/SingleAssignPage';
+import UserRoleStoreAssignmentPage from './features/userRolesStoresAssignment/pages/UserRoleStoreAssignmentPage';
+import UserAssignmentsPage from './features/userRolesStoresAssignment/pages/UserAssignmentsPage';
+import StoreAssignmentsPage from './features/userRolesStoresAssignment/pages/StoreAssignmentsPage';
+import AssignPage from './features/userRolesStoresAssignment/pages/AssignPage';
+import SingleAssignPage from './features/userRolesStoresAssignment/pages/SingleAssignPage';
 
 // Stores Hierarchy Management Routes
-import StoresHierarchyPage from './pages/storeHierarchy/StoresHierarchyPage';
-import StoreHierarchyDetailPage from './pages/storeHierarchy/StoreHierarchyDetailPage';
-import CreateHierarchyPage from './pages/storeHierarchy/CreateHierarchy';
-import ValidateHierarchyPage from './pages/storeHierarchy/ValidateHierarchy';
-import DeleteHierarchyConfirmationPage from './pages/storeHierarchy/DeleteHierarchyConfirmationPage';
+import StoresHierarchyPage from './features/storeHierarchy/pages/StoresHierarchyPage';
+import StoreHierarchyDetailPage from './features/storeHierarchy/pages/StoreHierarchyDetailPage';
+import CreateHierarchyPage from './features/storeHierarchy/pages/CreateHierarchy';
+import ValidateHierarchyPage from './features/storeHierarchy/pages/ValidateHierarchy';
+import DeleteHierarchyConfirmationPage from './features/storeHierarchy/pages/DeleteHierarchyConfirmationPage';
 
-// Example Pages
-import ManageLayoutExample from './pages/examples/ManageLayoutExample';
 
 function App() {
   return (
@@ -423,17 +421,7 @@ function App() {
                 }
               />
 
-              {/* Example Pages */}
-              <Route
-                path="/examples/manage-layout"
-                element={
-                  <ProtectedRoute>
-                    <MainLayout>
-                      <ManageLayoutExample />
-                    </MainLayout>
-                  </ProtectedRoute>
-                }
-              />
+              
 
               {/* Default Route */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

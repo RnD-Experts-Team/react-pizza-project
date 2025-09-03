@@ -1,0 +1,159 @@
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Copy, Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useServiceClients } from '@/features/serviceClients/hooks/useServiceClients';
+import { RotateTokenDialog } from '@/features/serviceClients/components/RotateTokenDialog';
+import { ServiceClientsTable } from '@/features/serviceClients/components/ServiceClientsTable';
+import { ManageLayout } from '@/components/layouts/ManageLayout';
+import type { ServiceClient } from '@/features/serviceClients/types';
+
+const ServiceClientsPage: React.FC = () => {
+  const { toast } = useToast();
+  const { fetchClients } = useServiceClients();
+  
+  // Dialog states
+  const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
+  const [tokenDialogOpen, setTokenDialogOpen] = useState(false);
+  const [selectedClient, setSelectedClient] = useState<ServiceClient | null>(null);
+  const [currentToken, setCurrentToken] = useState('');
+  const [showToken, setShowToken] = useState(false);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const perPage = 3;
+
+  useEffect(() => {
+    fetchClients({ per_page: perPage, page: currentPage });
+  }, [currentPage, fetchClients]);
+
+  const handleCreateSuccess = (token: string) => {
+    setCurrentToken(token);
+    setTokenDialogOpen(true);
+    toast({
+      title: "Success",
+      description: "Service client created successfully!",
+    });
+    // Refresh the current page
+    fetchClients({ per_page: perPage, page: currentPage });
+  };
+
+  const handleRotateSuccess = (token: string) => {
+    setCurrentToken(token);
+    setTokenDialogOpen(true);
+    setSelectedClient(null);
+    toast({
+      title: "Success",
+      description: "Service token rotated successfully!",
+    });
+  };
+
+  const handleRotateToken = (client: ServiceClient) => {
+    setSelectedClient(client);
+    setRotateDialogOpen(true);
+  };
+
+  const handleRefresh = () => {
+    fetchClients({ per_page: perPage, page: currentPage });
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Success",
+      description: "Token copied to clipboard!",
+    });
+  };
+
+  const handleCloseTokenDialog = () => {
+    setTokenDialogOpen(false);
+    setCurrentToken('');
+    setShowToken(false);
+  };
+
+  return (
+    <ManageLayout
+      title="Service Client Management"
+      subtitle="Manage API service clients and their authentication tokens"
+    >
+      {/* Main Content */}
+      <ServiceClientsTable 
+        onRotateToken={handleRotateToken}
+        onCreateSuccess={handleCreateSuccess}
+        onRefresh={handleRefresh}
+        onPageChange={handlePageChange}
+      />
+
+      {/* Rotate Token Dialog */}
+      <RotateTokenDialog
+        open={rotateDialogOpen}
+        onOpenChange={setRotateDialogOpen}
+        serviceClient={selectedClient}
+        onSuccess={handleRotateSuccess}
+      />
+
+      {/* Token Display Dialog */}
+      <Dialog open={tokenDialogOpen} onOpenChange={handleCloseTokenDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Service Client Token</DialogTitle>
+            <DialogDescription>
+              Save this token securely. You won't be able to see it again.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label>Token</Label>
+              <div className="flex items-center gap-2 mt-1">
+                <Input
+                  type={showToken ? "text" : "password"}
+                  value={currentToken}
+                  readOnly
+                  className="font-mono text-sm"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowToken(!showToken)}
+                >
+                  {showToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => copyToClipboard(currentToken)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                <strong>Important:</strong> Store this token securely. You won't be able to retrieve it again.
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={handleCloseTokenDialog}>
+              I've Saved the Token
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </ManageLayout>
+  );
+};
+
+export default ServiceClientsPage;
