@@ -1,11 +1,14 @@
 /**
  * Create Role Page
  * 
- * Complete form for creating a new role with permissions
+ * Complete form for creating a new role with permissions using React Hook Form
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useCreateRole } from '@/features/roles/hooks/useRoles';
 import { usePermissions } from '@/features/permissions/hooks/usePermissions';
 import { GUARD_NAMES } from '@/features/roles/types';
@@ -19,57 +22,53 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import { PermissionsSection } from '@/features/roles/components/CreateRole/PermissionsSection';
 
+// Validation schema
+const createRoleSchema = z.object({
+  name: z.string()
+    .min(1, 'Role name is required')
+    .min(2, 'Role name must be at least 2 characters')
+    .max(50, 'Role name must be less than 50 characters')
+    .regex(/^[a-zA-Z0-9\s-_]+$/, 'Role name can only contain letters, numbers, spaces, hyphens, and underscores'),
+  guard_name: z.nativeEnum(GUARD_NAMES),
+  permissions: z.array(z.string()).min(1, 'At least one permission must be selected'),
+});
+
+type CreateRoleFormData = z.infer<typeof createRoleSchema>;
+
 const CreateRolePage: React.FC = () => {
   const navigate = useNavigate();
-  const { createRole, loading, error, validateForm } = useCreateRole();
+  const { createRole, loading, error } = useCreateRole();
   const { permissions, loading: permissionsLoading } = usePermissions();
   
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    guard_name: GUARD_NAMES.WEB,
-    permissions: [] as string[],
+  // Form setup with React Hook Form
+  const {
+    register,
+    handleSubmit,
+    control,
+
+    formState: { errors, isSubmitting },
+ 
+  } = useForm<CreateRoleFormData>({
+    resolver: zodResolver(createRoleSchema),
+    defaultValues: {
+      name: '',
+      guard_name: GUARD_NAMES.WEB,
+      permissions: [],
+    },
+    mode: 'onChange', // Validate on change for better UX
   });
-  
-  // UI state
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const handleBack = () => {
     navigate('/user-management');
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const handlePermissionChange = (permissions: string[]) => {
-    setFormData(prev => ({ ...prev, permissions }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Client-side validation
-    const validation = validateForm(formData);
-    if (!validation.isValid) {
-      setValidationErrors(validation.errors);
-      return;
-    }
-
-    setIsSubmitting(true);
-    
+  const onSubmit = async (data: CreateRoleFormData) => {
     try {
       const roleData: CreateRoleRequest = {
-        name: formData.name,
-        guard_name: formData.guard_name,
-        permissions: formData.permissions,
+        name: data.name.trim(),
+        guard_name: data.guard_name,
+        permissions: data.permissions,
       };
 
       await createRole(roleData);
@@ -78,17 +77,9 @@ const CreateRolePage: React.FC = () => {
       navigate('/user-management');
     } catch (err) {
       console.error('Failed to create role:', err);
-    } finally {
-      setIsSubmitting(false);
+      // Error is handled by the useCreateRole hook
     }
   };
-
-  // Clear validation errors when form data changes
-  useEffect(() => {
-    if (Object.keys(validationErrors).length > 0) {
-      setValidationErrors({});
-    }
-  }, [formData]);
 
   return (
     <ManageLayout
@@ -107,7 +98,7 @@ const CreateRolePage: React.FC = () => {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
         {/* Basic Information */}
         <Card className="bg-card border-border shadow-sm">
           <CardHeader className="pb-3 sm:pb-6">
@@ -119,17 +110,15 @@ const CreateRolePage: React.FC = () => {
                 <Label htmlFor="name" className="text-sm font-medium text-foreground">Role Name *</Label>
                 <Input
                   id="name"
-                  name="name"
                   type="text"
-                  value={formData.name}
-                  onChange={handleInputChange}
+                  {...register('name')}
                   placeholder="Enter role name (e.g., Manager, Editor)"
                   className={`bg-background border-input text-foreground placeholder:text-muted-foreground ${
-                    validationErrors.name ? 'border-destructive focus:ring-destructive' : 'focus:ring-ring'
+                    errors.name ? 'border-destructive focus:ring-destructive' : 'focus:ring-ring'
                   }`}
                 />
-                {validationErrors.name && (
-                  <p className="text-sm text-destructive">{validationErrors.name}</p>
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
                 )}
               </div>
             </div>
@@ -137,12 +126,18 @@ const CreateRolePage: React.FC = () => {
         </Card>
 
         {/* Permissions Section */}
-        <PermissionsSection
-          permissions={permissions}
-          selectedPermissions={formData.permissions}
-          onPermissionChange={handlePermissionChange}
-          loading={permissionsLoading}
-          validationError={validationErrors.permissions}
+        <Controller
+          name="permissions"
+          control={control}
+          render={({ field: { value, onChange } }) => (
+            <PermissionsSection
+              permissions={permissions}
+              selectedPermissions={value}
+              onPermissionChange={onChange}
+              loading={permissionsLoading}
+              validationError={errors.permissions?.message}
+            />
+          )}
         />
 
         {/* Form Actions */}

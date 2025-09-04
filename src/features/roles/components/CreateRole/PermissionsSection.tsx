@@ -8,8 +8,9 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import type { Permission } from '@/features/permissions/types'; // Import the correct type
+import type { Permission } from '@/features/permissions/types';
 
 interface PermissionsSectionProps {
   permissions: Permission[];
@@ -34,13 +35,48 @@ export const PermissionsSection: React.FC<PermissionsSectionProps> = ({
     onPermissionChange(updatedPermissions);
   };
 
+  const handleSelectAll = () => {
+    const allPermissionNames = permissions.map(p => p.name);
+    onPermissionChange(allPermissionNames);
+  };
+
+  const handleDeselectAll = () => {
+    onPermissionChange([]);
+  };
+
   return (
     <Card className="bg-card border-border shadow-sm">
       <CardHeader className="pb-3 sm:pb-6">
-        <CardTitle className="text-lg sm:text-xl text-card-foreground">Permissions</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Select permissions for this role
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-lg sm:text-xl text-card-foreground">Permissions</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Select permissions for this role
+            </p>
+          </div>
+          {!loading && permissions.length > 0 && (
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleSelectAll}
+                className="text-xs"
+              >
+                Select All
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleDeselectAll}
+                className="text-xs"
+              >
+                Deselect All
+              </Button>
+            </div>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {loading ? (
