@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { StoresTable } from '@/features/stores/components/StoresTable';
+import { StoresTable } from '@/features/stores/components/StoresTable/StoresTable';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 
 export const StoresListPage: React.FC = () => {

@@ -3,24 +3,13 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
 
 // Store Hierarchy Management Pages
-import StoresHierarchyPage from '@/features/storeHierarchy/pages/StoresHierarchyPage';
 import StoreHierarchyDetailPage from '@/features/storeHierarchy/pages/StoreHierarchyDetailPage';
 import CreateHierarchyPage from '@/features/storeHierarchy/pages/CreateHierarchy';
 import ValidateHierarchyPage from '@/features/storeHierarchy/pages/ValidateHierarchy';
 import DeleteHierarchyConfirmationPage from '@/features/storeHierarchy/pages/DeleteHierarchyConfirmationPage';
 
 export const storeHierarchyRoutes = [
-  <Route
-    key="stores-hierarchy"
-    path="/stores-hierarchy"
-    element={
-      <ProtectedRoute>
-        <MainLayout>
-          <StoresHierarchyPage />
-        </MainLayout>
-      </ProtectedRoute>
-    }
-  />,
+  
   <Route
     key="view-store-hierarchy"
     path="/stores-hierarchy/view/:storeId"

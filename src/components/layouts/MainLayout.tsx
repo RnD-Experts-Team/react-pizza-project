@@ -120,11 +120,6 @@ function AppSidebar() {
       icon: Users,
     },
     {
-      title: 'Stores Hierarchy',
-      url: '/stores-hierarchy',
-      icon: Store,
-    },
-    {
       title: 'Settings',
       url: '/settings',
       icon: Settings,
@@ -290,7 +285,7 @@ function generateBreadcrumbs(pathname: string) {
       'user-management': 'User Management',
       'service-client-management': 'Service Client Management',
       'user-role-store-assignment': 'User Role Store Assignment',
-      'stores-hierarchy': 'Stores Hierarchy',
+      'stores-hierarchy': 'Stores',
       'auth-rules': 'Authorization Rules',
       'create': 'Create',
       'edit': 'Edit',
@@ -486,12 +481,22 @@ function AppHeader() {
                       {breadcrumb.label}
                     </BreadcrumbPage>
                   ) : (
-                    <BreadcrumbLink
-                      href={breadcrumb.href}
-                      className="text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm"
-                    >
-                      {breadcrumb.label}
-                    </BreadcrumbLink>
+                    // Special case for 'stores' - make it clickable and navigate to /stores
+                    breadcrumb.label.toLowerCase() === 'stores' ? (
+                      <BreadcrumbLink
+                        href="/stores"
+                        className="text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm cursor-pointer"
+                      >
+                        {breadcrumb.label}
+                      </BreadcrumbLink>
+                    ) : (
+                      <BreadcrumbLink
+                        href={breadcrumb.href}
+                        className="text-muted-foreground hover:text-foreground transition-colors text-xs sm:text-sm"
+                      >
+                        {breadcrumb.label}
+                      </BreadcrumbLink>
+                    )
                   )}
                 </BreadcrumbItem>
                 {index < breadcrumbs.length - 1 && (
