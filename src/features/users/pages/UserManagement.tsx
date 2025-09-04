@@ -18,7 +18,7 @@
 import React from 'react';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import { UsersTable } from '@/features/users/components/UsersTable';
-import { RolesTable } from '@/features/roles/components/RolesTable';
+import { RolesTable } from '@/features/roles/components/RoleTable/RolesTable';
 import { PermissionsTable } from '@/features/permissions/components/PermissionsTable/PermissionsTable';
 
 const UserManagementPage: React.FC = () => {
