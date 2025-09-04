@@ -6,30 +6,41 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Key, Plus, Loader2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
+import { useCreatePermission } from '@/features/permissions/hooks/usePermissions';
+
 
 interface CreatePermissionForm {
   name: string;
-  guard_name: string;
 }
+
 
 interface FormErrors {
   name?: string;
-  guard_name?: string;
 }
+
 
 const CreatePermissionPage: React.FC = () => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  
+  // Use the custom hook for creating permissions
+  const { 
+    createPermission, 
+    loading: isLoading, 
+    error: apiError, 
+    reset,
+    validateForm,
+    formatForApi 
+  } = useCreatePermission();
+  
   const [error, setError] = useState<string | null>(null);
   
   const [formData, setFormData] = useState<CreatePermissionForm>({
-    name: '',
-    guard_name: 'web'
+    name: ''
   });
   
   const [errors, setErrors] = useState<FormErrors>({});
+
 
   const handleInputChange = (field: keyof CreatePermissionForm, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -37,9 +48,15 @@ const CreatePermissionPage: React.FC = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
+    // Clear API error when user starts typing
+    if (apiError || error) {
+      setError(null);
+      reset();
+    }
   };
 
-  const validateForm = (): boolean => {
+
+  const validateFormLocal = (): boolean => {
     const newErrors: FormErrors = {};
     
     if (!formData.name.trim()) {
@@ -48,45 +65,58 @@ const CreatePermissionPage: React.FC = () => {
       newErrors.name = 'Permission name must be at least 3 characters';
     }
     
-    if (!formData.guard_name.trim()) {
-      newErrors.guard_name = 'Guard name is required';
-    }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (!validateFormLocal()) {
       return;
     }
     
-    setIsLoading(true);
     setError(null);
+    reset();
     
     try {
-      // TODO: Implement actual API call to create permission
-      console.log('Creating permission:', formData);
+      // Prepare data for API - adding default guard_name since the hook expects it
+      const apiData = {
+        name: formData.name,
+        guard_name: 'web' // Default guard name since we removed the field
+      };
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Use the hook's validation
+      const validation = validateForm(apiData);
+      if (!validation.isValid) {
+        const firstError = Object.values(validation.errors)[0];
+        setError(firstError);
+        return;
+      }
+      
+      // Create the permission using the hook
+      await createPermission(formatForApi(apiData));
       
       // Navigate back to permissions table on success
       navigate('/user-management', { 
         state: { message: 'Permission created successfully!' }
       });
     } catch (err) {
-      setError('Failed to create permission. Please try again.');
-    } finally {
-      setIsLoading(false);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create permission. Please try again.';
+      setError(errorMessage);
     }
   };
+
 
   const handleBack = () => {
     navigate(-1);
   };
+
+
+  // Combine local error with API error
+  const displayError = error || (apiError ? 'Failed to create permission. Please try again.' : null);
+
 
   return (
     <ManageLayout
@@ -97,11 +127,12 @@ const CreatePermissionPage: React.FC = () => {
       }}
     >
       {/* Error Alert */}
-      {error && (
+      {displayError && (
         <Alert variant="destructive" className="border-destructive bg-destructive/10 text-destructive">
-          <AlertDescription className="text-sm sm:text-base">{error}</AlertDescription>
+          <AlertDescription className="text-sm sm:text-base">{displayError}</AlertDescription>
         </Alert>
       )}
+
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
@@ -113,69 +144,36 @@ const CreatePermissionPage: React.FC = () => {
                   Permission Details
                 </CardTitle>
                 <CardDescription className="text-sm sm:text-base text-muted-foreground">
-                  Enter the permission name and guard configuration
+                  Enter the permission name
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  {/* Permission Name */}
-                  <div className="space-y-2 sm:space-y-3">
-                    <Label htmlFor="name" className="text-sm sm:text-base font-medium text-foreground">
-                      Permission Name *
-                    </Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      placeholder="e.g., manage-users, view-reports"
-                      value={formData.name}
-                      onChange={(e) => handleInputChange('name', e.target.value)}
-                      className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring transition-colors ${
-                        errors.name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
-                      }`}
-                      disabled={isLoading}
-                    />
-                    {errors.name && (
-                      <p className="text-xs sm:text-sm text-destructive font-medium">{errors.name}</p>
-                    )}
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Use lowercase letters, numbers, and hyphens only
-                    </p>
-                  </div>
-
-                  {/* Guard Name */}
-                  <div className="space-y-2 sm:space-y-3">
-                    <Label htmlFor="guard_name" className="text-sm sm:text-base font-medium text-foreground">
-                      Guard Name *
-                    </Label>
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                      <Input
-                        id="guard_name"
-                        type="text"
-                        placeholder="web"
-                        value={formData.guard_name}
-                        onChange={(e) => handleInputChange('guard_name', e.target.value)}
-                        className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring transition-colors flex-1 ${
-                          errors.guard_name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
-                        }`}
-                        disabled={isLoading}
-                      />
-                      <Badge 
-                        variant="outline" 
-                        className="px-3 py-2 text-xs sm:text-sm border-border text-muted-foreground bg-muted/50 self-start sm:self-center whitespace-nowrap"
-                      >
-                        Default: web
-                      </Badge>
-                    </div>
-                    {errors.guard_name && (
-                      <p className="text-xs sm:text-sm text-destructive font-medium">{errors.guard_name}</p>
-                    )}
-                    <p className="text-xs sm:text-sm text-muted-foreground">
-                      Specifies the authentication guard for this permission
-                    </p>
-                  </div>
+                {/* Permission Name */}
+                <div className="space-y-2 sm:space-y-3">
+                  <Label htmlFor="name" className="text-sm sm:text-base font-medium text-foreground">
+                    Permission Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="e.g., manage-users, view-reports"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    className={`bg-background border-input text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring transition-colors ${
+                      errors.name ? 'border-destructive focus:border-destructive focus:ring-destructive' : ''
+                    }`}
+                    disabled={isLoading}
+                  />
+                  {errors.name && (
+                    <p className="text-xs sm:text-sm text-destructive font-medium">{errors.name}</p>
+                  )}
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Use lowercase letters, numbers, and hyphens only
+                  </p>
                 </div>
               </CardContent>
             </Card>
+
 
             {/* Form Actions */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-4 sm:pt-6">
@@ -210,5 +208,6 @@ const CreatePermissionPage: React.FC = () => {
     </ManageLayout>
   );
 };
+
 
 export default CreatePermissionPage;
