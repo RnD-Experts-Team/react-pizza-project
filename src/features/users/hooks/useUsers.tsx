@@ -29,6 +29,7 @@ import {
   setSelectedUserId,
   setSearchTerm,
   setFilters,
+  setPerPage,
   selectUsers,
   selectUsersLoading,
   selectUsersError,
@@ -46,6 +47,7 @@ import {
   selectSelectedUserId,
   selectSearchTerm,
   selectFilters,
+  selectPerPage,
   selectHasUsers,
   selectIsEmpty,
   selectTotalUsers,
@@ -117,6 +119,7 @@ export const useUsers = (
   const totalUsers = useSelector(selectTotalUsers);
   const usersWithCounts = useSelector(selectUsersWithCounts);
   const filters = useSelector(selectFilters);
+  const perPage = useSelector(selectPerPage);
 
   // Apply client-side sorting using utilities
   const sortedUsers = useMemo(() => {
@@ -213,14 +216,21 @@ export const useUsers = (
   // Fetch function with error handling
   const fetchUsersCallback = useCallback(
     async (params?: GetUsersParams) => {
+      const fetchParams: GetUsersParams = {
+        page: pagination?.currentPage || 1,
+        per_page: perPage,
+        search: localSearchTerm,
+        ...filters,
+        ...params,
+      };
       try {
-        await dispatch(fetchUsers(params)).unwrap();
+        await dispatch(fetchUsers(fetchParams)).unwrap();
       } catch (error) {
         console.error('Failed to fetch users:', error);
         throw error;
       }
     },
-    [dispatch]
+    [dispatch, pagination?.currentPage, perPage, localSearchTerm, filters]
   );
 
   // Refetch with current parameters
@@ -231,6 +241,11 @@ export const useUsers = (
   // Set search term with Redux dispatch
   const setSearchTermCallback = useCallback((term: string) => {
     dispatch(setSearchTerm(term));
+  }, [dispatch]);
+
+  // Set per page with Redux dispatch
+  const setPerPageCallback = useCallback((perPageValue: number) => {
+    dispatch(setPerPage(perPageValue));
   }, [dispatch]);
 
   // Auto-fetch on mount if enabled - prevent fetching when there's an error
@@ -272,6 +287,8 @@ export const useUsers = (
       selectOptions,
       usersWithCounts,
       userStats,
+      perPage,
+      setPerPage: setPerPageCallback,
     }),
     [
       users,
@@ -294,6 +311,8 @@ export const useUsers = (
       selectOptions,
       usersWithCounts,
       userStats,
+      perPage,
+      setPerPageCallback,
     ]
   );
 };

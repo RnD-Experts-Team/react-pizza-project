@@ -5,8 +5,8 @@
  */
 
 export { ActionButtons } from '@/features/userRolesStoresAssignment/components/userRoleStoreAssignmentPage/ActionButtons';
-export { UsersTable } from '@/features/userRolesStoresAssignment/components/userRoleStoreAssignmentPage/UsersTable';
-export { StoresTable } from '@/features/userRolesStoresAssignment/components/userRoleStoreAssignmentPage/StoresTable';
+export { UsersTable } from '@/features/userRolesStoresAssignment/components/UsersTable/UsersTable';
+export { StoresTable } from '@/features/userRolesStoresAssignment/components/StoresTable/StoresTable';
 
 // export type { ActionButtons } from '@/features/userRolesStoresAssignment/components/userRoleStoreAssignmentPage/ActionButtons';
 // export type { UsersTableType } from '@/features/userRolesStoresAssignment/components/userRoleStoreAssignmentPage/UsersTable';

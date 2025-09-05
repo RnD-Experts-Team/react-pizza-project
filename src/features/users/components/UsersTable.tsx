@@ -5,12 +5,12 @@
  * - Displays users in a sortable table with Card wrapper
  * - Create, view, edit, and delete user functionality
  * - Loading states and responsive design
- * - Pagination functionality
+ * - Pagination functionality with per-page selection
  * - Error handling and refresh capability
  * - Light/dark mode compatibility using CSS variables
  */
 
-import React, { useState } from 'react';
+import React, { useState, memo, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useUsers } from '@/features/users/hooks/useUsers';
@@ -19,6 +19,13 @@ import { fetchUsers } from '@/features/users/store/usersSlice';
 import { userFormatting } from '@/features/users/utils';
 import type { AppDispatch } from '@/store';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Table, 
   TableBody, 
@@ -27,7 +34,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardFooter, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -42,10 +49,127 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Eye, Edit, Trash2, Plus, Loader2, RefreshCw, AlertCircle } from 'lucide-react';
 
+interface Pagination {
+  currentPage: number;
+  lastPage: number;
+  from: number;
+  to: number;
+  total: number;
+}
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  roles?: Array<{ id: number; name: string }>;
+  stores?: Array<{ store: { id: string; name: string } }>;
+}
+
+interface UsersTableFooterProps {
+  loading: boolean;
+  users: User[];
+  pagination: Pagination | null;
+  currentPage: number;
+  perPage: number;
+  onPerPageChange: (value: string) => void;
+  onPreviousPage: () => void;
+  onNextPage: () => void;
+}
+
+const PER_PAGE_OPTIONS = ['5', '10', '15', '20', '25', '50'] as const;
+
+const UsersTableFooter = memo<UsersTableFooterProps>(({
+  loading,
+  users,
+  pagination,
+  currentPage,
+  perPage,
+  onPerPageChange,
+  onPreviousPage,
+  onNextPage,
+}) => {
+  // Memoize expensive computations
+  const perPageString = useMemo(() => perPage.toString(), [perPage]);
+  const shouldShowFooter = useMemo(() => !loading && users.length > 0, [loading, users.length]);
+  const shouldShowPagination = useMemo(() => pagination && pagination.lastPage > 1, [pagination]);
+  const isPrevDisabled = useMemo(() => currentPage <= 1, [currentPage]);
+  const isNextDisabled = useMemo(() => currentPage >= (pagination?.lastPage || 1), [currentPage, pagination?.lastPage]);
+
+  const resultsText = useMemo(() => {
+    if (pagination) {
+      return `${pagination.from} to ${pagination.to} of ${pagination.total} users`;
+    }
+    return `1 to ${users.length} of ${users.length} users`;
+  }, [pagination, users.length]);
+
+  if (!shouldShowFooter) {
+    return null;
+  }
+
+  return (
+    <div className="px-4 py-3 border-t border-border bg-card flex flex-col lg:flex-row items-center justify-between gap-4">
+      {/* Left: Per Page Selection */}
+      <div className="flex items-center gap-2 text-xs sm:text-sm">
+        <span className="text-muted-foreground">Show</span>
+        <Select
+          value={perPageString}
+          onValueChange={onPerPageChange}
+        >
+          <SelectTrigger className="w-16 h-8 text-xs bg-background border-border text-foreground">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-popover border-border">
+            {PER_PAGE_OPTIONS.map((option) => (
+              <SelectItem key={option} value={option}>
+                {option}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <span className="text-muted-foreground">per page</span>
+      </div>
+
+      {/* Center: Pagination Controls */}
+      {shouldShowPagination && pagination && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onPreviousPage}
+            disabled={isPrevDisabled}
+            className="h-8 px-3 text-xs bg-background border-border text-foreground"
+          >
+            Prev
+          </Button>
+          <span className="text-xs sm:text-sm px-3 text-foreground">
+            Page {currentPage} of {pagination.lastPage}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onNextPage}
+            disabled={isNextDisabled}
+            className="h-8 px-3 text-xs bg-background border-border text-foreground"
+          >
+            Next
+          </Button>
+        </div>
+      )}
+
+      {/* Right: Results Info */}
+      <div className="text-xs sm:text-sm text-muted-foreground">
+        {resultsText}
+      </div>
+    </div>
+  );
+});
+
+UsersTableFooter.displayName = 'UsersTableFooter';
+
 export const UsersTable: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
-  const { users, loading, error, pagination, refetch } = useUsers();
+  const { users, loading, error, pagination, refetch, perPage, setPerPage } = useUsers();
   const { deleteUser, loading: deleteLoading } = useDeleteUser();
   
   // State for delete confirmation dialog
@@ -85,7 +209,28 @@ export const UsersTable: React.FC = () => {
 
   // Handle pagination by dispatching fetchUsers with the new page
   const handlePageChange = (page: number) => {
-    dispatch(fetchUsers({ page }));
+    dispatch(fetchUsers({ page, per_page: perPage }));
+  };
+
+  // Handle per-page change
+  const handlePerPageChange = async (value: string) => {
+    const newPerPage = parseInt(value, 10);
+    setPerPage(newPerPage);
+    // Reset to first page when changing per_page
+    dispatch(fetchUsers({ page: 1, per_page: newPerPage }));
+  };
+
+  // Footer handlers
+  const handlePreviousPage = () => {
+    if (pagination && pagination.currentPage > 1) {
+      handlePageChange(pagination.currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (pagination && pagination.currentPage < pagination.lastPage) {
+      handlePageChange(pagination.currentPage + 1);
+    }
   };
 
   return (
@@ -125,20 +270,6 @@ export const UsersTable: React.FC = () => {
                 Users
               </CardTitle>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                {pagination && (
-                  <div
-                    className="text-xs sm:text-sm text-muted-foreground order-2 sm:order-1"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    <span className="hidden sm:inline">
-                      Showing {pagination.from}-{pagination.to} of{' '}
-                      {pagination.total} users
-                    </span>
-                    <span className="sm:hidden">
-                      {pagination.from}-{pagination.to} of {pagination.total}
-                    </span>
-                  </div>
-                )}
                 <div className="flex items-center gap-2 order-1 sm:order-2">
                   <Button
                     variant="outline"
@@ -337,10 +468,10 @@ export const UsersTable: React.FC = () => {
                         </TableCell>
 
                         <TableCell className="p-2 sm:p-4 hidden sm:table-cell">
-                          <div className="space-y-1 max-w-[8rem] lg:max-w-none">
+                          <div className="space-y-1 max-w-[20rem] lg:max-w-none">
                             {user.roles && user.roles.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                {user.roles.slice(0, 2).map((role) => (
+                                {user.roles.slice(0, 4).map((role) => (
                                   <Badge
                                     key={role.id}
                                     variant="outline"
@@ -352,19 +483,19 @@ export const UsersTable: React.FC = () => {
                                     }}
                                   >
                                     <span
-                                      className="truncate max-w-[3rem]"
+                                      className="truncate max-w-[7rem]"
                                       title={role.name}
                                     >
                                       {role.name}
                                     </span>
                                   </Badge>
                                 ))}
-                                {user.roles.length > 2 && (
+                                {user.roles.length > 4 && (
                                   <span
                                     className="text-xs"
                                     style={{ color: 'var(--muted-foreground)' }}
                                   >
-                                    +{user.roles.length - 2}
+                                    +{user.roles.length - 4}
                                   </span>
                                 )}
                               </div>
@@ -380,10 +511,10 @@ export const UsersTable: React.FC = () => {
                         </TableCell>
 
                         <TableCell className="p-2 sm:p-4 hidden md:table-cell">
-                          <div className="space-y-1 max-w-[8rem] lg:max-w-none">
+                          <div className="space-y-1 max-w-[20rem] lg:max-w-none">
                             {user.stores && user.stores.length > 0 ? (
                               <div className="flex flex-wrap gap-1">
-                                {user.stores.slice(0, 2).map((userStore) => (
+                                {user.stores.slice(0, 4).map((userStore) => (
                                   <Badge
                                     key={userStore.store.id}
                                     variant="secondary"
@@ -395,19 +526,19 @@ export const UsersTable: React.FC = () => {
                                     }}
                                   >
                                     <span
-                                      className="truncate max-w-[3rem]"
+                                      className="truncate max-w-[7rem]"
                                       title={userStore.store.name}
                                     >
                                       {userStore.store.name}
                                     </span>
                                   </Badge>
                                 ))}
-                                {user.stores.length > 2 && (
+                                {user.stores.length > 4 && (
                                   <span
                                     className="text-xs"
                                     style={{ color: 'var(--muted-foreground)' }}
                                   >
-                                    +{user.stores.length - 2}
+                                    +{user.stores.length - 4}
                                   </span>
                                 )}
                               </div>
@@ -473,75 +604,18 @@ export const UsersTable: React.FC = () => {
               </div>
             )}
           </CardContent>
-          {pagination && pagination.lastPage > 1 && (
-            <CardFooter
-              className="pt-4 sm:pt-5 lg:pt-6"
-              style={{ backgroundColor: 'var(--card)', borderTop: '1px solid var(--border)' }}
-            >
-              <div className="flex flex-col items-center justify-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={pagination.currentPage <= 1 || loading}
-                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                    style={{
-                      backgroundColor:
-                        pagination.currentPage <= 1 || loading
-                          ? 'var(--muted)'
-                          : 'var(--secondary)',
-                      color: 'var(--secondary-foreground)',
-                      borderColor: 'var(--border)',
-                      opacity:
-                        pagination.currentPage <= 1 || loading
-                          ? 0.5
-                          : 1,
-                    }}
-                  >
-                    <span className="hidden xs:inline">Previous</span>
-                    <span className="xs:hidden">Prev</span>
-                  </Button>
-                  <span
-                    className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap"
-                    style={{ color: 'var(--muted-foreground)' }}
-                  >
-                    <span className="hidden sm:inline">
-                      Page {pagination.currentPage} of {pagination.lastPage}
-                    </span>
-                    <span className="sm:hidden">
-                      {pagination.currentPage}/{pagination.lastPage}
-                    </span>
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={
-                      pagination.currentPage >= pagination.lastPage ||
-                      loading
-                    }
-                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    style={{
-                      backgroundColor:
-                        pagination.currentPage >= pagination.lastPage ||
-                        loading
-                          ? 'var(--muted)'
-                          : 'var(--secondary)',
-                      color: 'var(--secondary-foreground)',
-                      borderColor: 'var(--border)',
-                      opacity:
-                        pagination.currentPage >= pagination.lastPage ||
-                        loading
-                          ? 0.5
-                          : 1,
-                    }}
-                  >
-                    <span className="hidden xs:inline">Next</span>
-                    <span className="xs:hidden">Next</span>
-                  </Button>
-                </div>
-              </div>
-            </CardFooter>
-          )}
+          
+          {/* Enhanced Footer with Per-Page Selector */}
+          <UsersTableFooter
+            loading={loading}
+            users={users}
+            pagination={pagination}
+            currentPage={pagination?.currentPage || 1}
+            perPage={perPage}
+            onPerPageChange={handlePerPageChange}
+            onPreviousPage={handlePreviousPage}
+            onNextPage={handleNextPage}
+          />
         </Card>
       </div>
 

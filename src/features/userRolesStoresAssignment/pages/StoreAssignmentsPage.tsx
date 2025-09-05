@@ -8,8 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUserRolesStoresAssignment } from '@/features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
-import { useUsers } from '@/features/users/hooks/useUsers';
-import { useRoles } from '@/features/roles/hooks/useRoles';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import {
   AssignmentsCard,
@@ -31,8 +29,7 @@ export const StoreAssignmentsPage: React.FC = () => {
     // Removed unused variables: isToggling, isRemoving, toggleError, removeError
   } = useUserRolesStoresAssignment();
   
-  const { users } = useUsers();
-  const { roles } = useRoles();
+
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
@@ -45,15 +42,15 @@ export const StoreAssignmentsPage: React.FC = () => {
     }
   }, [storeId, fetchStoreAssignments]);
 
-  // Helper functions to get names
+  // Helper functions to get names from assignment data
   const getUserName = (userId: number) => {
-    const user = users?.find(u => u.id === userId);
-    return user ? user.name : `User ID: ${userId}`;
+    const assignment = assignments.find(a => a.user_id === userId);
+    return assignment?.user?.name || `User ID: ${userId}`;
   };
 
   const getRoleName = (roleId: number) => {
-    const role = roles?.find(r => r.id === roleId);
-    return role ? role.name : `Role ID: ${roleId}`;
+    const assignment = assignments.find(a => a.role_id === roleId);
+    return assignment?.role?.name || `Role ID: ${roleId}`;
   };
 
   // getStoreName function removed as it's not used

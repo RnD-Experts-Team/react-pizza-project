@@ -4,12 +4,9 @@
  * This page displays all role assignments for a specific user
  * using the useUserRolesStoresAssignment hook.
  */
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUserRolesStoresAssignment } from '@/features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
-import { useRoles } from '@/features/roles/hooks/useRoles';
-import { useStores } from '@/features/stores/hooks/useStores';
 import {
   AssignmentsTable,
   DeleteAssignmentDialog,
@@ -17,10 +14,19 @@ import {
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import type { Assignment } from '@/features/userRolesStoresAssignment/types';
 
+const DATE_FORMAT_OPTIONS: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: 'short',
+  day: 'numeric',
+};
+
 export const UserAssignmentsPage: React.FC = () => {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
-  const userIdNumber = userId ? parseInt(userId) : 0;
+  
+  const userIdNumber = useMemo(() => {
+    return userId ? parseInt(userId) : 0;
+  }, [userId]);
   
   const {
     getUserAssignments,
@@ -30,45 +36,53 @@ export const UserAssignmentsPage: React.FC = () => {
     toggleUserRoleStatus,
     removeUserRole,
   } = useUserRolesStoresAssignment();
-
-  // Fetch roles and stores to get names
-  const { roles } = useRoles();
-  const { stores } = useStores();
   
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
   const [updatingAssignments, setUpdatingAssignments] = useState<Set<number>>(new Set());
-
+  
   // Fetch user assignments on component mount
   useEffect(() => {
     if (userIdNumber) {
       fetchUserAssignments(userIdNumber);
     }
   }, [userIdNumber, fetchUserAssignments]);
-
-  const assignments = getUserAssignments(userIdNumber);
-  const loading = isLoadingUserAssignments();
-  const error = getUserAssignmentsError();
-
-  const handleBack = () => {
+  
+  // Memoize expensive data derivations
+  const assignments = useMemo(() => {
+    return getUserAssignments(userIdNumber);
+  }, [getUserAssignments, userIdNumber]);
+  
+  const loading = useMemo(() => {
+    return isLoadingUserAssignments();
+  }, [isLoadingUserAssignments]);
+  
+  const error = useMemo(() => {
+    return getUserAssignmentsError();
+  }, [getUserAssignmentsError]);
+  
+  // Memoize callback functions
+  const handleBack = useCallback(() => {
     navigate('/user-role-store-assignment');
-  };
-
-  const handleAssignRole = () => {
+  }, [navigate]);
+  
+  const handleAssignRole = useCallback(() => {
     navigate(`/user-role-store-assignment/assign?userId=${userId}`);
-  };
-
-  const getRoleName = (roleId: number) => {
-    const role = roles.find(r => r.id === roleId);
-    return role ? role.name : `Role ID: ${roleId}`;
-  };
-
-  const getStoreName = (storeId: string) => {
-    const store = stores.find(s => s.id === storeId);
-    return store ? store.name : storeId;
-  };
-
-  const handleToggleStatus = async (assignment: Assignment) => {
+  }, [navigate, userId]);
+  
+  const getRoleName = useCallback((roleId: number) => {
+    // Get role name from assignment data if available
+    const assignment = assignments.find(a => a.role_id === roleId);
+    return assignment?.role?.name || `Role ID: ${roleId}`;
+  }, [assignments]);
+  
+  const getStoreName = useCallback((storeId: string) => {
+    // Get store name from assignment data if available
+    const assignment = assignments.find(a => a.store_id === storeId);
+    return assignment?.store?.name || storeId;
+  }, [assignments]);
+  
+  const handleToggleStatus = useCallback(async (assignment: Assignment) => {
     if (!assignment.id || updatingAssignments.has(assignment.id)) return;
     
     setUpdatingAssignments(prev => new Set(prev).add(assignment.id!));
@@ -91,15 +105,15 @@ export const UserAssignmentsPage: React.FC = () => {
         return newSet;
       });
     }
-  };
-
+  }, [updatingAssignments, toggleUserRoleStatus, fetchUserAssignments, userIdNumber]);
+  
   // Handle delete
-  const handleDeleteClick = (assignment: Assignment) => {
+  const handleDeleteClick = useCallback((assignment: Assignment) => {
     setAssignmentToDelete(assignment);
     setDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
+  }, []);
+  
+  const handleDeleteConfirm = useCallback(async () => {
     if (!assignmentToDelete) return;
     
     try {
@@ -115,46 +129,75 @@ export const UserAssignmentsPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete assignment:', error);
     }
-  };
+  }, [assignmentToDelete, removeUserRole, fetchUserAssignments, userIdNumber]);
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
+  const handleDeleteDialogOpenChange = useCallback((open: boolean) => {
+    setDeleteDialogOpen(open);
+    if (!open) {
+      setAssignmentToDelete(null);
+    }
+  }, []);
+  
+  const formatDate = useCallback((dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', DATE_FORMAT_OPTIONS);
+  }, []);
+  
+  // Memoize layout props
+  const layoutProps = useMemo(() => ({
+    title: "User Role Assignments",
+    subtitle: `View all role assignments for User ID: ${userId}`,
+    backButton: {
+      show: true,
+      onClick: handleBack
+    }
+  }), [userId, handleBack]);
+  
+  // Memoize table props
+  const tableProps = useMemo(() => ({
+    assignments,
+    loading,
+    error,
+    getRoleName,
+    getStoreName,
+    onToggleStatus: handleToggleStatus,
+    onDelete: handleDeleteClick,
+    updatingAssignments,
+    formatDate,
+    onAssignRole: handleAssignRole
+  }), [
+    assignments,
+    loading,
+    error,
+    getRoleName,
+    getStoreName,
+    handleToggleStatus,
+    handleDeleteClick,
+    updatingAssignments,
+    formatDate,
+    handleAssignRole
+  ]);
+  
+  // Memoize dialog props
+  const dialogProps = useMemo(() => ({
+    open: deleteDialogOpen,
+    onOpenChange: handleDeleteDialogOpenChange,
+    assignment: assignmentToDelete,
+    onConfirm: handleDeleteConfirm,
+    getRoleName,
+    getStoreName
+  }), [
+    deleteDialogOpen,
+    handleDeleteDialogOpenChange,
+    assignmentToDelete,
+    handleDeleteConfirm,
+    getRoleName,
+    getStoreName
+  ]);
+  
   return (
-    <ManageLayout
-      title="User Role Assignments"
-      subtitle={`View all role assignments for User ID: ${userId}`}
-      backButton={{
-        show: true,
-        onClick: handleBack
-      }}
-    >
-      <AssignmentsTable
-        assignments={assignments}
-        loading={loading}
-        error={error}
-        getRoleName={getRoleName}
-        getStoreName={getStoreName}
-        onToggleStatus={handleToggleStatus}
-        onDelete={handleDeleteClick}
-        updatingAssignments={updatingAssignments}
-        formatDate={formatDate}
-        onAssignRole={handleAssignRole}
-      />
-
-      <DeleteAssignmentDialog
-        open={deleteDialogOpen}
-        onOpenChange={setDeleteDialogOpen}
-        assignment={assignmentToDelete}
-        onConfirm={handleDeleteConfirm}
-        getRoleName={getRoleName}
-        getStoreName={getStoreName}
-      />
+    <ManageLayout {...layoutProps}>
+      <AssignmentsTable {...tableProps} />
+      <DeleteAssignmentDialog {...dialogProps} />
     </ManageLayout>
   );
 };

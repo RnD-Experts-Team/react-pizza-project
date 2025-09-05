@@ -6,7 +6,7 @@
  * Fully responsive design with CSS variables for light/dark mode compatibility.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Users, ShoppingBag } from 'lucide-react';
@@ -19,15 +19,15 @@ import {
 export const UserRoleStoreAssignmentPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleAssignRoles = () => {
+  const handleAssignRoles = useCallback(() => {
     navigate(`/user-role-store-assignment/assign`);
-  };
+  }, [navigate]);
 
-  const handleBulkAssign = () => {
+  const handleBulkAssign = useCallback(() => {
     navigate(`/user-role-store-assignment/bulk`);
-  };
+  }, [navigate]);
 
-  const mainButtons = (
+  const mainButtons = useMemo(() => (
     <Button 
       onClick={handleAssignRoles} 
       className="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 sm:px-6 sm:py-3 text-sm sm:text-base"
@@ -35,9 +35,9 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
       <Users className="h-4 w-4 sm:h-5 sm:w-5" />
       Assign Roles
     </Button>
-  );
+  ), [handleAssignRoles]);
 
-  const subButtons = (
+  const subButtons = useMemo(() => (
     <Button 
       onClick={handleBulkAssign} 
       variant="outline" 
@@ -46,7 +46,7 @@ export const UserRoleStoreAssignmentPage: React.FC = () => {
       <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
       Bulk Assign
     </Button>
-  );
+  ), [handleBulkAssign]);
 
   return (
     <ManageLayout

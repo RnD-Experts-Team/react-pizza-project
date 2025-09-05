@@ -173,6 +173,7 @@ export interface UsersState {
     from: number;
     to: number;
   } | null;
+  perPage: number; // Current per_page setting
   createLoading: boolean;
   createError: string | null;
   updateLoading: boolean;
@@ -233,6 +234,8 @@ export interface UseUsersReturn {
   loading: boolean;
   error: string | null;
   pagination: UsersState['pagination'];
+  perPage: number;
+  setPerPage: (perPage: number) => void;
   fetchUsers: (params?: GetUsersParams) => Promise<void>;
   refetch: () => Promise<void>;
 }

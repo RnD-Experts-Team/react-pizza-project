@@ -27,6 +27,7 @@ const initialState: UsersState = {
   loading: false,
   error: null,
   pagination: null,
+  perPage: 10, // Default per_page value
   createLoading: false,
   createError: null,
   updateLoading: false,
@@ -296,6 +297,11 @@ const usersSlice = createSlice({
       state.filters = action.payload;
     },
     
+    // Set per page
+    setPerPage: (state, action: PayloadAction<number>) => {
+      state.perPage = action.payload;
+    },
+    
     // Update a specific user in the state
     updateUserInState: (state, action: PayloadAction<User>) => {
       const index = state.users.findIndex(
@@ -545,6 +551,7 @@ export const {
   setSelectedUserId,
   setSearchTerm,
   setFilters,
+  setPerPage,
   updateUserInState,
   removeUserFromState,
   setLoading,
@@ -590,6 +597,8 @@ export const selectSelectedUserId = (state: RootState) => state.users.selectedUs
 export const selectSearchTerm = (state: RootState) => state.users.searchTerm;
 
 export const selectFilters = (state: RootState) => state.users.filters;
+
+export const selectPerPage = (state: RootState) => state.users.perPage;
 
 // Memoized selectors for performance
 export const selectUserById = (state: RootState, id: number) =>
