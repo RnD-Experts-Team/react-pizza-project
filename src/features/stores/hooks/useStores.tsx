@@ -329,12 +329,13 @@ export const useStoreOperations = (): UseStoreOperationsReturn & {
       errors.name = 'Store name is required';
     }
     
-    if (!data.metadata?.address || data.metadata.address.trim() === '') {
-      errors.address = 'Store address is required';
+    // Phone and address are now optional
+    if (data.metadata?.address && data.metadata.address.trim() === '') {
+      errors.address = 'Store address cannot be empty if provided';
     }
     
-    if (!data.metadata?.phone || data.metadata.phone.trim() === '') {
-      errors.phone = 'Store phone is required';
+    if (data.metadata?.phone && data.metadata.phone.trim() === '') {
+      errors.phone = 'Store phone cannot be empty if provided';
     }
     
     // Validate store ID for create operations

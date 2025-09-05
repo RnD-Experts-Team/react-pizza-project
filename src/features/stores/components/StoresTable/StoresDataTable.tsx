@@ -13,10 +13,6 @@ interface StoreRowData {
   name: string;
   is_active: boolean;
   created_at: string;
-  metadata?: {
-    phone?: string;
-    address?: string;
-  };
   formattedDate: string;
   statusBadgeVariant: string;
   statusBadgeClassName: string;
@@ -46,12 +42,6 @@ export const StoresDataTable: React.FC<StoresDataTableProps> = ({
             </TableHead>
             <TableHead className="min-w-[10rem] text-xs sm:text-sm text-foreground font-semibold">
               Name
-            </TableHead>
-            <TableHead className="min-w-[10rem] text-xs sm:text-sm hidden md:table-cell text-foreground font-semibold">
-              Phone
-            </TableHead>
-            <TableHead className="min-w-[12rem] text-xs sm:text-sm hidden lg:table-cell text-foreground font-semibold">
-              Address
             </TableHead>
             <TableHead className="min-w-[5rem] text-xs sm:text-sm text-foreground font-semibold">
               Status

@@ -260,8 +260,9 @@ class StoreApiService {
       throw new Error('Store ID and name are required');
     }
     
-    if (!payload.metadata?.address || !payload.metadata?.phone) {
-      throw new Error('Store address and phone are required');
+    // Validate metadata exists but phone and address are now optional
+    if (!payload.metadata) {
+      throw new Error('Store metadata is required');
     }
     
     const response = await apiCall(
@@ -284,8 +285,12 @@ class StoreApiService {
       throw new Error('Store ID is required');
     }
     
-    if (!payload.name || !payload.metadata) {
-      throw new Error('Store name and metadata are required');
+    if (!payload.name) {
+      throw new Error('Store name is required');
+    }
+    
+    if (!payload.metadata) {
+      throw new Error('Store metadata is required');
     }
     
     const response = await apiCall(

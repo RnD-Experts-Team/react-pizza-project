@@ -1,15 +1,11 @@
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { StoreActionsDropdown } from './StoreActionsDropdown';
+import { StoreActionsDropdown } from '@/features/stores/components/StoresTable/StoreActionsDropdown';
 
 interface StoreRowData {
   id: string;
   name: string;
-  metadata?: {
-    phone?: string;
-    address?: string;
-  };
   formattedDate: string;
   statusBadgeVariant: string;
   statusBadgeClassName: string;
@@ -52,18 +48,8 @@ export const StoreTableRow: React.FC<StoreTableRowProps> = ({
         </div>
       </TableCell>
 
-      <TableCell className="p-2 sm:p-4 text-xs sm:text-sm hidden md:table-cell text-foreground">
-        {store.metadata?.phone || 'N/A'}
-      </TableCell>
 
-      <TableCell className="p-2 sm:p-4 text-xs sm:text-sm hidden lg:table-cell text-foreground">
-        <div
-          className="truncate max-w-[10rem] lg:max-w-none"
-          title={store.metadata?.address || 'N/A'}
-        >
-          {store.metadata?.address || 'N/A'}
-        </div>
-      </TableCell>
+      
 
       <TableCell className="p-2 sm:p-4">
         <Badge

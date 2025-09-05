@@ -1,17 +1,14 @@
 import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { StoresDataTable } from './StoresDataTable';
+import { StoresDataTable } from '@/features/stores/components/StoresTable/StoresDataTable';
 
 interface Store {
   id: string;
   name: string;
   is_active: boolean;
   created_at: string;
-  metadata?: {
-    phone?: string;
-    address?: string;
-  };
+  
 }
 
 interface StoreRowData extends Store {

@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStoreById, updateStore } from '@/features/stores/store/storesSlice';
-import { StoreForm } from '@/features/stores/components/StoreForm';
+import { StoreForm } from '@/features/stores/components/StoreForm/StoreForm';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';

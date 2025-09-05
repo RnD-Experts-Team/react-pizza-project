@@ -12,8 +12,8 @@
  * Store metadata containing additional information about the store
  */
 export interface StoreMetadata {
-  phone: string;
-  address: string;
+  phone?: string;
+  address?: string;
   [key: string]: any; // Allow for additional metadata fields
 }
 
@@ -429,8 +429,9 @@ export const isStore = (obj: any): obj is Store => {
     typeof obj.id === 'string' &&
     typeof obj.name === 'string' &&
     obj.metadata &&
-    typeof obj.metadata.phone === 'string' &&
-    typeof obj.metadata.address === 'string' &&
+    typeof obj.metadata === 'object' &&
+    (obj.metadata.phone === undefined || typeof obj.metadata.phone === 'string') &&
+    (obj.metadata.address === undefined || typeof obj.metadata.address === 'string') &&
     typeof obj.is_active === 'boolean' &&
     typeof obj.created_at === 'string' &&
     typeof obj.updated_at === 'string'

@@ -7,7 +7,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createStore } from '@/features/stores/store/storesSlice';
-import { StoreForm } from '@/features/stores/components/StoreForm';
+import { StoreForm } from '@/features/stores/components/StoreForm/StoreForm';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import { toast } from 'sonner';
 import type { CreateStorePayload, UpdateStorePayload } from '@/features/stores/types';
