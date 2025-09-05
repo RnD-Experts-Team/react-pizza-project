@@ -12,7 +12,7 @@ interface MetadataSectionProps {
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
 }
 
-const MetadataSection: React.FC<MetadataSectionProps> = ({
+const MetadataSection = React.memo<MetadataSectionProps>(({
   createdBy,
   reason,
   validationErrors,
@@ -69,6 +69,9 @@ const MetadataSection: React.FC<MetadataSectionProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+// Add display name for better debugging
+MetadataSection.displayName = 'MetadataSection';
 
 export default MetadataSection;

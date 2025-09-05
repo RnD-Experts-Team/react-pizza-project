@@ -5,13 +5,12 @@
  * Users can select higher and lower roles to check if the hierarchy exists,
  * then create or remove it based on the validation result.
  */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useRoles } from '@/features/roles/hooks/useRoles';
 import { useStoreHierarchy, useHierarchyTree } from '@/features/storeHierarchy/hooks/UseRoleHierarchy';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import {  AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { 
   RoleSelection,
   ValidationSection
@@ -45,9 +44,32 @@ const ValidateHierarchyPage: React.FC = () => {
   const [isValidating, setIsValidating] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  
+  // Memoize combined loading state to prevent unnecessary re-renders
+  const isLoading = useMemo(() => {
+    return rolesLoading || hierarchiesLoading || treeLoading;
+  }, [rolesLoading, hierarchiesLoading, treeLoading]);
 
-  const handleRoleChange = (field: 'higher_role_id' | 'lower_role_id', value: string) => {
+  // Memoize hierarchy existence check to avoid recalculating on every render
+  const hierarchyExists = useMemo(() => {
+    if (!hierarchies || hierarchies.length === 0) return false;
+    if (!formData.higher_role_id || !formData.lower_role_id) return false;
+    
+    const higherRoleId = parseInt(formData.higher_role_id);
+    const lowerRoleId = parseInt(formData.lower_role_id);
+    
+    return hierarchies.some(hierarchy => 
+      hierarchy.higher_role_id === higherRoleId && 
+      hierarchy.lower_role_id === lowerRoleId
+    );
+  }, [hierarchies, formData.higher_role_id, formData.lower_role_id]);
+
+  // Memoize validation capability to prevent recalculation
+  const canValidate = useMemo(() => {
+    return !!formData.higher_role_id && !!formData.lower_role_id;
+  }, [formData.higher_role_id, formData.lower_role_id]);
+
+  // Use useCallback for event handlers to prevent child re-renders
+  const handleRoleChange = useCallback((field: 'higher_role_id' | 'lower_role_id', value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear validation error for this field
@@ -59,9 +81,10 @@ const ValidateHierarchyPage: React.FC = () => {
     if (validationResult) {
       setValidationResult(null);
     }
-  };
+  }, [validationErrors, validationResult]);
 
-  const validateForm = (): boolean => {
+  // Memoize form validation function
+  const validateForm = useCallback((): boolean => {
     const errors: Record<string, string> = {};
     
     if (!formData.higher_role_id) {
@@ -78,29 +101,24 @@ const ValidateHierarchyPage: React.FC = () => {
     
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [formData.higher_role_id, formData.lower_role_id]);
 
-  const handleValidate = async () => {
+  // Optimize validation handler with useCallback
+  const handleValidate = useCallback(async () => {
     if (!validateForm()) {
       return;
     }
-
+    
     if (!storeId) {
       setValidationErrors({ general: 'Store ID is required' });
       return;
     }
-
+    
     setIsValidating(true);
     
     try {
       const higherRoleId = parseInt(formData.higher_role_id);
       const lowerRoleId = parseInt(formData.lower_role_id);
-      
-      // Check if hierarchy relationship exists using the fetched hierarchies
-      const hierarchyExists = hierarchies.some(hierarchy => 
-        hierarchy.higher_role_id === higherRoleId && 
-        hierarchy.lower_role_id === lowerRoleId
-      );
       
       // Additional validation using tree utilities
       let additionalValidation: string[] = [];
@@ -154,18 +172,19 @@ const ValidateHierarchyPage: React.FC = () => {
     } finally {
       setIsValidating(false);
     }
-  };
+  }, [formData.higher_role_id, formData.lower_role_id, storeId, treeUtils, tree, hierarchyExists, validateForm]);
 
-  const handleCreateHierarchy = () => {
+  // Optimize navigation handlers with useCallback
+  const handleCreateHierarchy = useCallback(() => {
     navigate(`/stores-hierarchy/create/${storeId}`, {
       state: {
         preselectedHigherRole: formData.higher_role_id,
         preselectedLowerRole: formData.lower_role_id
       }
     });
-  };
+  }, [navigate, storeId, formData.higher_role_id, formData.lower_role_id]);
 
-  const handleRemoveHierarchy = () => {
+  const handleRemoveHierarchy = useCallback(() => {
     // Navigate to delete confirmation page with the validated hierarchy data
     navigate(`/stores-hierarchy/delete/${storeId}`, {
       state: {
@@ -178,14 +197,14 @@ const ValidateHierarchyPage: React.FC = () => {
         }
       }
     });
-  };
+  }, [navigate, storeId, formData.higher_role_id, formData.lower_role_id]);
 
-  // Clear validation errors when form data changes
+  // Optimize the useEffect with proper dependency
   useEffect(() => {
     if (Object.keys(validationErrors).length > 0) {
       setValidationErrors({});
     }
-  }, [formData]);
+  }, [formData, validationErrors]);
 
   if (!storeId) {
     return (
@@ -214,7 +233,6 @@ const ValidateHierarchyPage: React.FC = () => {
         show: true,
       }}
     >
-
         {/* Error Alerts */}
         {validationErrors.general && (
           <Alert variant="destructive" className="border-destructive/50">
@@ -253,7 +271,7 @@ const ValidateHierarchyPage: React.FC = () => {
             roles={roles}
             selectedRoleId={formData.higher_role_id}
             disabledRoleId={formData.lower_role_id}
-            isLoading={rolesLoading || hierarchiesLoading || treeLoading}
+            isLoading={isLoading}
             validationError={validationErrors.higher_role_id}
             onRoleChange={(value) => handleRoleChange('higher_role_id', value)}
           />
@@ -266,7 +284,7 @@ const ValidateHierarchyPage: React.FC = () => {
             roles={roles}
             selectedRoleId={formData.lower_role_id}
             disabledRoleId={formData.higher_role_id}
-            isLoading={rolesLoading || hierarchiesLoading || treeLoading}
+            isLoading={isLoading}
             validationError={validationErrors.lower_role_id}
             onRoleChange={(value) => handleRoleChange('lower_role_id', value)}
           />
@@ -274,8 +292,8 @@ const ValidateHierarchyPage: React.FC = () => {
           {/* Validation Section */}
           <ValidationSection
             isValidating={isValidating}
-            isLoading={rolesLoading || hierarchiesLoading || treeLoading}
-            canValidate={!!formData.higher_role_id && !!formData.lower_role_id}
+            isLoading={isLoading}
+            canValidate={canValidate}
             validationResult={validationResult}
             hierarchiesCount={hierarchies.length}
             onValidate={handleValidate}

@@ -5,7 +5,7 @@
  * and optional metadata fields for created_by and reason.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useCreateHierarchy } from '@/features/storeHierarchy/hooks/UseRoleHierarchy';
 import { useRoles } from '@/features/roles/hooks/useRoles';
@@ -15,102 +15,168 @@ import { AlertCircle } from 'lucide-react';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
 import { CreateHierarchyForm } from '@/features/storeHierarchy/components/createHierarchy';
 
-const CreateHierarchyPage: React.FC = () => {
+// Constants
+const DEFAULT_CREATED_BY = 'system';
+const DEFAULT_IS_ACTIVE = true;
+
+interface PreselectedState {
+  preselectedHigherRole?: string;
+  preselectedLowerRole?: string;
+}
+
+interface FormData {
+  higher_role_id: string;
+  lower_role_id: string;
+  created_by: string;
+  reason: string;
+}
+
+// Error component for missing store ID
+const StoreIdRequiredError: React.FC = () => (
+  <ManageLayout
+    title="Create Hierarchy"
+    subtitle="Store ID is required to create hierarchy"
+    backButton={{ show: true }}
+  >
+    <Alert variant="destructive" className="border-destructive/50 text-destructive">
+      <AlertCircle className="h-4 w-4" />
+      <AlertDescription className="text-sm sm:text-base">
+        Store ID is required to create hierarchy.
+      </AlertDescription>
+    </Alert>
+  </ManageLayout>
+);
+
+// Main component content with guaranteed storeId
+const CreateHierarchyPageContent: React.FC<{ storeId: string }> = ({ storeId }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { storeId } = useParams<{ storeId: string }>();
   const { createHierarchy, isLoading, error } = useCreateHierarchy();
   const { roles, loading: rolesLoading } = useRoles();
   
   // Get preselected roles from navigation state (from validate page)
-  const preselectedState = location.state as {
-    preselectedHigherRole?: string;
-    preselectedLowerRole?: string;
-  } | null;
+  const preselectedState = location.state as PreselectedState | null;
   
-  // Form state
-  const [formData, setFormData] = useState<{
-    higher_role_id: string;
-    lower_role_id: string;
-    created_by: string;
-    reason: string;
-  }>({
+  // Memoized initial form data to optimize re-renders
+  const initialFormData = useMemo<FormData>(() => ({
     higher_role_id: preselectedState?.preselectedHigherRole || '',
     lower_role_id: preselectedState?.preselectedLowerRole || '',
-    created_by: 'system',
+    created_by: DEFAULT_CREATED_BY,
     reason: ''
-  });
+  }), [preselectedState?.preselectedHigherRole, preselectedState?.preselectedLowerRole]);
   
-  // UI state
+  // Form state
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  
+  // UI state - using Record<string, string> to match component props
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleBack = () => {
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleBack = useCallback(() => {
     navigate(`/stores-hierarchy/view/${storeId}`);
-  };
+  }, [navigate, storeId]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const clearFieldError = useCallback((fieldName: string) => {
+    setValidationErrors(prev => {
+      if (prev[fieldName]) {
+        const { [fieldName]: _, ...rest } = prev;
+        return rest;
+      }
+      return prev;
+    });
+  }, []);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    
     setFormData(prev => ({ ...prev, [name]: value }));
     
     // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+    clearFieldError(name);
+  }, [clearFieldError]);
 
-  const handleRoleChange = (field: 'higher_role_id' | 'lower_role_id', value: string) => {
+  const handleRoleChange = useCallback((field: 'higher_role_id' | 'lower_role_id', value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear validation error for this field
-    if (validationErrors[field]) {
-      setValidationErrors(prev => ({ ...prev, [field]: '' }));
-    }
-  };
+    clearFieldError(field);
+  }, [clearFieldError]);
 
-  const validateForm = (): boolean => {
+  // Enhanced validation with better error handling
+  const validateForm = useCallback((): { isValid: boolean; errors: Record<string, string> } => {
     const errors: Record<string, string> = {};
     
-    if (!formData.higher_role_id) {
+    // Validate higher role selection
+    if (!formData.higher_role_id.trim()) {
       errors.higher_role_id = 'Please select a higher role';
     }
     
-    if (!formData.lower_role_id) {
+    // Validate lower role selection
+    if (!formData.lower_role_id.trim()) {
       errors.lower_role_id = 'Please select a lower role';
     }
     
-    if (formData.higher_role_id === formData.lower_role_id && formData.higher_role_id) {
+    // Validate role IDs are valid numbers
+    const higherRoleId = Number(formData.higher_role_id);
+    const lowerRoleId = Number(formData.lower_role_id);
+    
+    if (formData.higher_role_id && (isNaN(higherRoleId) || higherRoleId <= 0)) {
+      errors.higher_role_id = 'Please select a valid higher role';
+    }
+    
+    if (formData.lower_role_id && (isNaN(lowerRoleId) || lowerRoleId <= 0)) {
+      errors.lower_role_id = 'Please select a valid lower role';
+    }
+    
+    // Validate roles are different
+    if (
+      formData.higher_role_id && 
+      formData.lower_role_id && 
+      formData.higher_role_id === formData.lower_role_id
+    ) {
       errors.lower_role_id = 'Higher role and lower role cannot be the same';
     }
     
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  }, [formData.higher_role_id, formData.lower_role_id]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Enhanced submit handler with better error handling
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      return;
-    }
-
-    if (!storeId) {
-      setValidationErrors({ general: 'Store ID is required' });
+    // Validate form
+    const validation = validateForm();
+    if (!validation.isValid) {
+      setValidationErrors(validation.errors);
       return;
     }
 
     setIsSubmitting(true);
+    setValidationErrors({}); // Clear any existing errors
     
     try {
+      // Parse and validate role IDs
+      const higherRoleId = Number(formData.higher_role_id);
+      const lowerRoleId = Number(formData.lower_role_id);
+      
+      // Double-check parsing (shouldn't happen due to validation, but good defensive programming)
+      if (isNaN(higherRoleId) || isNaN(lowerRoleId)) {
+        throw new Error('Invalid role selection');
+      }
+
       const hierarchyRequest: CreateHierarchyRequest = {
-        higher_role_id: parseInt(formData.higher_role_id),
-        lower_role_id: parseInt(formData.lower_role_id),
+        higher_role_id: higherRoleId,
+        lower_role_id: lowerRoleId,
         store_id: storeId,
         metadata: {
-          created_by: formData.created_by,
-          reason: formData.reason || ''
+          created_by: formData.created_by.trim() || DEFAULT_CREATED_BY,
+          reason: formData.reason.trim()
         },
-        is_active: true
+        is_active: DEFAULT_IS_ACTIVE
       };
       
       await createHierarchy(hierarchyRequest);
@@ -119,35 +185,20 @@ const CreateHierarchyPage: React.FC = () => {
       navigate(`/stores-hierarchy/view/${storeId}`);
     } catch (err) {
       console.error('Failed to create hierarchy:', err);
-      setValidationErrors({ general: 'Failed to create hierarchy. Please try again.' });
+      
+      // More specific error handling
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Failed to create hierarchy. Please try again.';
+      
+      setValidationErrors({ general: errorMessage });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData, storeId, validateForm, createHierarchy, navigate]);
 
-  // Clear validation errors when form data changes
-  useEffect(() => {
-    if (Object.keys(validationErrors).length > 0) {
-      setValidationErrors({});
-    }
-  }, [formData]);
-
-  if (!storeId) {
-    return (
-      <ManageLayout
-        title="Create Hierarchy"
-        subtitle="Store ID is required to create hierarchy"
-        backButton={{ show: true }}
-      >
-        <Alert variant="destructive" className="border-destructive/50 text-destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-sm sm:text-base">
-            Store ID is required to create hierarchy.
-          </AlertDescription>
-        </Alert>
-      </ManageLayout>
-    );
-  }
+  // Compute combined loading state
+  const isAnyLoading = isLoading || rolesLoading || isSubmitting;
 
   return (
     <ManageLayout
@@ -173,7 +224,7 @@ const CreateHierarchyPage: React.FC = () => {
         roles={roles}
         rolesLoading={rolesLoading}
         isSubmitting={isSubmitting}
-        isLoading={isLoading}
+        isLoading={isAnyLoading}
         validationErrors={validationErrors}
         onSubmit={handleSubmit}
         onInputChange={handleInputChange}
@@ -182,6 +233,19 @@ const CreateHierarchyPage: React.FC = () => {
       />
     </ManageLayout>
   );
+};
+
+// Main component with proper parameter validation
+const CreateHierarchyPage: React.FC = () => {
+  const { storeId } = useParams<{ storeId: string }>();
+  
+  // Early return for missing storeId with proper error handling
+  if (!storeId) {
+    return <StoreIdRequiredError />;
+  }
+
+  // Now TypeScript knows storeId is defined
+  return <CreateHierarchyPageContent storeId={storeId} />;
 };
 
 export default CreateHierarchyPage;

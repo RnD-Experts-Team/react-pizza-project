@@ -11,7 +11,7 @@ interface HierarchyTreeHeaderProps {
   onCollapseAll: () => void;
 }
 
-export const HierarchyTreeHeader: React.FC<HierarchyTreeHeaderProps> = ({
+export const HierarchyTreeHeader: React.FC<HierarchyTreeHeaderProps> = React.memo(({
   searchTerm,
   onSearchChange,
   onExpandAll,
@@ -49,6 +49,9 @@ export const HierarchyTreeHeader: React.FC<HierarchyTreeHeaderProps> = ({
       </div>
     </CardHeader>
   );
-};
+});
+
+// Add display name for debugging purposes
+HierarchyTreeHeader.displayName = 'HierarchyTreeHeader';
 
 export default HierarchyTreeHeader;

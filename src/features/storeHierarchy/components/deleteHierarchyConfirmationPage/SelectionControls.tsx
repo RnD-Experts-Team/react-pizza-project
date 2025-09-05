@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -23,6 +23,18 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
   onDeleteSelected,
   isDeleting
 }) => {
+  const checkboxRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (checkboxRef.current) {
+      // For button-based checkboxes, we need to find the actual input element
+      const inputElement = checkboxRef.current.querySelector('input[type="checkbox"]') as HTMLInputElement;
+      if (inputElement) {
+        inputElement.indeterminate = someSelected;
+      }
+    }
+  }, [someSelected]);
+
   if (totalCount === 0) {
     return null;
   }
@@ -33,10 +45,8 @@ export const SelectionControls: React.FC<SelectionControlsProps> = ({
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
           <div className="flex items-center space-x-3 sm:space-x-4">
             <Checkbox
+              ref={checkboxRef}
               checked={allSelected}
-              ref={(el) => {
-                if (el) (el as any).indeterminate = someSelected;
-              }}
               onCheckedChange={onSelectAll}
             />
             <div>

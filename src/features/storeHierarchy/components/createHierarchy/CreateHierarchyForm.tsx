@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import RoleSelection from '@/features/storeHierarchy/components/validateHierarchy/RoleSelection';
 import MetadataSection from '@/features/storeHierarchy/components/createHierarchy/MetadataSection';
 import SubmitActions from '@/features/storeHierarchy/components/createHierarchy/SubmitActions';
@@ -41,6 +41,15 @@ const CreateHierarchyForm: React.FC<CreateHierarchyFormProps> = ({
   onRoleChange,
   onCancel
 }) => {
+  // Create stable handler functions
+  const handleHigherRoleChange = useCallback((value: string) => {
+    onRoleChange('higher_role_id', value);
+  }, [onRoleChange]);
+
+  const handleLowerRoleChange = useCallback((value: string) => {
+    onRoleChange('lower_role_id', value);
+  }, [onRoleChange]);
+
   return (
     <form onSubmit={onSubmit} className="space-y-4 sm:space-y-6">
       {/* Higher Role Selection */}
@@ -53,7 +62,7 @@ const CreateHierarchyForm: React.FC<CreateHierarchyFormProps> = ({
         disabledRoleId={formData.lower_role_id}
         isLoading={rolesLoading}
         validationError={validationErrors.higher_role_id}
-        onRoleChange={(value) => onRoleChange('higher_role_id', value)}
+        onRoleChange={handleHigherRoleChange} // Stable reference
       />
 
       {/* Lower Role Selection */}
@@ -66,7 +75,7 @@ const CreateHierarchyForm: React.FC<CreateHierarchyFormProps> = ({
         disabledRoleId={formData.higher_role_id}
         isLoading={rolesLoading}
         validationError={validationErrors.lower_role_id}
-        onRoleChange={(value) => onRoleChange('lower_role_id', value)}
+        onRoleChange={handleLowerRoleChange} // Stable reference
       />
 
       {/* Metadata */}

@@ -4,8 +4,7 @@
  * Displays the role hierarchy tree for a specific store with interactive features.
  * Shows roles, permissions, and hierarchical relationships in a beautiful tree view.
  */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useHierarchyTree } from '@/features/storeHierarchy/hooks/UseRoleHierarchy';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,7 +24,25 @@ import {
 } from '@/features/storeHierarchy/components/storeHierarchyDetailPage';
 import type { RoleTreeNode, Role } from '@/features/storeHierarchy/types';
 
+/**
+ * Extracted helper function to get all node IDs from a tree structure
+ * This function recursively traverses the tree and collects all role IDs
+ */
+const getAllNodeIds = (nodes: RoleTreeNode[]): Set<number> => {
+  const allNodeIds = new Set<number>();
 
+  const collectNodeIds = (nodes: RoleTreeNode[]) => {
+    nodes.forEach(node => {
+      allNodeIds.add(node.role.id);
+      if (node.children) {
+        collectNodeIds(node.children);
+      }
+    });
+  };
+
+  collectNodeIds(nodes);
+  return allNodeIds;
+};
 
 export const StoreHierarchyDetailPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
@@ -42,15 +59,20 @@ export const StoreHierarchyDetailPage: React.FC = () => {
     utils: treeUtilities
   } = useHierarchyTree(storeId!);
 
+  // Memoize rootIds calculation to avoid recalculation on every render
+  const rootIds = useMemo(() => {
+    return hierarchyTree?.map((node: RoleTreeNode) => node.role.id) || [];
+  }, [hierarchyTree]);
+
   // Auto-expand root nodes on load
   useEffect(() => {
     if (hierarchyTree && hierarchyTree.length > 0) {
-      const rootIds = hierarchyTree.map((node: RoleTreeNode) => node.role.id);
       setExpandedNodes(new Set(rootIds));
     }
-  }, [hierarchyTree]);
+  }, [hierarchyTree, rootIds]);
 
-  const handleToggleExpand = (nodeId: number) => {
+  // Memoized callback to prevent unnecessary re-renders of child components
+  const handleToggleExpand = useCallback((nodeId: number) => {
     setExpandedNodes(prev => {
       const newSet = new Set(prev);
       if (newSet.has(nodeId)) {
@@ -60,33 +82,25 @@ export const StoreHierarchyDetailPage: React.FC = () => {
       }
       return newSet;
     });
-  };
+  }, []);
 
-  const handleSelectRole = (role: Role) => {
+  // Memoized callback for role selection
+  const handleSelectRole = useCallback((role: Role) => {
     setSelectedRole(role);
-  };
+  }, []);
 
-  const handleExpandAll = () => {
+  // Simplified handleExpandAll using extracted helper function
+  const handleExpandAll = useCallback(() => {
     if (hierarchyTree && treeUtilities) {
-      const allNodeIds = new Set<number>();
-      
-      const collectNodeIds = (nodes: RoleTreeNode[]) => {
-        nodes.forEach(node => {
-          allNodeIds.add(node.role.id);
-          if (node.children) {
-            collectNodeIds(node.children);
-          }
-        });
-      };
-      
-      collectNodeIds(hierarchyTree);
+      const allNodeIds = getAllNodeIds(hierarchyTree);
       setExpandedNodes(allNodeIds);
     }
-  };
+  }, [hierarchyTree, treeUtilities]);
 
-  const handleCollapseAll = () => {
+  // Memoized callback for collapsing all nodes
+  const handleCollapseAll = useCallback(() => {
     setExpandedNodes(new Set());
-  };
+  }, []);
 
   if (!storeId) {
     return (
@@ -108,6 +122,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         variant="outline"
         size="sm"
         className="hover:bg-accent text-xs sm:text-sm"
+        aria-label="Create new hierarchy for this store"
       >
         <Link className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         <span className="hidden sm:inline">Create Hierarchy</span>
@@ -118,6 +133,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         variant="outline"
         size="sm"
         className="hover:bg-accent text-xs sm:text-sm"
+        aria-label="Remove hierarchy for this store"
       >
         <Trash2 className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         <span className="hidden sm:inline">Remove Hierarchy</span>
@@ -128,6 +144,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         variant="outline"
         size="sm"
         className="hover:bg-accent text-xs sm:text-sm"
+        aria-label="Validate hierarchy for this store"
       >
         <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
         <span className="hidden sm:inline">Validate Hierarchy</span>
@@ -139,6 +156,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
         size="sm"
         disabled={loading}
         className="hover:bg-accent text-xs sm:text-sm"
+        aria-label="Refresh hierarchy data"
       >
         <RefreshCw className={cn("h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2", loading && "animate-spin")} />
         <span className="hidden sm:inline">Refresh</span>
@@ -165,7 +183,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
           </AlertDescription>
         </Alert>
       )}
-
+      
       {/* Main Content */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6">
         {/* Hierarchy Tree */}
@@ -218,7 +236,7 @@ export const StoreHierarchyDetailPage: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-
+        
         {/* Role Details Panel */}
         <div className="space-y-4">
           {selectedRole ? (

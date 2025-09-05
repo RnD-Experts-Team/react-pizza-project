@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ArrowLeft, Crown, UserCheck, Shield, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { RoleHierarchy } from '@/features/storeHierarchy/types';
+
 
 interface HierarchyItemProps {
   hierarchy: RoleHierarchy;
@@ -12,12 +13,22 @@ interface HierarchyItemProps {
   isDeleting: boolean;
 }
 
+
 export const HierarchyItem: React.FC<HierarchyItemProps> = ({
   hierarchy,
   onSelect,
   isSelected,
   isDeleting
 }) => {
+  const handleSelect = useCallback(
+    (checked: boolean | 'indeterminate') => {
+      if (typeof checked === 'boolean') {
+        onSelect(hierarchy, checked);
+      }
+    },
+    [hierarchy, onSelect]
+  );
+
   return (
     <div className={cn(
       "p-3 sm:p-4 border rounded-lg transition-all duration-200",
@@ -27,7 +38,7 @@ export const HierarchyItem: React.FC<HierarchyItemProps> = ({
       <div className="flex items-start space-x-2 sm:space-x-3">
         <Checkbox
           checked={isSelected}
-          onCheckedChange={(checked) => onSelect(hierarchy, checked as boolean)}
+          onCheckedChange={handleSelect}
           disabled={isDeleting}
           className="mt-1"
         />
@@ -101,5 +112,6 @@ export const HierarchyItem: React.FC<HierarchyItemProps> = ({
     </div>
   );
 };
+
 
 export default HierarchyItem;

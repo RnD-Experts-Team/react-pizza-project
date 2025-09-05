@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { AlertTriangle, RefreshCw, Trash2 } from 'lucide-react';
 import type { RoleHierarchy } from '@/features/storeHierarchy/types';
+
 
 interface DeleteConfirmationDialogProps {
   selectedHierarchies: RoleHierarchy[];
@@ -14,6 +15,7 @@ interface DeleteConfirmationDialogProps {
   open: boolean;
 }
 
+
 export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
   selectedHierarchies,
   onConfirm,
@@ -21,8 +23,14 @@ export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> =
   isDeleting,
   open
 }) => {
+  const handleOpenChange = useCallback((open: boolean) => {
+    if (!open) {
+      onCancel();
+    }
+  }, [onCancel]);
+
   return (
-    <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[500px] p-4 sm:p-6">
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2 text-lg sm:text-xl">

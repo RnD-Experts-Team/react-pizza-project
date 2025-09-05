@@ -28,7 +28,7 @@ interface ValidationSectionProps {
   onRemoveHierarchy: () => void;
 }
 
-const ValidationSection: React.FC<ValidationSectionProps> = ({
+const ValidationSection: React.FC<ValidationSectionProps> = React.memo(({
   isValidating,
   isLoading,
   canValidate,
@@ -156,6 +156,9 @@ const ValidationSection: React.FC<ValidationSectionProps> = ({
       )}
     </>
   );
-};
+});
+
+// Add display name for better debugging
+ValidationSection.displayName = 'ValidationSection';
 
 export default ValidationSection;
