@@ -1,37 +1,47 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Loader2, Search, Shield } from 'lucide-react';
-import type { Role } from '@/features/roles/types';
+import { useRoles } from '@/features/roles/hooks/useRoles';
 
-interface RoleWithStatus extends Role {
-  status?: string;
-}
+
 
 interface RoleSelectionTabProps {
-  displayRoles: RoleWithStatus[];
   selectedRoleId: number | null;
-  roleSearch: string;
-  rolesLoading: boolean;
-  rolesError: string | null;
   onRoleSelect: (roleId: string) => void;
-  onRoleSearchChange: (search: string) => void;
-  formatDate: (dateString: string) => string;
 }
 
 export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
-  displayRoles,
   selectedRoleId,
-  roleSearch,
-  rolesLoading,
-  rolesError,
   onRoleSelect,
-  onRoleSearchChange,
-  formatDate,
 }) => {
+  // Internal state for search
+  const [roleSearch, setRoleSearch] = useState('');
+
+  // Fetch roles data
+  const {
+    roles,
+    loading: rolesLoading,
+    error: rolesError,
+  } = useRoles();
+
+  // Filter roles based on search
+  const displayRoles = useMemo(() => {
+    return roles.filter(role =>
+      role.name.toLowerCase().includes(roleSearch.toLowerCase())
+    );
+  }, [roles, roleSearch]);
+
+  // Utility function
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
   return (
     <Card className="bg-[var(--card)] border-[var(--border)]">
       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
@@ -44,7 +54,7 @@ export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
             <Input
               placeholder="Search roles..."
               value={roleSearch}
-              onChange={(e) => onRoleSearchChange(e.target.value)}
+              onChange={(e) => setRoleSearch(e.target.value)}
               className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
             />
           </div>
@@ -89,18 +99,6 @@ export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
                         </div>
                       </div>
                       <div className="flex flex-col items-start sm:items-end gap-2 sm:gap-1">
-                        {role.status && (
-                          <Badge
-                            variant={role.status === 'active' ? 'default' : 'secondary'}
-                            className={`text-xs ${
-                              role.status === 'active'
-                                ? 'bg-[#16a34a] text-white'
-                                : 'bg-[var(--secondary)] text-[var(--secondary-foreground)]'
-                            }`}
-                          >
-                            {role.status}
-                          </Badge>
-                        )}
                         <div className="text-xs text-[var(--muted-foreground)]">
                           {formatDate(role.created_at)}
                         </div>

@@ -4,8 +4,7 @@
  * This page displays all role assignments for a specific store
  * using the useUserRolesStoresAssignment hook.
  */
-
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useUserRolesStoresAssignment } from '@/features/userRolesStoresAssignment/hooks/UseUserRolesStoresAssignment';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
@@ -18,7 +17,6 @@ import type { Assignment } from '@/features/userRolesStoresAssignment/types';
 export const StoreAssignmentsPage: React.FC = () => {
   const { storeId } = useParams<{ storeId: string }>();
   const navigate = useNavigate();
-  
   const {
     getStoreAssignments,
     fetchStoreAssignments,
@@ -26,14 +24,20 @@ export const StoreAssignmentsPage: React.FC = () => {
     getStoreAssignmentsError,
     toggleUserRoleStatus,
     removeUserRole,
-    // Removed unused variables: isToggling, isRemoving, toggleError, removeError
   } = useUserRolesStoresAssignment();
-  
 
-  
+  // State for UI controls
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [assignmentToDelete, setAssignmentToDelete] = useState<Assignment | null>(null);
   const [updatingAssignments, setUpdatingAssignments] = useState<Set<number>>(new Set());
+  
+  // State for error messages
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Get data from hook
+  const assignments = getStoreAssignments(storeId || '');
+  const loading = isLoadingStoreAssignments();
+  const error = getStoreAssignmentsError();
 
   // Fetch store assignments on component mount
   useEffect(() => {
@@ -42,36 +46,48 @@ export const StoreAssignmentsPage: React.FC = () => {
     }
   }, [storeId, fetchStoreAssignments]);
 
-  // Helper functions to get names from assignment data
-  const getUserName = (userId: number) => {
+  // Clear error message when assignments change
+  useEffect(() => {
+    if (errorMessage) {
+      const timer = setTimeout(() => {
+        setErrorMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMessage]);
+
+  // Memoized helper functions to get names from assignment data
+  const getUserName = useCallback((userId: number) => {
     const assignment = assignments.find(a => a.user_id === userId);
     return assignment?.user?.name || `User ID: ${userId}`;
-  };
+  }, [assignments]);
 
-  const getRoleName = (roleId: number) => {
+  const getRoleName = useCallback((roleId: number) => {
     const assignment = assignments.find(a => a.role_id === roleId);
     return assignment?.role?.name || `Role ID: ${roleId}`;
-  };
+  }, [assignments]);
 
-  // getStoreName function removed as it's not used
-
-  // Handle toggle status
-  const handleToggleStatus = async (assignment: Assignment) => {
+  // Memoized handle toggle status
+  const handleToggleStatus = useCallback(async (assignment: Assignment) => {
     if (!assignment.id || updatingAssignments.has(assignment.id)) return;
     
     setUpdatingAssignments(prev => new Set(prev).add(assignment.id!));
+    setErrorMessage(null); // Clear any previous error
+    
     try {
       await toggleUserRoleStatus({
         user_id: assignment.user_id,
         role_id: assignment.role_id,
         store_id: assignment.store_id
       });
+      
       // Refresh the assignments after toggle
       if (storeId) {
         fetchStoreAssignments(storeId);
       }
     } catch (error) {
       console.error('Failed to toggle assignment status:', error);
+      setErrorMessage('Failed to update assignment status. Please try again.');
     } finally {
       setUpdatingAssignments(prev => {
         const newSet = new Set(prev);
@@ -81,16 +97,19 @@ export const StoreAssignmentsPage: React.FC = () => {
         return newSet;
       });
     }
-  };
+  }, [toggleUserRoleStatus, storeId, fetchStoreAssignments, updatingAssignments]);
 
-  // Handle delete
-  const handleDeleteClick = (assignment: Assignment) => {
+  // Memoized handle delete click
+  const handleDeleteClick = useCallback((assignment: Assignment) => {
     setAssignmentToDelete(assignment);
     setDeleteDialogOpen(true);
-  };
+  }, []);
 
-  const handleDeleteConfirm = async () => {
+  // Memoized handle delete confirm
+  const handleDeleteConfirm = useCallback(async () => {
     if (!assignmentToDelete) return;
+    
+    setErrorMessage(null); // Clear any previous error
     
     try {
       await removeUserRole({
@@ -98,37 +117,39 @@ export const StoreAssignmentsPage: React.FC = () => {
         role_id: assignmentToDelete.role_id,
         store_id: assignmentToDelete.store_id
       });
+      
       setDeleteDialogOpen(false);
       setAssignmentToDelete(null);
+      
       // Refresh the assignments after deletion
       if (storeId) {
         fetchStoreAssignments(storeId);
       }
     } catch (error) {
       console.error('Failed to delete assignment:', error);
+      setErrorMessage('Failed to delete assignment. Please try again.');
+      // Keep dialog open so user can retry
     }
-  };
+  }, [assignmentToDelete, removeUserRole, storeId, fetchStoreAssignments]);
 
-  // Handle assign role navigation
-  const handleAssignRole = () => {
+  // Memoized handle assign role navigation
+  const handleAssignRole = useCallback(() => {
     navigate(`/user-role-store-assignment/assign?storeId=${storeId}`);
-  };
+  }, [navigate, storeId]);
 
-  const assignments = getStoreAssignments(storeId || '');
-  const loading = isLoadingStoreAssignments();
-  const error = getStoreAssignmentsError();
-
-  const handleBack = () => {
+  // Memoized handle back navigation
+  const handleBack = useCallback(() => {
     navigate('/user-role-store-assignment');
-  };
+  }, [navigate]);
 
-  const formatDate = (dateString: string) => {
+  // Memoized format date function
+  const formatDate = useCallback((dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
     });
-  };
+  }, []);
 
   return (
     <ManageLayout
@@ -139,6 +160,21 @@ export const StoreAssignmentsPage: React.FC = () => {
         onClick: handleBack
       }}
     >
+      {/* Error message display */}
+      {errorMessage && (
+        <div style={{
+          backgroundColor: '#fee2e2',
+          border: '1px solid #fecaca',
+          color: '#dc2626',
+          padding: '12px',
+          marginBottom: '16px',
+          borderRadius: '6px',
+          fontSize: '14px'
+        }}>
+          {errorMessage}
+        </div>
+      )}
+      
       <AssignmentsCard
         assignments={assignments}
         loading={loading}
@@ -151,7 +187,7 @@ export const StoreAssignmentsPage: React.FC = () => {
         onAssignRole={handleAssignRole}
         updatingAssignments={updatingAssignments}
       />
-
+      
       <DeleteConfirmationDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}

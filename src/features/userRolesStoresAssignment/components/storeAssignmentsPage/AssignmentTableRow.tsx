@@ -34,13 +34,13 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
   return (
     <TableRow key={assignment.id}>
       <TableCell className="font-mono text-xs sm:text-sm py-3">
-        <span className="px-2 py-1 rounded text-xs" style={{ backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)' }}>
+        <span className="px-2 py-1 rounded text-xs bg-muted text-muted-foreground">
           {assignment.id}
         </span>
       </TableCell>
       <TableCell className="py-3">
         <div className="flex items-center gap-1 sm:gap-2">
-          <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" style={{ color: 'var(--chart-4)' }} />
+          <User className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-chart-4" />
           <span className="font-medium text-xs sm:text-sm truncate">
             {getUserName(assignment.user_id)}
           </span>
@@ -48,7 +48,7 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
       </TableCell>
       <TableCell className="py-3">
         <div className="flex items-center gap-1 sm:gap-2">
-          <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" style={{ color: 'var(--chart-3)' }} />
+          <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0 text-chart-3" />
           <span className="font-medium text-xs sm:text-sm truncate">
             {getRoleName(assignment.role_id)}
           </span>
@@ -62,24 +62,28 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
             disabled={!assignment.id || isUpdating}
             className="scale-75 sm:scale-100"
           />
-          <Badge 
+          <Badge
             variant={assignment.is_active ? 'default' : 'secondary'}
             className="text-xs px-1.5 py-0.5 sm:px-2 sm:py-1"
           >
-            <span className="hidden sm:inline">{assignment.is_active ? 'Active' : 'Inactive'}</span>
-            <span className="sm:hidden">{assignment.is_active ? 'On' : 'Off'}</span>
+            <span className="hidden sm:inline">
+              {assignment.is_active ? 'Active' : 'Inactive'}
+            </span>
+            <span className="sm:hidden">
+              {assignment.is_active ? 'On' : 'Off'}
+            </span>
           </Badge>
           {isUpdating && (
-            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" style={{ color: 'var(--primary)' }} />
+            <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin text-primary" />
           )}
         </div>
       </TableCell>
-      <TableCell className="text-xs sm:text-sm py-3 hidden md:table-cell" style={{ color: 'var(--muted-foreground)' }}>
+      <TableCell className="text-xs sm:text-sm py-3 hidden md:table-cell text-muted-foreground">
         <div className="flex flex-col">
           <span>{formatDate(assignment.created_at)}</span>
         </div>
       </TableCell>
-      <TableCell className="text-xs sm:text-sm py-3 hidden lg:table-cell" style={{ color: 'var(--muted-foreground)' }}>
+      <TableCell className="text-xs sm:text-sm py-3 hidden lg:table-cell text-muted-foreground">
         <div className="flex flex-col">
           <span>{formatDate(assignment.updated_at)}</span>
         </div>
@@ -87,7 +91,11 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
       <TableCell className="text-right py-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-6 w-6 p-0 sm:h-8 sm:w-8" size="sm">
+            <Button
+              variant="ghost"
+              className="h-6 w-6 p-0 sm:h-8 sm:w-8"
+              size="sm"
+            >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-3 w-3 sm:h-4 sm:w-4" />
             </Button>
@@ -95,8 +103,7 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
           <DropdownMenuContent align="end" className="w-48">
             <DropdownMenuItem
               onClick={() => onDeleteClick(assignment)}
-              className="text-xs sm:text-sm"
-              style={{ color: 'var(--destructive)' }}
+              className="text-xs sm:text-sm text-destructive"
             >
               <Trash2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Delete Assignment</span>

@@ -21,7 +21,9 @@ interface DeleteConfirmationDialogProps {
   onConfirm: () => void;
 }
 
-export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> = ({
+export const DeleteConfirmationDialog: React.FC<
+  DeleteConfirmationDialogProps
+> = ({
   open,
   onOpenChange,
   assignmentToDelete,
@@ -33,26 +35,29 @@ export const DeleteConfirmationDialog: React.FC<DeleteConfirmationDialogProps> =
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="mx-4 max-w-md sm:max-w-lg">
         <AlertDialogHeader className="space-y-3">
-          <AlertDialogTitle className="text-lg sm:text-xl">Are you absolutely sure?</AlertDialogTitle>
+          <AlertDialogTitle className="text-lg sm:text-xl">
+            Are you absolutely sure?
+          </AlertDialogTitle>
           <AlertDialogDescription className="text-sm sm:text-base leading-relaxed">
-            This action cannot be undone. This will permanently delete the role assignment
+            This action cannot be undone. This will permanently delete the role
+            assignment
             {assignmentToDelete && (
-              <span className="font-medium block mt-2 p-2 rounded" style={{ backgroundColor: 'var(--muted)', color: 'var(--foreground)' }}>
-                User: {getUserName(assignmentToDelete.user_id)}<br />
+              <span className="font-medium block mt-2 p-2 rounded bg-muted text-foreground">
+                User: {getUserName(assignmentToDelete.user_id)}
+                <br />
                 Role: {getRoleName(assignmentToDelete.role_id)}
               </span>
-            )}.
+            )}
+            .
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
-          <AlertDialogCancel className="w-full sm:w-auto order-2 sm:order-1">Cancel</AlertDialogCancel>
+          <AlertDialogCancel className="w-full sm:w-auto order-2 sm:order-1">
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
-            className="w-full sm:w-auto order-1 sm:order-2"
-            style={{ 
-              backgroundColor: 'var(--destructive)', 
-              color: 'var(--destructive-foreground)'
-            }}
+            className="w-full sm:w-auto order-1 sm:order-2 text-destructive-foreground bg-destructive"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete Assignment

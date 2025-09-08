@@ -5,7 +5,7 @@
  * with radio button selection for single choice interface.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUsers } from '@/features/users/hooks/useUsers';
 import { useRoles } from '@/features/roles/hooks/useRoles';
@@ -61,14 +61,7 @@ export const SingleAssignPage: React.FC = () => {
     selectedStore: preSelectedStoreId || null,
   });
 
-  // State for search terms
-  const [userSearch, setUserSearch] = useState('');
-  const [roleSearch, setRoleSearch] = useState('');
-  const [storeSearch, setStoreSearch] = useState('');
 
-  // State for filters
-  const [userFilter, setUserFilter] = useState<'all' | 'with-roles' | 'without-roles'>('all');
-  const [storeFilter, setStoreFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   // State for assignment process
   const [isAssigning, setIsAssigning] = useState(false);
@@ -78,72 +71,15 @@ export const SingleAssignPage: React.FC = () => {
   } | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  // Fetch data using hooks
-  const {
-    users,
-    loading: usersLoading,
-    error: usersError,
-  } = useUsers();
-
-  const {
-    roles,
-    loading: rolesLoading,
-    error: rolesError,
-  } = useRoles();
-
-  const {
-    stores,
-    loading: storesLoading,
-    error: storesError,
-  } = useStores();
+  // Fetch data using hooks (only needed for SelectionSummary component)
+  const { users } = useUsers();
+  const { roles } = useRoles();
+  const { stores } = useStores();
 
   // Get assignment operations hook
   const { assignUserRole, assignError } = useAssignmentOperations();
 
-  // Filter users based on local filters
-  const displayUsers = useMemo(() => {
-    let filtered = users.filter(user =>
-      user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearch.toLowerCase())
-    );
 
-    switch (userFilter) {
-      case 'with-roles':
-        filtered = filtered.filter(user => user.roles && user.roles.length > 0);
-        break;
-      case 'without-roles':
-        filtered = filtered.filter(user => !user.roles || user.roles.length === 0);
-        break;
-    }
-
-    return filtered;
-  }, [users, userSearch, userFilter]);
-
-  // Filter roles based on search
-  const displayRoles = useMemo(() => {
-    return roles.filter(role =>
-      role.name.toLowerCase().includes(roleSearch.toLowerCase())
-    );
-  }, [roles, roleSearch]);
-
-  // Filter stores based on search and status
-  const displayStores = useMemo(() => {
-    let filtered = stores.filter(store =>
-      store.name.toLowerCase().includes(storeSearch.toLowerCase()) ||
-      store.id.toLowerCase().includes(storeSearch.toLowerCase())
-    );
-
-    switch (storeFilter) {
-      case 'active':
-        filtered = filtered.filter(store => store.is_active);
-        break;
-      case 'inactive':
-        filtered = filtered.filter(store => !store.is_active);
-        break;
-    }
-
-    return filtered;
-  }, [stores, storeSearch, storeFilter]);
 
   // Assignment steps for progress tracking
   const assignmentSteps: AssignmentStep[] = [
@@ -247,25 +183,7 @@ export const SingleAssignPage: React.FC = () => {
                    assignmentData.selectedRole !== null &&
                    assignmentData.selectedStore !== null;
 
-  // Use the hook's loading state for better consistency
-  // const isActuallyAssigning = isAssigning || isAssigningHook;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
 
   return (
     <ManageLayout
@@ -367,48 +285,24 @@ export const SingleAssignPage: React.FC = () => {
         {/* Users Tab */}
         <TabsContent value="users" className="space-y-4 sm:space-y-6">
           <UserSelectionTab
-            users={users}
-            displayUsers={displayUsers}
             selectedUserId={assignmentData.selectedUser}
-            userSearch={userSearch}
-            userFilter={userFilter}
-            usersLoading={usersLoading}
-            usersError={usersError}
             onUserSelect={handleUserSelect}
-            onUserSearchChange={setUserSearch}
-            onUserFilterChange={setUserFilter}
-            formatDate={formatDate}
-            getInitials={getInitials}
           />
         </TabsContent>
 
         {/* Roles Tab */}
         <TabsContent value="roles" className="space-y-4 sm:space-y-6">
           <RoleSelectionTab
-            displayRoles={displayRoles}
             selectedRoleId={assignmentData.selectedRole}
-            roleSearch={roleSearch}
-            rolesLoading={rolesLoading}
-            rolesError={rolesError}
             onRoleSelect={handleRoleSelect}
-            onRoleSearchChange={setRoleSearch}
-            formatDate={formatDate}
           />
         </TabsContent>
 
         {/* Stores Tab */}
         <TabsContent value="stores" className="space-y-4 sm:space-y-6">
           <StoreSelectionTab
-            displayStores={displayStores}
             selectedStoreId={assignmentData.selectedStore}
-            storeSearch={storeSearch}
-            storeFilter={storeFilter}
-            storesLoading={storesLoading}
-            storesError={storesError}
             onStoreSelect={handleStoreSelect}
-            onStoreSearchChange={setStoreSearch}
-            onStoreFilterChange={setStoreFilter}
-            formatDate={formatDate}
           />
         </TabsContent>
       </Tabs>

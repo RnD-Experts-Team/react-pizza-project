@@ -5,20 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 
-import { Loader2, Search, Store } from 'lucide-react';
-
-interface Store {
-  id: string;
-  name: string;
-  metadata: {
-    phone: string;
-    address: string;
-    [key: string]: any;
-  };
-  is_active: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { Loader2, Search, Store as StoreIcon } from 'lucide-react';
+import type { Store } from '@/features/stores/types';
 
 interface BulkStoreSelectionTabProps {
   displayStores: Store[];
@@ -51,7 +39,7 @@ export const BulkStoreSelectionTab: React.FC<BulkStoreSelectionTabProps> = ({
       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0 gap-3 sm:gap-4">
           <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-card-foreground">
-            <Store className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+            <StoreIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             Select Stores
           </CardTitle>
           <div className="relative">
@@ -115,7 +103,7 @@ export const BulkStoreSelectionTab: React.FC<BulkStoreSelectionTabProps> = ({
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
                       <div className="flex items-center gap-3">
                         <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <Store className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          <StoreIcon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="font-medium text-sm sm:text-base text-card-foreground truncate">

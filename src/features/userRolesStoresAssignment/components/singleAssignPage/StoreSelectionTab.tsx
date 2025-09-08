@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,33 +12,60 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Loader2, Search, Filter, Store as StoreIcon } from 'lucide-react';
-import type { Store } from '@/features/stores/types';
+import { useStores } from '@/features/stores/hooks/useStores';
 
 interface StoreSelectionTabProps {
-  displayStores: Store[];
   selectedStoreId: string | null;
-  storeSearch: string;
-  storeFilter: 'all' | 'active' | 'inactive';
-  storesLoading: boolean;
-  storesError: string | null;
   onStoreSelect: (storeId: string) => void;
-  onStoreSearchChange: (search: string) => void;
-  onStoreFilterChange: (filter: 'all' | 'active' | 'inactive') => void;
-  formatDate: (dateString: string) => string;
 }
 
 export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
-  displayStores,
   selectedStoreId,
-  storeSearch,
-  storeFilter,
-  storesLoading,
-  storesError,
   onStoreSelect,
-  onStoreSearchChange,
-  onStoreFilterChange,
-  formatDate,
 }) => {
+  // Internal state for search and filter
+  const [storeSearch, setStoreSearch] = useState('');
+  const [storeFilter, setStoreFilter] = useState<'all' | 'active' | 'inactive'>('all');
+
+  // Handler for filter change
+  const handleFilterChange = (value: string) => {
+    setStoreFilter(value as 'all' | 'active' | 'inactive');
+  };
+
+  // Fetch stores data
+  const {
+    stores,
+    loading: storesLoading,
+    error: storesError,
+  } = useStores();
+
+  // Filter stores based on search and status
+  const displayStores = useMemo(() => {
+    let filtered = stores.filter(store =>
+      store.name.toLowerCase().includes(storeSearch.toLowerCase()) ||
+      store.id.toLowerCase().includes(storeSearch.toLowerCase())
+    );
+
+    switch (storeFilter) {
+      case 'active':
+        filtered = filtered.filter(store => store.is_active);
+        break;
+      case 'inactive':
+        filtered = filtered.filter(store => !store.is_active);
+        break;
+    }
+
+    return filtered;
+  }, [stores, storeSearch, storeFilter]);
+
+  // Utility function
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
   return (
     <Card className="bg-[var(--card)] border-[var(--border)]">
       <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
@@ -52,11 +79,11 @@ export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
               <Input
                 placeholder="Search stores..."
                 value={storeSearch}
-                onChange={(e) => onStoreSearchChange(e.target.value)}
+                onChange={(e) => setStoreSearch(e.target.value)}
                 className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
               />
             </div>
-            <Select value={storeFilter} onValueChange={onStoreFilterChange}>
+            <Select value={storeFilter} onValueChange={handleFilterChange}>
               <SelectTrigger className="w-full sm:w-40 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] text-sm sm:text-base">
                 <Filter className="h-4 w-4 mr-2 text-[var(--muted-foreground)]" />
                 <SelectValue />

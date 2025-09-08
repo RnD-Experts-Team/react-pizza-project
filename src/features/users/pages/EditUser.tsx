@@ -1,328 +1,300 @@
 /**
- * Edit User Page - Updated with Role-Permission Linking
- * 
+ * Edit User Page - Complete unified component with paginated roles and permissions
+ *
  * When a role is checked, all its permissions are automatically checked and locked
- * Refactored for consistent color variables and comprehensive responsiveness
+ * Fully responsive design with ManageLayout for consistent header and navigation
+ * Features paginated role selection and permission selection with smooth navigation
+ * FIXED: Maintains locked permissions across role pagination pages
+ *
+ * NEW: Uses React Hook Form with Zod validation, memoization, and performance optimizations
+ * FIXED: TypeScript type errors with proper generic typing
  */
-
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useUser, useUpdateUser } from '@/features/users/hooks/useUsers';
+import { useForm, type SubmitHandler } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ManageLayout } from '@/components/layouts/ManageLayout';
+import { useUpdateUser, useUser } from '@/features/users/hooks/useUsers';
 import { useRoles } from '@/features/roles/hooks/useRoles';
 import { usePermissions } from '@/features/permissions/hooks/usePermissions';
-// ADDED: Import useAuth hook for manual profile refresh
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import type { UserFormData } from '@/features/users/types';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
-import LoadingState from '@/features/users/components/editUser/LoadingState';
-import ErrorState from '@/features/users/components/editUser/ErrorState';
-import ManageLayout from '@/components/layouts/ManageLayout';
-import BasicInformationSection from '@/features/users/components/editUser/BasicInformationSection';
-import PasswordSection from '@/features/users/components/editUser/PasswordSection';
-import RolesSection from '@/features/users/components/editUser/RolesSection';
-import PermissionsSection from '@/features/users/components/editUser/PermissionsSection';
-import ActionButtons from '@/features/users/components/editUser/ActionButtons';
+import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
+import { AlertCircle, Loader2 } from 'lucide-react';
+
+// Import reusable components and utilities
+import { BasicInfoSection } from '../components/CreateAndEditUser/BasicInfoSection';
+import { RoleSelectionSection } from '../components/CreateAndEditUser/RoleSelectionSection';
+import { PermissionSelectionSection } from '../components/CreateAndEditUser/PermissionSelectionSection';
+import { useRolePermissionManager } from '../hooks/useRolePermissionManager';
+import { usePagination } from '../hooks/usePagination';
+import {
+  editUserFormSchema,
+  type EditUserFormType,
+} from '../schemas/userFormSchemas';
 
 const EditUserPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const userId = id ? parseInt(id) : undefined;
-  
+  const userId = parseInt(id || '0', 10);
+
+  // Fetch user data
   const { user, loading: userLoading, error: userError } = useUser(userId);
-  const { updateUser, error, validateForm } = useUpdateUser();
-  const { roles, loading: rolesLoading } = useRoles();
-  const { permissions, loading: permissionsLoading } = usePermissions();
-  // ADDED: Get getUserProfile function and current user for manual profile refresh
-  const { getUserProfile, user: currentUser } = useAuth();
-  
-  // Form state
-  const [formData, setFormData] = useState<UserFormData>({
-    name: '',
-    email: '',
-    password: '',
-    password_confirmation: '',
-    roles: [],
-    permissions: [],
+  const { updateUser, error: updateUserError } = useUpdateUser();
+
+  // Form setup with React Hook Form
+  const form = useForm<EditUserFormType>({
+    resolver: zodResolver(editUserFormSchema),
+    defaultValues: {
+      name: '',
+      email: '',
+      password: '',
+      password_confirmation: '',
+      roles: [],
+      permissions: [],
+    },
+    mode: 'onBlur',
   });
-  
-  // Role-Permission linking state
-  const [checkedRoles, setCheckedRoles] = useState<Set<string>>(new Set());
-  const [manualPermissions, setManualPermissions] = useState<Set<string>>(new Set());
-  
+
+  const {
+    handleSubmit,
+    setValue,
+    formState: { isSubmitting },
+  } = form;
+
+  // Extract roles and permissions data from API hooks
+  const rolesQuery = useRoles(true);
+  const permissionsQuery = usePermissions(true);
+  const roles = rolesQuery.roles || [];
+  const permissions = permissionsQuery.permissions || [];
+  const rolesLoading = rolesQuery.loading;
+  const permissionsLoading = permissionsQuery.loading;
+
+  // Role-permission management hook
+  const rolePermissionManager = useRolePermissionManager({
+    roles,
+    permissions,
+    initialSelectedRoles: [],
+    initialSelectedPermissions: []
+  });
+
+  // Pagination hooks
+  const rolePagination = usePagination({
+    totalItems: roles.length,
+    itemsPerPage: 8,
+    initialPage: 1
+  });
+  const permissionPagination = usePagination({
+    totalItems: permissions.length,
+    itemsPerPage: 12,
+    initialPage: 1
+  });
+
   // UI state
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [includePassword, setIncludePassword] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  // Calculate all permissions that should be checked (from roles + manual)
-  const allCheckedPermissions = useMemo(() => {
-    const rolePermissions = new Set<string>();
-    
-    // Add permissions from checked roles
-    checkedRoles.forEach(roleName => {
-      const role = roles.find(r => r.name === roleName);
-      if (role?.permissions) {
-        role.permissions.forEach(p => rolePermissions.add(p.name));
-      }
-    });
-    
-    // Add manual permissions
-    manualPermissions.forEach(p => rolePermissions.add(p));
-    
-    return rolePermissions;
-  }, [checkedRoles, manualPermissions, roles]);
+  // Get current page items from pagination hooks
+  const currentRoles = rolePagination.getCurrentPageItems(roles);
+  const currentPermissions = permissionPagination.getCurrentPageItems(permissions);
 
-  // Check if a permission is locked by a role
-  const isPermissionLocked = (permissionName: string): boolean => {
-    return Array.from(checkedRoles).some(roleName => {
-      const role = roles.find(r => r.name === roleName);
-      return role?.permissions?.some(p => p.name === permissionName) || false;
-    });
-  };
-
-  // Initialize form data when user loads
+  // Sync form values with role-permission manager
   useEffect(() => {
-    if (user && roles.length > 0) {
-      const userRoles = new Set(user.roles?.map(role => role.name) || []);
-      const userDirectPermissions = new Set(user.permissions?.map(permission => permission.name) || []);
-      
-      // Calculate which permissions are manual (not from roles)
+    if (isInitialized) {
+      setValue('roles', Array.from(rolePermissionManager.selectedRoles));
+      setValue(
+        'permissions',
+        Array.from(rolePermissionManager.selectedPermissions),
+      );
+    }
+  }, [
+    rolePermissionManager.selectedRoles,
+    rolePermissionManager.selectedPermissions,
+    isInitialized,
+    setValue,
+  ]);
+
+  // Initialize form data when user data is loaded
+  useEffect(() => {
+    if (user && !isInitialized) {
+      // Use React Hook Form's setValue to initialize form data
+      setValue('name', user.name || '');
+      setValue('email', user.email || '');
+      setValue('password', '');
+      setValue('password_confirmation', '');
+
+      // Initialize role-permission manager with user's current selections
+      const userRoleNames = user.roles?.map((role) => role.name) || [];
+      const userPermissionNames =
+        user.permissions?.map((perm) => perm.name) || [];
+
+      // Set initial selections in role-permission manager
+      userRoleNames.forEach((roleName) => {
+        rolePermissionManager.handleRoleChange(roleName, true);
+      });
+
+      // Set manual permissions (those not from roles)
       const rolePermissions = new Set<string>();
-      userRoles.forEach(roleName => {
-        const role = roles.find(r => r.name === roleName);
-        if (role?.permissions) {
-          role.permissions.forEach(p => rolePermissions.add(p.name));
-        }
+      user.roles?.forEach((role) => {
+        role.permissions?.forEach((perm) => {
+          rolePermissions.add(perm.name);
+        });
       });
-      
-      const manualPerms = new Set<string>();
-      userDirectPermissions.forEach(permName => {
+
+      userPermissionNames.forEach((permName) => {
         if (!rolePermissions.has(permName)) {
-          manualPerms.add(permName);
+          rolePermissionManager.handlePermissionChange(permName, true);
         }
       });
-      
-      setCheckedRoles(userRoles);
-      setManualPermissions(manualPerms);
-      
-      setFormData({
-        name: user.name,
-        email: user.email,
-        password: '',
-        password_confirmation: '',
-        roles: Array.from(userRoles),
-        permissions: Array.from(userDirectPermissions),
-      });
+
+      setIsInitialized(true);
     }
-  }, [user, roles]);
+  }, [user, isInitialized, setValue, rolePermissionManager]);
 
-  // Sync form data when checked states change
-  useEffect(() => {
-    setFormData(prev => ({
-      ...prev,
-      roles: Array.from(checkedRoles),
-      permissions: Array.from(allCheckedPermissions),
-    }));
-  }, [checkedRoles, allCheckedPermissions]);
 
-  const handleBack = () => {
-    navigate('/user-management');
-  };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    
-    // Clear validation error for this field
-    if (validationErrors[name]) {
-      setValidationErrors(prev => ({ ...prev, [name]: '' }));
-    }
-  };
+  // Form submit handler using React Hook Form
+  const onSubmit: SubmitHandler<EditUserFormType> = async (data) => {
+    // Prepare update data - exclude password fields if empty
+    const updateData: any = {
+      name: data.name,
+      email: data.email,
+      roles: data.roles,
+      permissions: data.permissions,
+    };
 
-  const handleRoleChange = (roleName: string, checked: boolean) => {
-    setCheckedRoles(prev => {
-      const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(roleName);
-      } else {
-        newSet.delete(roleName);
-        
-        // Remove permissions that were only from this role
-        const role = roles.find(r => r.name === roleName);
-        if (role?.permissions) {
-          setManualPermissions(prevManual => {
-            const newManual = new Set(prevManual);
-            role.permissions!.forEach(p => {
-              // Only remove if it's not controlled by another checked role
-              const stillControlledByOtherRole = Array.from(newSet).some(otherRoleName => {
-                const otherRole = roles.find(r => r.name === otherRoleName);
-                return otherRole?.permissions?.some(op => op.name === p.name) || false;
-              });
-              if (!stillControlledByOtherRole) {
-                newManual.delete(p.name);
-              }
-            });
-            return newManual;
-          });
-        }
-      }
-      return newSet;
-    });
-  };
-
-  const handlePermissionChange = (permissionName: string, checked: boolean) => {
-    // Don't allow unchecking if permission is locked by a role
-    if (isPermissionLocked(permissionName) && !checked) {
-      return;
-    }
-    
-    // Don't allow manual checking if already controlled by a role
-    if (isPermissionLocked(permissionName) && checked) {
-      return;
+    // Only include password if provided
+    if (data.password && data.password.trim() !== '') {
+      updateData.password = data.password;
+      updateData.password_confirmation = data.password_confirmation;
     }
 
-    setManualPermissions(prev => {
-      const newSet = new Set(prev);
-      if (checked) {
-        newSet.add(permissionName);
-      } else {
-        newSet.delete(permissionName);
-      }
-      return newSet;
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!userId) return;
-
-    // Client-side validation
-    const validation = validateForm(formData);
-    if (!validation.isValid) {
-      setValidationErrors(validation.errors);
-      return;
-    }
-
-    setIsSubmitting(true);
-    
     try {
-      const updateData: any = {
-        name: formData.name,
-        email: formData.email,
-        roles: formData.roles,
-        permissions: formData.permissions,
-      };
-
-      // Only include password if user wants to change it
-      if (includePassword && formData.password) {
-        updateData.password = formData.password;
-        updateData.password_confirmation = formData.password_confirmation;
-      }
-
       await updateUser(userId, updateData);
-      
-      // ADDED: Manual refresh of user profile to update permissions in real-time
-      // Only refresh if the updated user is the current user
-      if (currentUser && currentUser.id === userId) {
-        getUserProfile();
-      }
-      
       // Success - navigate back to users list
       navigate('/user-management');
     } catch (err) {
       console.error('Failed to update user:', err);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  // Clear validation errors when form data changes
-  useEffect(() => {
-    if (Object.keys(validationErrors).length > 0) {
-      setValidationErrors({});
-    }
-  }, [formData]);
-
+  // Show loading state while user data is being fetched
   if (userLoading) {
-    return <LoadingState />;
+    return (
+      <ManageLayout
+        title="Edit User"
+        subtitle="Update user information and permissions"
+        backButton={{ show: true }}
+      >
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin mr-3 text-muted-foreground" />
+          <span className="text-lg text-muted-foreground">Loading user...</span>
+        </div>
+      </ManageLayout>
+    );
   }
 
+  // Show error if user not found or error occurred
   if (userError || !user) {
-    return <ErrorState error={userError || 'User not found'} onBack={handleBack} />;
+    return (
+      <ManageLayout
+        title="Edit User"
+        subtitle="Update user information and permissions"
+        backButton={{ show: true }}
+      >
+        <Alert className="mb-6 border-destructive bg-destructive/10">
+          <AlertCircle className="h-4 w-4 text-destructive" />
+          <AlertDescription className="text-destructive">
+            {userError || 'User not found'}
+          </AlertDescription>
+        </Alert>
+      </ManageLayout>
+    );
   }
 
   return (
     <ManageLayout
       title="Edit User"
-      subtitle={user?.name ? `Update ${user.name}'s information` : 'Update user information'}
+      subtitle="Update user information and permissions"
       backButton={{
         show: true,
       }}
-    
     >
       {/* Error Alert */}
-      {error && (
-        <Alert variant="destructive" className="border-destructive bg-destructive/10">
+      {updateUserError && (
+        <Alert className="mb-6 border-destructive bg-destructive/10">
           <AlertCircle className="h-4 w-4 text-destructive" />
-          <AlertDescription className="text-destructive">{error}</AlertDescription>
+          <AlertDescription className="text-destructive">
+            {updateUserError}
+          </AlertDescription>
         </Alert>
       )}
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 md:space-y-6">
-        <BasicInformationSection
-          formData={formData}
-          validationErrors={validationErrors}
-          onInputChange={handleInputChange}
+      <Form {...form}>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-6 sm:space-y-8 max-w-full"
+        >
+        {/* Basic Information */}
+        <BasicInfoSection
+          form={form}
+          isEditMode={true}
+          showPasswordFields={true}
         />
 
-        <PasswordSection
-          formData={formData}
-          includePassword={includePassword}
-          showPassword={showPassword}
-          showConfirmPassword={showConfirmPassword}
-          validationErrors={validationErrors}
-          onInputChange={handleInputChange}
-          onIncludePasswordChange={(checked) => {
-            setIncludePassword(checked as boolean);
-            if (!checked) {
-              setFormData(prev => ({
-                ...prev,
-                password: '',
-                password_confirmation: '',
-              }));
+        {/* Role Selection with Pagination */}
+        <RoleSelectionSection
+          roles={currentRoles}
+          isLoading={rolesLoading}
+          selectedRoles={rolePermissionManager.selectedRoles}
+          onRoleChange={rolePermissionManager.handleRoleChange}
+          paginationInfo={rolePagination.paginationInfo}
+          onPageChange={rolePagination.handlePageChange}
+        />
+
+        {/* Permission Selection with Pagination */}
+        <PermissionSelectionSection
+          permissions={currentPermissions}
+          isLoading={permissionsLoading}
+          selectedPermissions={rolePermissionManager.selectedPermissions}
+          roleBasedPermissions={rolePermissionManager.roleBasedPermissions}
+          onPermissionChange={rolePermissionManager.handlePermissionChange}
+          paginationInfo={permissionPagination.paginationInfo}
+          onPageChange={permissionPagination.handlePageChange}
+        />
+
+        {/* Form Actions */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 pt-6 sm:pt-8 px-4 sm:px-2 lg:px-0 border-t border-border">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate('/user-management')}
+            disabled={isSubmitting}
+            className="w-full sm:w-auto h-11 sm:h-12 text-sm sm:text-base font-medium transition-all duration-200 hover:scale-105 border-border bg-background text-foreground"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            disabled={
+              isSubmitting ||
+              rolesLoading ||
+              permissionsLoading ||
+              !isInitialized
             }
-          }}
-          onShowPasswordToggle={() => setShowPassword(!showPassword)}
-          onShowConfirmPasswordToggle={() => setShowConfirmPassword(!showConfirmPassword)}
-        />
-
-        <RolesSection
-          roles={roles}
-          rolesLoading={rolesLoading}
-          checkedRoles={checkedRoles}
-          validationErrors={validationErrors}
-          onRoleChange={handleRoleChange}
-        />
-
-        <PermissionsSection
-          permissions={permissions}
-          permissionsLoading={permissionsLoading}
-          allCheckedPermissions={allCheckedPermissions}
-          validationErrors={validationErrors}
-          onPermissionChange={handlePermissionChange}
-          isPermissionLocked={isPermissionLocked}
-        />
-
-        <ActionButtons
-          isSubmitting={isSubmitting}
-          onCancel={handleBack}
-        />
-      </form>
+            className="w-full sm:w-auto min-w-[140px] sm:min-w-[160px] h-11 sm:h-12 text-sm sm:text-base font-medium transition-all duration-200 hover:scale-105 shadow-lg bg-primary text-primary-foreground border-primary"
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin text-primary-foreground" />
+                <span className="text-sm sm:text-base">Updating...</span>
+              </>
+            ) : (
+              <span className="text-sm sm:text-base">Update User</span>
+            )}
+          </Button>
+        </div>
+        </form>
+      </Form>
     </ManageLayout>
   );
 };
