@@ -109,7 +109,7 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = memo(({
         </div>
       </TableCell>
       <TableCell className="text-right py-2 sm:py-4">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-6 w-6 sm:h-8 sm:w-8 p-0">
               <span className="sr-only">Open menu</span>

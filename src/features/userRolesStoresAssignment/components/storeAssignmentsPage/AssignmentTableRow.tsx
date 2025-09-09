@@ -89,7 +89,7 @@ export const AssignmentTableRow: React.FC<AssignmentTableRowProps> = ({
         </div>
       </TableCell>
       <TableCell className="text-right py-3">
-        <DropdownMenu>
+        <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"

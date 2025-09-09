@@ -4,6 +4,7 @@ import MainLayout from '@/components/layouts/MainLayout';
 
 // Main Pages
 import Dashboard from '@/pages/Dashboard';
+import BlankPage from '@/pages/BlankPage';
 import TermsOfService from '@/pages/settings-and-abouts/TermsOfService';
 import PrivacyPolicy from '@/pages/settings-and-abouts/PrivacyPolicy';
 import Settings from '@/pages/settings-and-abouts/Settings';
@@ -16,6 +17,17 @@ export const mainRoutes = [
       <ProtectedRoute>
         <MainLayout>
           <Dashboard />
+        </MainLayout>
+      </ProtectedRoute>
+    }
+  />,
+  <Route
+    key="blank-page"
+    path="/blank-page"
+    element={
+      <ProtectedRoute>
+        <MainLayout>
+          <BlankPage />
         </MainLayout>
       </ProtectedRoute>
     }

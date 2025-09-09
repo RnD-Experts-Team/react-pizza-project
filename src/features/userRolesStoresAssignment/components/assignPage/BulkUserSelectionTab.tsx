@@ -15,15 +15,11 @@ import {
 import { Loader2, Search, Filter, Users, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUsers } from '@/features/users/hooks/useUsers';
 
-
-
-
 interface BulkUserSelectionTabProps {
   selectedUserIds: number[];
   onUserToggle: (userId: number) => void;
   onSelectAllUsers: () => void;
 }
-
 
 export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
   selectedUserIds,
@@ -32,8 +28,7 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
   // Internal state for search and filters
   const [userSearch, setUserSearch] = useState('');
   const [userFilter, setUserFilter] = useState<'all' | 'with-roles' | 'without-roles'>('all');
-
-
+  
   // Fetch users data with pagination
   const {
     users,
@@ -45,28 +40,56 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
     setPerPage,
   } = useUsers();
 
+  // Create a Set of selected user IDs for O(1) lookup performance
+  const selectedUserIdsSet = useMemo(() => new Set(selectedUserIds), [selectedUserIds]);
 
-  // Filter users based on search and filters
+  // Filter users based on search and filters - only recalculate when dependencies change
   const displayUsers = useMemo(() => {
-    let filtered = users.filter(user =>
-      user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearch.toLowerCase())
-    );
-
-
-    switch (userFilter) {
-      case 'with-roles':
-        filtered = filtered.filter(user => user.roles && user.roles.length > 0);
-        break;
-      case 'without-roles':
-        filtered = filtered.filter(user => !user.roles || user.roles.length === 0);
-        break;
+    if (!users || users.length === 0) return [];
+    
+    let filtered = users;
+    
+    // Apply search filter if search term exists
+    if (userSearch.trim()) {
+      const searchLower = userSearch.toLowerCase();
+      filtered = users.filter(user =>
+        user.name.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower)
+      );
     }
-
-
+    
+    // Apply role filter
+    if (userFilter !== 'all') {
+      filtered = filtered.filter(user => {
+        const hasRoles = user.roles && user.roles.length > 0;
+        return userFilter === 'with-roles' ? hasRoles : !hasRoles;
+      });
+    }
+    
     return filtered;
   }, [users, userSearch, userFilter]);
 
+  // Extract current page user IDs for selection logic
+  const currentPageUserIds = useMemo(
+    () => displayUsers.map(user => user.id),
+    [displayUsers]
+  );
+
+  // Selection state calculations
+  const selectionState = useMemo(() => {
+    if (displayUsers.length === 0) {
+      return { allSelected: false, someSelected: false };
+    }
+    
+    const selectedCount = currentPageUserIds.filter(userId => 
+      selectedUserIdsSet.has(userId)
+    ).length;
+    
+    return {
+      allSelected: selectedCount === currentPageUserIds.length,
+      someSelected: selectedCount > 0 && selectedCount < currentPageUserIds.length
+    };
+  }, [currentPageUserIds, selectedUserIdsSet]);
 
   // Utility functions
   const formatDate = (dateString: string) => {
@@ -76,7 +99,6 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
       day: 'numeric',
     });
   };
-
 
   const getInitials = (name: string) => {
     return name
@@ -96,7 +118,6 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
     }
   }, [fetchUsers, perPage]);
 
-
   const handlePerPageChange = useCallback(async (newPerPage: string) => {
     const perPageNum = parseInt(newPerPage, 10);
     setPerPage(perPageNum);
@@ -107,30 +128,26 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
     }
   }, [setPerPage, fetchUsers]);
 
-  // Selection logic based on current page users
-  const allDisplayUsersSelected = displayUsers.length > 0 && displayUsers.every(user => selectedUserIds.includes(user.id));
-  const someDisplayUsersSelected = displayUsers.some(user => selectedUserIds.includes(user.id)) && !allDisplayUsersSelected;
-
-  // Handle selection logic for current page users
+  // Optimized selection logic for current page users
   const handleSelectAllCurrentPage = useCallback(() => {
-    const currentPageUserIds = displayUsers.map(user => user.id);
+    if (currentPageUserIds.length === 0) return;
     
-    if (allDisplayUsersSelected) {
-      // Deselect all current page users
+    if (selectionState.allSelected) {
+      // Deselect all current page users - batch the operations
       currentPageUserIds.forEach(userId => {
-        if (selectedUserIds.includes(userId)) {
+        if (selectedUserIdsSet.has(userId)) {
           onUserToggle(userId);
         }
       });
     } else {
-      // Select all current page users
+      // Select all current page users - batch the operations
       currentPageUserIds.forEach(userId => {
-        if (!selectedUserIds.includes(userId)) {
+        if (!selectedUserIdsSet.has(userId)) {
           onUserToggle(userId);
         }
       });
     }
-  }, [displayUsers, allDisplayUsersSelected, selectedUserIds, onUserToggle]);
+  }, [currentPageUserIds, selectionState.allSelected, selectedUserIdsSet, onUserToggle]);
 
   // Pagination info
   const paginationInfo = useMemo(() => {
@@ -143,7 +160,6 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
       total: pagination.total || 0,
     };
   }, [pagination]);
-
 
   return (
     <Card className="bg-card border-border shadow-sm">
@@ -185,9 +201,9 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
         {displayUsers.length > 0 && (
           <div className="flex items-center gap-2 pt-2">
             <Checkbox
-              checked={allDisplayUsersSelected}
+              checked={selectionState.allSelected}
               ref={(el) => {
-                if (el) (el as any).indeterminate = someDisplayUsersSelected;
+                if (el) (el as any).indeterminate = selectionState.someSelected;
               }}
               onCheckedChange={handleSelectAllCurrentPage}
               className="border-border"
@@ -198,7 +214,7 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
               onClick={handleSelectAllCurrentPage}
               className="text-xs sm:text-sm text-muted-foreground hover:text-foreground"
             >
-              {allDisplayUsersSelected ? 'Deselect All' : 'Select All'} ({displayUsers.length})
+              {selectionState.allSelected ? 'Deselect All' : 'Select All'} ({displayUsers.length})
             </Button>
           </div>
         )}
@@ -225,7 +241,7 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
               displayUsers.map((user) => (
                 <div key={user.id} className="flex items-center space-x-3 p-3 sm:p-4 border border-border rounded-lg hover:bg-muted/50 transition-colors">
                   <Checkbox
-                    checked={selectedUserIds.includes(user.id)}
+                    checked={selectedUserIdsSet.has(user.id)}
                     onCheckedChange={() => onUserToggle(user.id)}
                     className="border-border"
                   />
@@ -299,8 +315,6 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
               </Select>
               <span className="text-muted-foreground">per page</span>
             </div>
-
-
             {/* Center: Page navigation */}
             <div className="flex items-center gap-2">
               <Button
@@ -313,13 +327,9 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
                 <ChevronLeft className="h-3 w-3 mr-1" />
                 Prev
               </Button>
-
-
               <span className="text-xs sm:text-sm px-3 text-foreground font-medium">
                 Page {paginationInfo.currentPage} of {paginationInfo.lastPage}
               </span>
-
-
               <Button
                 variant="outline"
                 size="sm"
@@ -331,8 +341,6 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
                 <ChevronRight className="h-3 w-3 ml-1" />
               </Button>
             </div>
-
-
             {/* Right: Results info */}
             <div className="text-xs sm:text-sm text-muted-foreground">
               <span className="hidden sm:inline">

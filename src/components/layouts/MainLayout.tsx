@@ -44,6 +44,7 @@ import {
   Check,
   Users,
   ShieldCheck,
+  FileText,
 } from 'lucide-react';
 
 
@@ -88,6 +89,11 @@ function AppSidebar() {
       title: 'Dashboard',
       url: '/dashboard',
       icon: Home,
+    },
+    {
+      title: 'Blank Page',
+      url: '/blank-page',
+      icon: FileText,
     },
     {
       title: 'User Management',
@@ -261,6 +267,7 @@ function generateBreadcrumbs(pathname: string) {
   // Define all valid routes from App.tsx
   const validRoutes = [
     '/dashboard',
+    '/blank-page',
     '/settings',
     '/terms',
     '/privacy',
@@ -315,6 +322,7 @@ function generateBreadcrumbs(pathname: string) {
       'user-role-store-assignment': 'User Role Store Assignment',
       'stores-hierarchy': 'Stores',
       'auth-rules': 'Authorization Rules',
+      'blank-page': 'Blank Page',
       create: 'Create',
       edit: 'Edit',
       view: 'View',
