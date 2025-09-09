@@ -354,3 +354,22 @@ export type Required<T, K extends keyof T> = T & { [P in K]-?: T[P] };
  * Type for partial assignment updates
  */
 export type PartialAssignment = Optional<Assignment, 'id' | 'created_at' | 'updated_at'>;
+
+// types.ts
+export interface AssignmentData {
+  selectedUsers: number[];
+  selectedRoles: number[];
+  selectedStores: string[];
+}
+
+export interface AssignmentStep {
+  id: string;
+  title: string;
+  description: string;
+  completed: boolean;
+}
+
+export interface AssignmentResult {
+  success: boolean;
+  message: string;
+}

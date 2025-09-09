@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import {
@@ -11,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Search, Filter, Store as StoreIcon } from 'lucide-react';
+import { Loader2, Search, Filter, Store as StoreIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useStores } from '@/features/stores/hooks/useStores';
+import { setPerPage, selectPerPage } from '@/features/stores/store/storesSlice';
+import type { AppDispatch } from '@/store';
 
 interface StoreSelectionTabProps {
   selectedStoreId: string | null;
@@ -23,28 +27,34 @@ export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
   selectedStoreId,
   onStoreSelect,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  
   // Internal state for search and filter
   const [storeSearch, setStoreSearch] = useState('');
   const [storeFilter, setStoreFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  
+  // Get current per page value from Redux
+  const perPage = useSelector(selectPerPage);
 
   // Handler for filter change
   const handleFilterChange = (value: string) => {
     setStoreFilter(value as 'all' | 'active' | 'inactive');
   };
 
-  // Fetch stores data
+  // Fetch stores data with pagination
   const {
     stores,
+    pagination,
     loading: storesLoading,
     error: storesError,
-  } = useStores();
+    changePage,
+    currentPageData,
+    refetch,
+  } = useStores(true, { search: storeSearch });
 
-  // Filter stores based on search and status
+  // Filter stores based on status (search is handled server-side)
   const displayStores = useMemo(() => {
-    let filtered = stores.filter(store =>
-      store.name.toLowerCase().includes(storeSearch.toLowerCase()) ||
-      store.id.toLowerCase().includes(storeSearch.toLowerCase())
-    );
+    let filtered = stores;
 
     switch (storeFilter) {
       case 'active':
@@ -56,7 +66,83 @@ export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
     }
 
     return filtered;
-  }, [stores, storeSearch, storeFilter]);
+  }, [stores, storeFilter]);
+
+  // Pagination options
+  const perPageOptions = [5, 10, 15, 25, 50];
+
+  // Handle per page change
+  const handlePerPageChange = useCallback(async (value: string) => {
+    const newPerPage = parseInt(value, 10);
+    dispatch(setPerPage(newPerPage));
+    
+    // Refetch with new per page value
+    await refetch({ 
+      per_page: newPerPage, 
+      page: 1,
+      search: storeSearch
+    });
+  }, [dispatch, refetch, storeSearch]);
+
+  // Handle search with debouncing effect
+  const handleSearchChange = useCallback((value: string) => {
+    setStoreSearch(value);
+    // Reset to first page when searching
+    if (pagination && pagination.current_page !== 1) {
+      changePage(1);
+    }
+  }, [pagination, changePage]);
+
+  // Pagination state calculations
+  const paginationState = useMemo(() => {
+    if (!pagination) {
+      return {
+        shouldShowPagination: false,
+        currentPage: 1,
+        isPrevDisabled: true,
+        isNextDisabled: true,
+      };
+    }
+
+    return {
+      shouldShowPagination: pagination.last_page > 1,
+      currentPage: pagination.current_page,
+      isPrevDisabled: pagination.current_page <= 1,
+      isNextDisabled: pagination.current_page >= pagination.last_page,
+    };
+  }, [pagination]);
+
+  // Handle page navigation
+  const handlePreviousPage = useCallback(() => {
+    if (!paginationState.isPrevDisabled) {
+      changePage(paginationState.currentPage - 1);
+    }
+  }, [paginationState.isPrevDisabled, paginationState.currentPage, changePage]);
+
+  const handleNextPage = useCallback(() => {
+    if (!paginationState.isNextDisabled) {
+      changePage(paginationState.currentPage + 1);
+    }
+  }, [paginationState.isNextDisabled, paginationState.currentPage, changePage]);
+
+  // Results text for pagination info
+  const resultsText = useMemo(() => {
+    if (!currentPageData || currentPageData.total === 0) {
+      return 'No stores found';
+    }
+
+    const { from, to, total } = currentPageData;
+    return (
+      <>
+        <span className="hidden sm:inline">
+          {from} to {to} of {total} stores
+        </span>
+        <span className="sm:hidden">
+          {from}-{to} of {total}
+        </span>
+      </>
+    );
+  }, [currentPageData]);
 
   // Utility function
   const formatDate = (dateString: string) => {
@@ -79,7 +165,7 @@ export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
               <Input
                 placeholder="Search stores..."
                 value={storeSearch}
-                onChange={(e) => setStoreSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
               />
             </div>
@@ -171,6 +257,69 @@ export const StoreSelectionTab: React.FC<StoreSelectionTabProps> = ({
               ))
             )}
           </RadioGroup>
+        )}
+        
+        {/* Pagination Controls */}
+        {(displayStores.length > 0 || paginationState.shouldShowPagination) && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 border-t border-[var(--border)] bg-[var(--card)]/50">
+            {/* Left: Per page selector */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-[var(--muted-foreground)]">Show</span>
+              <Select
+                value={perPage.toString()}
+                onValueChange={handlePerPageChange}
+                disabled={storesLoading}
+              >
+                <SelectTrigger className="w-16 h-8 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[var(--popover)] border-[var(--border)]">
+                  {perPageOptions.map((option) => (
+                    <SelectItem key={option} value={option.toString()} className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-[var(--muted-foreground)]">per page</span>
+            </div>
+
+            {/* Center: Page navigation */}
+            {paginationState.shouldShowPagination && pagination && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={paginationState.isPrevDisabled || storesLoading}
+                  className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                >
+                  <ChevronLeft className="h-3 w-3 mr-1" />
+                  Prev
+                </Button>
+
+                <span className="text-xs sm:text-sm px-3 text-[var(--foreground)] font-medium">
+                  Page {paginationState.currentPage} of {pagination.last_page}
+                </span>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={paginationState.isNextDisabled || storesLoading}
+                  className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                >
+                  Next
+                  <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+            )}
+
+            {/* Right: Results info */}
+            <div className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+              {resultsText}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>

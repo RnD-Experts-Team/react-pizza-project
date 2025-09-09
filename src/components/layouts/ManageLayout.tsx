@@ -60,7 +60,7 @@ export const ManageLayout: React.FC<ManageLayoutProps> = ({
   };
 
   return (
-    <div className={cn('flex flex-col min-h-full', className)}>
+    <div className={cn('flex-1 flex-col min-h-full space-y-6 p-4 md:p-6 lg:p-8', className)}>
       {/* Header Section */}
       <header
         className={cn(

@@ -1,6 +1,6 @@
 /**
  * Single Assignment Page
- * 
+ *
  * A page for assigning a single role to a user for a specific store
  * with radio button selection for single choice interface.
  */
@@ -49,19 +49,17 @@ interface AssignmentStep {
 
 export const SingleAssignPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  
+
   // Get pre-selected values from URL params
   const preSelectedUserId = searchParams.get('userId');
   const preSelectedStoreId = searchParams.get('storeId');
-  
+
   // State for assignment data
   const [assignmentData, setAssignmentData] = useState<AssignmentData>({
     selectedUser: preSelectedUserId ? parseInt(preSelectedUserId) : null,
     selectedRole: null,
     selectedStore: preSelectedStoreId || null,
   });
-
-
 
   // State for assignment process
   const [isAssigning, setIsAssigning] = useState(false);
@@ -78,8 +76,6 @@ export const SingleAssignPage: React.FC = () => {
 
   // Get assignment operations hook
   const { assignUserRole, assignError } = useAssignmentOperations();
-
-
 
   // Assignment steps for progress tracking
   const assignmentSteps: AssignmentStep[] = [
@@ -103,26 +99,28 @@ export const SingleAssignPage: React.FC = () => {
     },
   ];
 
-  const completedSteps = assignmentSteps.filter(step => step.completed).length;
+  const completedSteps = assignmentSteps.filter(
+    (step) => step.completed,
+  ).length;
   const progressPercentage = (completedSteps / assignmentSteps.length) * 100;
 
   // Handler functions
   const handleUserSelect = (userId: string) => {
-    setAssignmentData(prev => ({
+    setAssignmentData((prev) => ({
       ...prev,
       selectedUser: parseInt(userId),
     }));
   };
 
   const handleRoleSelect = (roleId: string) => {
-    setAssignmentData(prev => ({
+    setAssignmentData((prev) => ({
       ...prev,
       selectedRole: parseInt(roleId),
     }));
   };
 
   const handleStoreSelect = (storeId: string) => {
-    setAssignmentData(prev => ({
+    setAssignmentData((prev) => ({
       ...prev,
       selectedStore: storeId,
     }));
@@ -138,7 +136,11 @@ export const SingleAssignPage: React.FC = () => {
   };
 
   const handleAssignment = async () => {
-    if (!assignmentData.selectedUser || !assignmentData.selectedRole || !assignmentData.selectedStore) {
+    if (
+      !assignmentData.selectedUser ||
+      !assignmentData.selectedRole ||
+      !assignmentData.selectedStore
+    ) {
       return;
     }
 
@@ -153,12 +155,12 @@ export const SingleAssignPage: React.FC = () => {
         is_active: true,
         metadata: {
           start_date: new Date().toISOString(),
-          notes: 'Single assignment via Assignment Page'
-        }
+          notes: 'Single assignment via Assignment Page',
+        },
       };
 
       await assignUserRole(assignmentRequest);
-      
+
       setAssignmentResult({
         success: true,
         message: `Successfully assigned role to user for the selected store.`,
@@ -172,18 +174,18 @@ export const SingleAssignPage: React.FC = () => {
       console.error('Assignment error:', error);
       setAssignmentResult({
         success: false,
-        message: assignError?.message || 'Failed to assign role. Please try again.',
+        message:
+          assignError?.message || 'Failed to assign role. Please try again.',
       });
     } finally {
       setIsAssigning(false);
     }
   };
 
-  const canAssign = assignmentData.selectedUser !== null &&
-                   assignmentData.selectedRole !== null &&
-                   assignmentData.selectedStore !== null;
-
-
+  const canAssign =
+    assignmentData.selectedUser !== null &&
+    assignmentData.selectedRole !== null &&
+    assignmentData.selectedStore !== null;
 
   return (
     <ManageLayout
@@ -222,7 +224,8 @@ export const SingleAssignPage: React.FC = () => {
             <DialogHeader>
               <DialogTitle>Confirm Role Assignment</DialogTitle>
               <DialogDescription>
-                You are about to assign a role to the selected user for the selected store.
+                You are about to assign a role to the selected user for the
+                selected store.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -232,9 +235,7 @@ export const SingleAssignPage: React.FC = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleAssignment}>
-                Confirm Assignment
-              </Button>
+              <Button onClick={handleAssignment}>Confirm Assignment</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -246,11 +247,11 @@ export const SingleAssignPage: React.FC = () => {
         progressPercentage={progressPercentage}
       />
 
-      {assignmentResult && (
-        <AssignmentResult result={assignmentResult} />
-      )}
+      {assignmentResult && <AssignmentResult result={assignmentResult} />}
 
-      {(assignmentData.selectedUser || assignmentData.selectedRole || assignmentData.selectedStore) && (
+      {(assignmentData.selectedUser ||
+        assignmentData.selectedRole ||
+        assignmentData.selectedStore) && (
         <SelectionSummary
           assignmentData={assignmentData}
           users={users}
@@ -262,23 +263,44 @@ export const SingleAssignPage: React.FC = () => {
       {/* Main Content Tabs */}
       <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
         <TabsList className="grid w-full grid-cols-3 bg-[var(--muted)] p-1 rounded-lg">
-          <TabsTrigger value="users" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="users"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm"
+          >
             <Users className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Users</span>
             <span className="sm:hidden">U</span>
-            {assignmentData.selectedUser && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
+            {assignmentData.selectedUser && (
+              <span className="hidden lg:inline text-[var(--primary)]">
+                (1 selected)
+              </span>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="roles" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="roles"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm"
+          >
             <Shield className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Roles</span>
             <span className="sm:hidden">R</span>
-            {assignmentData.selectedRole && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
+            {assignmentData.selectedRole && (
+              <span className="hidden lg:inline text-[var(--primary)]">
+                (1 selected)
+              </span>
+            )}
           </TabsTrigger>
-          <TabsTrigger value="stores" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm">
+          <TabsTrigger
+            value="stores"
+            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 sm:py-3 data-[state=active]:bg-[var(--background)] data-[state=active]:text-[var(--foreground)] data-[state=active]:shadow-sm"
+          >
             <Store className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
             <span className="hidden sm:inline">Stores</span>
             <span className="sm:hidden">S</span>
-            {assignmentData.selectedStore && <span className="hidden lg:inline text-[var(--primary)]">(1 selected)</span>}
+            {assignmentData.selectedStore && (
+              <span className="hidden lg:inline text-[var(--primary)]">
+                (1 selected)
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
 

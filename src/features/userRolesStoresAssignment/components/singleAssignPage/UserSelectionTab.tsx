@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,8 +13,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Search, Filter, ChevronRight } from 'lucide-react';
+import { Loader2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useUsers } from '@/features/users/hooks/useUsers';
+import { setPerPage, selectPerPage } from '@/features/users/store/usersSlice';
+import type { AppDispatch } from '@/store';
 
 interface UserSelectionTabProps {
   selectedUserId: number | null;
@@ -24,9 +27,14 @@ export const UserSelectionTab: React.FC<UserSelectionTabProps> = ({
   selectedUserId,
   onUserSelect,
 }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  
   // Internal state for search and filter
   const [userSearch, setUserSearch] = useState('');
   const [userFilter, setUserFilter] = useState<'all' | 'with-roles' | 'without-roles'>('all');
+  
+  // Get current per page value from Redux
+  const perPage = useSelector(selectPerPage);
 
   // Handler for filter change
   const handleFilterChange = (value: string) => {
@@ -36,18 +44,15 @@ export const UserSelectionTab: React.FC<UserSelectionTabProps> = ({
   // Fetch users data with pagination
   const {
     users,
+    pagination,
     loading: usersLoading,
     error: usersError,
-    pagination,
     fetchUsers,
-  } = useUsers(true, { per_page: 50 });
+  } = useUsers(true, { per_page: perPage, search: userSearch });
 
-  // Filter users based on local filters
+  // Filter users based on status (search is handled server-side)
   const displayUsers = useMemo(() => {
-    let filtered = users.filter(user =>
-      user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearch.toLowerCase())
-    );
+    let filtered = users;
 
     switch (userFilter) {
       case 'with-roles':
@@ -59,7 +64,83 @@ export const UserSelectionTab: React.FC<UserSelectionTabProps> = ({
     }
 
     return filtered;
-  }, [users, userSearch, userFilter]);
+  }, [users, userFilter]);
+
+  // Pagination options
+  const perPageOptions = [5, 10, 15, 25, 50];
+
+  // Handle per page change
+  const handlePerPageChange = useCallback(async (value: string) => {
+    const newPerPage = parseInt(value, 10);
+    dispatch(setPerPage(newPerPage));
+    
+    // Refetch with new per page value
+    await fetchUsers({ 
+      per_page: newPerPage, 
+      page: 1,
+      search: userSearch
+    });
+  }, [dispatch, fetchUsers, userSearch]);
+
+  // Handle search with debouncing effect
+  const handleSearchChange = useCallback((value: string) => {
+    setUserSearch(value);
+    // Reset to first page when searching
+    if (pagination && pagination.currentPage !== 1) {
+      fetchUsers({ page: 1, per_page: perPage, search: value });
+    }
+  }, [pagination, fetchUsers, perPage]);
+
+  // Pagination state calculations
+  const paginationState = useMemo(() => {
+    if (!pagination) {
+      return {
+        shouldShowPagination: false,
+        currentPage: 1,
+        isPrevDisabled: true,
+        isNextDisabled: true,
+      };
+    }
+
+    return {
+      shouldShowPagination: pagination.lastPage > 1,
+      currentPage: pagination.currentPage,
+      isPrevDisabled: pagination.currentPage <= 1,
+      isNextDisabled: pagination.currentPage >= pagination.lastPage,
+    };
+  }, [pagination]);
+
+  // Handle page navigation
+  const handlePreviousPage = useCallback(() => {
+    if (!paginationState.isPrevDisabled) {
+      fetchUsers({ page: paginationState.currentPage - 1, per_page: perPage, search: userSearch });
+    }
+  }, [paginationState.isPrevDisabled, paginationState.currentPage, fetchUsers, perPage, userSearch]);
+
+  const handleNextPage = useCallback(() => {
+    if (!paginationState.isNextDisabled) {
+      fetchUsers({ page: paginationState.currentPage + 1, per_page: perPage, search: userSearch });
+    }
+  }, [paginationState.isNextDisabled, paginationState.currentPage, fetchUsers, perPage, userSearch]);
+
+  // Results text for pagination info
+  const resultsText = useMemo(() => {
+    if (!pagination || pagination.total === 0) {
+      return 'No users found';
+    }
+
+    const { from, to, total } = pagination;
+    return (
+      <>
+        <span className="hidden sm:inline">
+          {from} to {to} of {total} users
+        </span>
+        <span className="sm:hidden">
+          {from}-{to} of {total}
+        </span>
+      </>
+    );
+  }, [pagination]);
 
   // Utility functions
   const formatDate = (dateString: string) => {
@@ -91,7 +172,7 @@ export const UserSelectionTab: React.FC<UserSelectionTabProps> = ({
               <Input
                 placeholder="Search users..."
                 value={userSearch}
-                onChange={(e) => setUserSearch(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
               />
             </div>
@@ -182,33 +263,73 @@ export const UserSelectionTab: React.FC<UserSelectionTabProps> = ({
                     </Label>
                   </div>
                 ))}
-                
-                {/* Pagination Controls */}
-                {pagination && pagination.currentPage < pagination.lastPage && (
-                  <div className="flex justify-center pt-4 sm:pt-6">
-                    <Button
-                      variant="outline"
-                      onClick={() => fetchUsers({ page: pagination.currentPage + 1, per_page: 50 })}
-                      disabled={usersLoading}
-                      className="flex items-center gap-2 px-4 py-2 text-sm bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {usersLoading ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading...
-                        </>
-                      ) : (
-                        <>
-                          Next Page
-                          <ChevronRight className="h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
+
               </>
             )}
           </RadioGroup>
+        )}
+        
+        {/* Pagination Controls */}
+        {(displayUsers.length > 0 || paginationState.shouldShowPagination) && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 border-t border-[var(--border)] bg-[var(--card)]/50">
+            {/* Left: Per page selector */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-[var(--muted-foreground)]">Show</span>
+              <Select
+                value={perPage.toString()}
+                onValueChange={handlePerPageChange}
+                disabled={usersLoading}
+              >
+                <SelectTrigger className="w-16 h-8 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[var(--popover)] border-[var(--border)]">
+                  {perPageOptions.map((option) => (
+                    <SelectItem key={option} value={option.toString()} className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-[var(--muted-foreground)]">per page</span>
+            </div>
+
+            {/* Center: Page navigation */}
+            {paginationState.shouldShowPagination && pagination && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handlePreviousPage}
+                  disabled={paginationState.isPrevDisabled || usersLoading}
+                  className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                >
+                  <ChevronLeft className="h-3 w-3 mr-1" />
+                  Prev
+                </Button>
+
+                <span className="text-xs sm:text-sm px-3 text-[var(--foreground)] font-medium">
+                   Page {paginationState.currentPage} of {pagination.lastPage}
+                 </span>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleNextPage}
+                  disabled={paginationState.isNextDisabled || usersLoading}
+                  className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+                >
+                  Next
+                  <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              </div>
+            )}
+
+            {/* Right: Results info */}
+            <div className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+              {resultsText}
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>

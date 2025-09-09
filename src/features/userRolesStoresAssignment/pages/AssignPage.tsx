@@ -5,51 +5,14 @@
  * with an intuitive multi-select interface and advanced filtering capabilities.
  */
 
-import React, { useState, useMemo } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { useUsers } from '@/features/users/hooks/useUsers';
-import { useRoles } from '@/features/roles/hooks/useRoles';
-import { useStores } from '@/features/stores/hooks/useStores';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useAssignmentOperations } from '../hooks/UseUserRolesStoresAssignment';
 import type { BulkAssignUserRolesRequest, BulkAssignmentItem } from '../types';
 import { ManageLayout } from '@/components/layouts/ManageLayout';
-import { BulkProgressIndicator } from '@/features/userRolesStoresAssignment/components/assignPage/BulkProgressIndicator';
-import { BulkSelectionSummary } from '@/features/userRolesStoresAssignment/components/assignPage/BulkSelectionSummary';
-import { BulkUserSelectionTab } from '@/features/userRolesStoresAssignment/components/assignPage/BulkUserSelectionTab';
-import { BulkRoleSelectionTab } from '@/features/userRolesStoresAssignment/components/assignPage/BulkRoleSelectionTab';
-import { BulkStoreSelectionTab } from '@/features/userRolesStoresAssignment/components/assignPage/BulkStoreSelectionTab';
-import { BulkAssignmentResult } from '@/features/userRolesStoresAssignment/components/assignPage/BulkAssignmentResult';
-import {
-  Users,
-  Shield,
-  Store,
-  X,
-  UserCheck,
-  Loader2,
-} from 'lucide-react';
-
-interface AssignmentData {
-  selectedUsers: number[];
-  selectedRoles: number[];
-  selectedStores: string[];
-}
-
-interface AssignmentStep {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
+import { AssignmentActionButtons } from '@/features/userRolesStoresAssignment/components/assignPage/AssignmentActionButtons';
+import { AssignmentProgressAndResults } from '@/features/userRolesStoresAssignment/components/assignPage/AssignmentProgressAndResults';
+import { AssignmentTabs } from '@/features/userRolesStoresAssignment/components/assignPage/AssignmentTabs';
+import type { AssignmentData, AssignmentStep, AssignmentResult } from '@/features/userRolesStoresAssignment/types';
 
 export const AssignPage: React.FC = () => {
   // State for assignment data
@@ -59,79 +22,13 @@ export const AssignPage: React.FC = () => {
     selectedStores: [],
   });
 
-  // State for search terms
-  const [userSearch, setUserSearch] = useState('');
-  const [roleSearch, setRoleSearch] = useState('');
-  const [storeSearch, setStoreSearch] = useState('');
-
-  // State for filters
-  const [userFilter, setUserFilter] = useState<'all' | 'with-roles' | 'without-roles'>('all');
-
   // State for assignment process
   const [isAssigning, setIsAssigning] = useState(false);
-  const [assignmentResult, setAssignmentResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
+  const [assignmentResult, setAssignmentResult] = useState<AssignmentResult | null>(null);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  // Fetch data using hooks
-  const {
-    users,
-    loading: usersLoading,
-    error: usersError,
-  } = useUsers();
-
-  const {
-    roles,
-    loading: rolesLoading,
-    error: rolesError,
-  } = useRoles();
-
-  const {
-    stores,
-    loading: storesLoading,
-    error: storesError,
-  } = useStores();
-
-  // Filter users based on local filters
-  const displayUsers = useMemo(() => {
-    let filtered = users.filter(user =>
-      user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
-      user.email.toLowerCase().includes(userSearch.toLowerCase())
-    );
-
-    switch (userFilter) {
-      case 'with-roles':
-        filtered = filtered.filter(user => user.roles && user.roles.length > 0);
-        break;
-      case 'without-roles':
-        filtered = filtered.filter(user => !user.roles || user.roles.length === 0);
-        break;
-    }
-
-    return filtered;
-  }, [users, userSearch, userFilter]);
-
-  // Filter roles based on search
-  const displayRoles = useMemo(() => {
-    return roles.filter(role =>
-      role.name.toLowerCase().includes(roleSearch.toLowerCase())
-    );
-  }, [roles, roleSearch]);
-
-  // Filter stores based on search
-  const displayStores = useMemo(() => {
-    return stores.filter(store =>
-      store.name.toLowerCase().includes(storeSearch.toLowerCase()) ||
-      store.id.toLowerCase().includes(storeSearch.toLowerCase())
-    );
-  }, [stores, storeSearch]);
-
-
-
-  // Assignment steps for progress tracking
-  const assignmentSteps: AssignmentStep[] = [
+  // Memoized assignment steps for progress tracking
+  const assignmentSteps = useMemo((): AssignmentStep[] => [
     {
       id: 'users',
       title: 'Select Users',
@@ -150,79 +47,75 @@ export const AssignPage: React.FC = () => {
       description: 'Choose stores for the assignment',
       completed: assignmentData.selectedStores.length > 0,
     },
-  ];
+  ], [assignmentData.selectedUsers.length, assignmentData.selectedRoles.length, assignmentData.selectedStores.length]);
 
-  const completedSteps = assignmentSteps.filter(step => step.completed).length;
-  const progressPercentage = (completedSteps / assignmentSteps.length) * 100;
+  // Memoized calculations
+  const completedSteps = useMemo(() => 
+    assignmentSteps.filter(step => step.completed).length, 
+    [assignmentSteps]
+  );
 
-  // Handler functions
-  const handleUserToggle = (userId: number) => {
+  const progressPercentage = useMemo(() => 
+    (completedSteps / assignmentSteps.length) * 100, 
+    [completedSteps, assignmentSteps.length]
+  );
+
+  // Memoized handler functions with useCallback
+  const handleUserToggle = useCallback((userId: number) => {
     setAssignmentData(prev => ({
       ...prev,
       selectedUsers: prev.selectedUsers.includes(userId)
         ? prev.selectedUsers.filter(id => id !== userId)
         : [...prev.selectedUsers, userId],
     }));
-  };
+  }, []);
 
-  const handleRoleToggle = (roleId: number) => {
+  const handleRoleToggle = useCallback((roleId: number) => {
     setAssignmentData(prev => ({
       ...prev,
       selectedRoles: prev.selectedRoles.includes(roleId)
         ? prev.selectedRoles.filter(id => id !== roleId)
         : [...prev.selectedRoles, roleId],
     }));
-  };
+  }, []);
 
-  const handleStoreToggle = (storeId: string) => {
+  const handleStoreToggle = useCallback((storeId: string) => {
     setAssignmentData(prev => ({
       ...prev,
       selectedStores: prev.selectedStores.includes(storeId)
         ? prev.selectedStores.filter(id => id !== storeId)
         : [...prev.selectedStores, storeId],
     }));
-  };
+  }, []);
 
-  const handleSelectAllUsers = () => {
-    setAssignmentData(prev => ({
-      ...prev,
-      selectedUsers: prev.selectedUsers.length === displayUsers.length
-        ? []
-        : displayUsers.map(user => user.id),
-    }));
-  };
+  const handleSelectAllUsers = useCallback(() => {
+    // This will be handled by the BulkUserSelectionTab component internally
+    // The component will call onUserToggle for each user
+  }, []);
 
-  const handleSelectAllRoles = () => {
-    setAssignmentData(prev => ({
-      ...prev,
-      selectedRoles: prev.selectedRoles.length === displayRoles.length
-        ? []
-        : displayRoles.map(role => role.id),
-    }));
-  };
+  const handleSelectAllRoles = useCallback(() => {
+    // This will be handled by the BulkRoleSelectionTab component internally
+    // The component will call onRoleToggle for each role
+  }, []);
 
-  const handleSelectAllStores = () => {
-    setAssignmentData(prev => ({
-      ...prev,
-      selectedStores: prev.selectedStores.length === displayStores.length
-        ? []
-        : displayStores.map(store => store.id),
-    }));
-  };
+  const handleSelectAllStores = useCallback(() => {
+    // This will be handled by the BulkStoreSelectionTab component internally
+    // The component will call onStoreToggle for each store
+  }, []);
 
-  const handleClearSelection = () => {
+  const handleClearSelection = useCallback(() => {
     setAssignmentData({
       selectedUsers: [],
       selectedRoles: [],
       selectedStores: [],
     });
     setAssignmentResult(null);
-  };
+  }, []);
 
   // Get assignment operations hook
   const { bulkAssignUserRoles, isBulkAssigning, bulkAssignError } = useAssignmentOperations();
 
-  const handleAssignment = async () => {
+  const handleAssignment = useCallback(async () => {
     setIsAssigning(true);
     setShowConfirmDialog(false);
 
@@ -291,31 +184,21 @@ export const AssignPage: React.FC = () => {
     } finally {
       setIsAssigning(false);
     }
-  };
+  }, [assignmentData, bulkAssignUserRoles, bulkAssignError, handleClearSelection]);
 
-  const canAssign = assignmentData.selectedUsers.length > 0 &&
-                   assignmentData.selectedRoles.length > 0 &&
-                   assignmentData.selectedStores.length > 0;
+  // Memoized validation
+  const canAssign = useMemo(() => 
+    assignmentData.selectedUsers.length > 0 &&
+    assignmentData.selectedRoles.length > 0 &&
+    assignmentData.selectedStores.length > 0, 
+    [assignmentData]
+  );
 
-  // Use the hook's loading state for better consistency
-  const isActuallyAssigning = isAssigning || isBulkAssigning;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  };
+  // Memoized loading state
+  const isActuallyAssigning = useMemo(() => 
+    isAssigning || isBulkAssigning, 
+    [isAssigning, isBulkAssigning]
+  );
 
   return (
     <ManageLayout
@@ -323,161 +206,33 @@ export const AssignPage: React.FC = () => {
       subtitle="Assign roles to users across different stores with an intuitive interface"
       backButton={{ show: true }}
     >
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 justify-end mb-4">
-        <Button
-          variant="outline"
-          onClick={handleClearSelection}
-          disabled={!canAssign}
-          className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2"
-        >
-          <X className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline">Clear Selection</span>
-          <span className="sm:hidden">Clear</span>
-        </Button>
-        <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-          <DialogTrigger asChild>
-            <Button
-              disabled={!canAssign || isActuallyAssigning}
-              className="flex items-center gap-2 w-full sm:w-auto text-sm sm:text-base px-3 sm:px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              {isActuallyAssigning ? (
-                <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
-              ) : (
-                <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
-              )}
-              <span className="hidden sm:inline">
-                {isActuallyAssigning ? 'Assigning...' : 'Assign Roles'}
-              </span>
-              <span className="sm:hidden">
-                {isActuallyAssigning ? 'Assigning...' : 'Assign'}
-              </span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Confirm Role Assignment</DialogTitle>
-              <DialogDescription>
-                You are about to assign {assignmentData.selectedRoles.length} roles to{' '}
-                {assignmentData.selectedUsers.length} users across{' '}
-                {assignmentData.selectedStores.length} stores.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button
-                variant="outline"
-                onClick={() => setShowConfirmDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleAssignment}>
-                Confirm Assignment
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <AssignmentActionButtons
+        assignmentData={assignmentData}
+        canAssign={canAssign}
+        isAssigning={isActuallyAssigning}
+        showConfirmDialog={showConfirmDialog}
+        onShowConfirmDialog={setShowConfirmDialog}
+        onClearSelection={handleClearSelection}
+        onConfirmAssignment={handleAssignment}
+      />
 
-      {/* Progress Indicator */}
-      <BulkProgressIndicator
+      <AssignmentProgressAndResults
         assignmentSteps={assignmentSteps}
         completedSteps={completedSteps}
         progressPercentage={progressPercentage}
+        assignmentResult={assignmentResult}
+        assignmentData={assignmentData}
       />
 
-      {/* Assignment Result */}
-      {assignmentResult && (
-        <BulkAssignmentResult result={assignmentResult} />
-      )}
-
-      {/* Selection Summary */}
-      {(assignmentData.selectedUsers.length > 0 || assignmentData.selectedRoles.length > 0 || assignmentData.selectedStores.length > 0) && (
-        <BulkSelectionSummary
-          assignmentData={assignmentData}
-          users={users}
-          roles={roles}
-          stores={stores}
-        />
-      )}
-
-      {/* Main Content Tabs */}
-      <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-3 bg-muted p-1 rounded-md">
-          <TabsTrigger 
-            value="users" 
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-          >
-            <Users className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Users ({assignmentData.selectedUsers.length})</span>
-            <span className="sm:hidden">Users</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="roles" 
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-          >
-            <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Roles ({assignmentData.selectedRoles.length})</span>
-            <span className="sm:hidden">Roles</span>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="stores" 
-            className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm px-2 sm:px-4 py-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm transition-all"
-          >
-            <Store className="h-3 w-3 sm:h-4 sm:w-4" />
-            <span className="hidden sm:inline">Stores ({assignmentData.selectedStores.length})</span>
-            <span className="sm:hidden">Stores</span>
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Users Tab */}
-        <TabsContent value="users">
-          <BulkUserSelectionTab
-            users={users}
-            displayUsers={displayUsers}
-            selectedUserIds={assignmentData.selectedUsers}
-            userSearch={userSearch}
-            userFilter={userFilter}
-            usersLoading={usersLoading}
-            usersError={usersError}
-            onUserToggle={handleUserToggle}
-            onUserSearchChange={setUserSearch}
-            onUserFilterChange={setUserFilter}
-            onSelectAllUsers={handleSelectAllUsers}
-            formatDate={formatDate}
-            getInitials={getInitials}
-          />
-        </TabsContent>
-
-        {/* Roles Tab */}
-        <TabsContent value="roles">
-          <BulkRoleSelectionTab
-            displayRoles={displayRoles}
-            selectedRoleIds={assignmentData.selectedRoles}
-            roleSearch={roleSearch}
-            rolesLoading={rolesLoading}
-            rolesError={rolesError}
-            onRoleToggle={handleRoleToggle}
-            onRoleSearchChange={setRoleSearch}
-            onSelectAllRoles={handleSelectAllRoles}
-            formatDate={formatDate}
-          />
-        </TabsContent>
-
-        {/* Stores Tab */}
-        <TabsContent value="stores">
-          <BulkStoreSelectionTab
-            displayStores={displayStores}
-            selectedStoreIds={assignmentData.selectedStores}
-            storeSearch={storeSearch}
-            storesLoading={storesLoading}
-            storesError={storesError}
-            onStoreToggle={(storeId: string) => handleStoreToggle(storeId)}
-            onStoreSearchChange={setStoreSearch}
-            onSelectAllStores={handleSelectAllStores}
-            formatDate={formatDate}
-          />
-        </TabsContent>
-      </Tabs>
+      <AssignmentTabs
+        assignmentData={assignmentData}
+        onUserToggle={handleUserToggle}
+        onRoleToggle={handleRoleToggle}
+        onStoreToggle={handleStoreToggle}
+        onSelectAllUsers={handleSelectAllUsers}
+        onSelectAllRoles={handleSelectAllRoles}
+        onSelectAllStores={handleSelectAllStores}
+      />
     </ManageLayout>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,48 +12,138 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, Search, Filter, Users } from 'lucide-react';
+import { Loader2, Search, Filter, Users, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useUsers } from '@/features/users/hooks/useUsers';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-  roles?: any[];
-  created_at: string;
-}
+
+
 
 interface BulkUserSelectionTabProps {
-  users: User[];
-  displayUsers: User[];
   selectedUserIds: number[];
-  userSearch: string;
-  userFilter: 'all' | 'with-roles' | 'without-roles';
-  usersLoading: boolean;
-  usersError: string | null;
   onUserToggle: (userId: number) => void;
   onSelectAllUsers: () => void;
-  onUserSearchChange: (search: string) => void;
-  onUserFilterChange: (filter: 'all' | 'with-roles' | 'without-roles') => void;
-  formatDate: (dateString: string) => string;
-  getInitials: (name: string) => string;
 }
 
+
 export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
-  displayUsers,
   selectedUserIds,
-  userSearch,
-  userFilter,
-  usersLoading,
-  usersError,
   onUserToggle,
-  onSelectAllUsers,
-  onUserSearchChange,
-  onUserFilterChange,
-  formatDate,
-  getInitials,
 }) => {
-  const allDisplayUsersSelected = displayUsers.length > 0 && selectedUserIds.length === displayUsers.length;
-  const someDisplayUsersSelected = selectedUserIds.length > 0 && selectedUserIds.length < displayUsers.length;
+  // Internal state for search and filters
+  const [userSearch, setUserSearch] = useState('');
+  const [userFilter, setUserFilter] = useState<'all' | 'with-roles' | 'without-roles'>('all');
+
+
+  // Fetch users data with pagination
+  const {
+    users,
+    loading: usersLoading,
+    error: usersError,
+    pagination,
+    fetchUsers,
+    perPage,
+    setPerPage,
+  } = useUsers();
+
+
+  // Filter users based on search and filters
+  const displayUsers = useMemo(() => {
+    let filtered = users.filter(user =>
+      user.name.toLowerCase().includes(userSearch.toLowerCase()) ||
+      user.email.toLowerCase().includes(userSearch.toLowerCase())
+    );
+
+
+    switch (userFilter) {
+      case 'with-roles':
+        filtered = filtered.filter(user => user.roles && user.roles.length > 0);
+        break;
+      case 'without-roles':
+        filtered = filtered.filter(user => !user.roles || user.roles.length === 0);
+        break;
+    }
+
+
+    return filtered;
+  }, [users, userSearch, userFilter]);
+
+
+  // Utility functions
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  // Pagination handlers
+  const handlePageChange = useCallback(async (page: number) => {
+    try {
+      await fetchUsers({ page, per_page: perPage });
+    } catch (error) {
+      console.error('Failed to fetch users for page:', page, error);
+    }
+  }, [fetchUsers, perPage]);
+
+
+  const handlePerPageChange = useCallback(async (newPerPage: string) => {
+    const perPageNum = parseInt(newPerPage, 10);
+    setPerPage(perPageNum);
+    try {
+      await fetchUsers({ page: 1, per_page: perPageNum });
+    } catch (error) {
+      console.error('Failed to fetch users with new per page:', perPageNum, error);
+    }
+  }, [setPerPage, fetchUsers]);
+
+  // Selection logic based on current page users
+  const allDisplayUsersSelected = displayUsers.length > 0 && displayUsers.every(user => selectedUserIds.includes(user.id));
+  const someDisplayUsersSelected = displayUsers.some(user => selectedUserIds.includes(user.id)) && !allDisplayUsersSelected;
+
+  // Handle selection logic for current page users
+  const handleSelectAllCurrentPage = useCallback(() => {
+    const currentPageUserIds = displayUsers.map(user => user.id);
+    
+    if (allDisplayUsersSelected) {
+      // Deselect all current page users
+      currentPageUserIds.forEach(userId => {
+        if (selectedUserIds.includes(userId)) {
+          onUserToggle(userId);
+        }
+      });
+    } else {
+      // Select all current page users
+      currentPageUserIds.forEach(userId => {
+        if (!selectedUserIds.includes(userId)) {
+          onUserToggle(userId);
+        }
+      });
+    }
+  }, [displayUsers, allDisplayUsersSelected, selectedUserIds, onUserToggle]);
+
+  // Pagination info
+  const paginationInfo = useMemo(() => {
+    if (!pagination) return null;
+    return {
+      currentPage: pagination.currentPage || 1,
+      lastPage: pagination.lastPage || 1,
+      from: pagination.from || 0,
+      to: pagination.to || 0,
+      total: pagination.total || 0,
+    };
+  }, [pagination]);
+
 
   return (
     <Card className="bg-card border-border shadow-sm">
@@ -69,11 +159,11 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
               <Input
                 placeholder="Search users..."
                 value={userSearch}
-                onChange={(e) => onUserSearchChange(e.target.value)}
+                onChange={(e) => setUserSearch(e.target.value)}
                 className="pl-10 w-full sm:w-64 bg-background border-border text-foreground placeholder:text-muted-foreground focus:ring-ring focus:border-ring text-sm sm:text-base"
               />
             </div>
-            <Select value={userFilter} onValueChange={onUserFilterChange}>
+            <Select value={userFilter} onValueChange={(value) => setUserFilter(value as 'all' | 'with-roles' | 'without-roles')}>
               <SelectTrigger className="w-full sm:w-40 bg-background border-border text-foreground text-sm sm:text-base">
                 <Filter className="h-4 w-4 mr-2 text-muted-foreground" />
                 <SelectValue />
@@ -99,13 +189,13 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
               ref={(el) => {
                 if (el) (el as any).indeterminate = someDisplayUsersSelected;
               }}
-              onCheckedChange={onSelectAllUsers}
+              onCheckedChange={handleSelectAllCurrentPage}
               className="border-border"
             />
             <Button
               variant="ghost"
               size="sm"
-              onClick={onSelectAllUsers}
+              onClick={handleSelectAllCurrentPage}
               className="text-xs sm:text-sm text-muted-foreground hover:text-foreground"
             >
               {allDisplayUsersSelected ? 'Deselect All' : 'Select All'} ({displayUsers.length})
@@ -182,6 +272,76 @@ export const BulkUserSelectionTab: React.FC<BulkUserSelectionTabProps> = ({
                 </div>
               ))
             )}
+          </div>
+        )}
+        
+        {/* Pagination Controls */}
+        {paginationInfo && paginationInfo.total > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 border-t border-border bg-card/50">
+            {/* Left: Per page selector */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-muted-foreground">Show</span>
+              <Select
+                value={perPage.toString()}
+                onValueChange={handlePerPageChange}
+                disabled={usersLoading}
+              >
+                <SelectTrigger className="w-16 h-8 text-xs bg-background border-border text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  {[5, 10, 15, 25, 50].map(option => (
+                    <SelectItem key={option} value={option.toString()} className="text-popover-foreground focus:bg-accent focus:text-accent-foreground">
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground">per page</span>
+            </div>
+
+
+            {/* Center: Page navigation */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(paginationInfo.currentPage - 1)}
+                disabled={usersLoading || paginationInfo.currentPage <= 1}
+                className="h-8 px-3 text-xs bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" />
+                Prev
+              </Button>
+
+
+              <span className="text-xs sm:text-sm px-3 text-foreground font-medium">
+                Page {paginationInfo.currentPage} of {paginationInfo.lastPage}
+              </span>
+
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handlePageChange(paginationInfo.currentPage + 1)}
+                disabled={usersLoading || paginationInfo.currentPage >= paginationInfo.lastPage}
+                className="h-8 px-3 text-xs bg-background border-border text-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                Next
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+
+
+            {/* Right: Results info */}
+            <div className="text-xs sm:text-sm text-muted-foreground">
+              <span className="hidden sm:inline">
+                {paginationInfo.from} to {paginationInfo.to} of {paginationInfo.total} users
+              </span>
+              <span className="sm:hidden">
+                {paginationInfo.from}-{paginationInfo.to} of {paginationInfo.total}
+              </span>
+            </div>
           </div>
         )}
       </CardContent>

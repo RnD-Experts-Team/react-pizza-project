@@ -36,11 +36,11 @@ export const BulkProgressIndicator: React.FC<BulkProgressIndicatorProps> = ({
             {assignmentSteps.map((step, index) => (
               <div key={step.id} className="flex items-center gap-1.5 sm:gap-2">
                 {step.completed ? (
-                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4" style={{color: '#10b981'}} />
+                  <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-[#10b981]" />
                 ) : (
                   <div className="h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-muted bg-background" />
                 )}
-                <span className={`text-xs sm:text-sm ${step.completed ? 'font-medium' : 'text-muted-foreground'}`} style={{color: step.completed ? '#059669' : undefined}}>
+                <span className={`text-xs sm:text-sm ${step.completed ? 'font-medium text-green-600' : 'text-muted-foreground'}`}>
                   <span className="hidden sm:inline">{step.title}</span>
                   <span className="sm:hidden">{step.title.split(' ')[1] || step.title}</span>
                 </span>

@@ -1,10 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, Search, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Search, Shield, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRoles } from '@/features/roles/hooks/useRoles';
+import type { GetRolesParams } from '@/features/roles/types';
 
 
 
@@ -17,22 +20,72 @@ export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
   selectedRoleId,
   onRoleSelect,
 }) => {
-  // Internal state for search
+  // Internal state for search and pagination
   const [roleSearch, setRoleSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
 
-  // Fetch roles data
+  // Pagination parameters
+  const paginationParams: GetRolesParams = {
+    page: currentPage,
+    per_page: perPage,
+    search: roleSearch || undefined,
+  };
+
+  // Fetch roles data with pagination
   const {
     roles,
     loading: rolesLoading,
     error: rolesError,
-  } = useRoles();
+    pagination,
+    fetchRoles,
+  } = useRoles(true, paginationParams);
 
-  // Filter roles based on search
-  const displayRoles = useMemo(() => {
-    return roles.filter(role =>
-      role.name.toLowerCase().includes(roleSearch.toLowerCase())
-    );
-  }, [roles, roleSearch]);
+  // Use roles directly from API (no client-side filtering needed)
+  const displayRoles = roles;
+
+  // Pagination handlers
+  const handlePageChange = useCallback(async (newPage: number) => {
+    setCurrentPage(newPage);
+    await fetchRoles({
+      page: newPage,
+      per_page: perPage,
+      search: roleSearch || undefined,
+    });
+  }, [fetchRoles, perPage, roleSearch]);
+
+  const handlePerPageChange = useCallback(async (newPerPage: string) => {
+    const perPageValue = parseInt(newPerPage, 10);
+    setPerPage(perPageValue);
+    setCurrentPage(1); // Reset to first page
+    await fetchRoles({
+      page: 1,
+      per_page: perPageValue,
+      search: roleSearch || undefined,
+    });
+  }, [fetchRoles, roleSearch]);
+
+  const handleSearchChange = useCallback(async (searchValue: string) => {
+    setRoleSearch(searchValue);
+    setCurrentPage(1); // Reset to first page when searching
+    await fetchRoles({
+      page: 1,
+      per_page: perPage,
+      search: searchValue || undefined,
+    });
+  }, [fetchRoles, perPage]);
+
+  const handlePreviousPage = useCallback(() => {
+    if (pagination && currentPage > 1) {
+      handlePageChange(currentPage - 1);
+    }
+  }, [currentPage, pagination, handlePageChange]);
+
+  const handleNextPage = useCallback(() => {
+    if (pagination && currentPage < pagination.lastPage) {
+      handlePageChange(currentPage + 1);
+    }
+  }, [currentPage, pagination, handlePageChange]);
 
   // Utility function
   const formatDate = (dateString: string) => {
@@ -52,11 +105,11 @@ export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-[var(--muted-foreground)]" />
             <Input
-              placeholder="Search roles..."
-              value={roleSearch}
-              onChange={(e) => setRoleSearch(e.target.value)}
-              className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
-            />
+                placeholder="Search roles..."
+                value={roleSearch}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 w-full sm:w-64 bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] focus:ring-[var(--ring)] focus:border-[var(--ring)] text-sm sm:text-base"
+              />
           </div>
         </div>
       </CardHeader>
@@ -109,6 +162,72 @@ export const RoleSelectionTab: React.FC<RoleSelectionTabProps> = ({
               ))
             )}
           </RadioGroup>
+        )}
+        
+        {/* Pagination Controls */}
+        {pagination && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 sm:px-6 py-3 border-t border-[var(--border)] bg-[var(--card)]/50">
+            {/* Left: Per page selector */}
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className="text-[var(--muted-foreground)]">Show</span>
+              <Select
+                value={perPage.toString()}
+                onValueChange={handlePerPageChange}
+                disabled={rolesLoading}
+              >
+                <SelectTrigger className="w-16 h-8 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-[var(--popover)] border-[var(--border)]">
+                  <SelectItem value="5" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">5</SelectItem>
+                  <SelectItem value="10" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">10</SelectItem>
+                  <SelectItem value="25" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">25</SelectItem>
+                  <SelectItem value="50" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">50</SelectItem>
+                  <SelectItem value="100" className="text-[var(--popover-foreground)] focus:bg-[var(--accent)] focus:text-[var(--accent-foreground)]">100</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-[var(--muted-foreground)]">per page</span>
+            </div>
+
+            {/* Center: Page navigation */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handlePreviousPage}
+                disabled={rolesLoading || currentPage <= 1}
+                className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+              >
+                <ChevronLeft className="h-3 w-3 mr-1" />
+                Prev
+              </Button>
+
+              <span className="text-xs sm:text-sm px-3 text-[var(--foreground)] font-medium">
+                Page {currentPage} of {pagination.lastPage || 1}
+              </span>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleNextPage}
+                disabled={rolesLoading || currentPage >= (pagination.lastPage || 1)}
+                className="h-8 px-3 text-xs bg-[var(--background)] border-[var(--border)] text-[var(--foreground)] hover:bg-[var(--accent)] hover:text-[var(--accent-foreground)]"
+              >
+                Next
+                <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+
+            {/* Right: Results info */}
+            <div className="text-xs sm:text-sm text-[var(--muted-foreground)]">
+              <span className="hidden sm:inline">
+                {pagination.from || 0} to {pagination.to || 0} of {pagination.total || 0} roles
+              </span>
+              <span className="sm:hidden">
+                {pagination.from || 0}-{pagination.to || 0} of {pagination.total || 0}
+              </span>
+            </div>
+          </div>
         )}
       </CardContent>
     </Card>
