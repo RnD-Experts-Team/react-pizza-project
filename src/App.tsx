@@ -7,6 +7,7 @@ import {
 // import { AuthProvider } from './hooks/useAuth';
 import { ThemeProvider } from '@/hooks/useTheme';
 import AuthInitializer from '@/components/AuthInitializer';
+import CustomLoadingScreen from '@/components/CustomLoadingScreen';
 
 // Import all route modules
 import {
@@ -25,7 +26,7 @@ function App() {
   return (
     <ThemeProvider defaultTheme="light" storageKey="pizza-app-theme">
       {/* <AuthProvider> */}
-      <AuthInitializer>
+      <AuthInitializer fallback={<CustomLoadingScreen />}>
         <Router>
           <div className="min-h-screen bg-background text-foreground transition-colors">
             <Routes>

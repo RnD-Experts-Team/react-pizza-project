@@ -13,8 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
 import { AuthRuleRow } from '@/features/authorizationRules/components/AuthRulesTable/AuthRuleRow';
+import { EnhancedLoadingComponent } from '@/components/EnhancedLoadingComponent';
 
 interface AuthRule {
   id: number;
@@ -45,11 +45,12 @@ export const AuthRulesTableContent: React.FC<AuthRulesTableContentProps> = ({
   return (
     <CardContent className="p-0 bg-card">
       {loading ? (
-        <div className="flex items-center justify-center h-48 sm:h-64 bg-card text-muted-foreground">
-          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-          <span className="ml-2 text-sm sm:text-base text-foreground">
-            Loading rules...
-          </span>
+        <div className="flex items-center justify-center h-48 sm:h-64 bg-card">
+          <EnhancedLoadingComponent 
+            message="Loading rules..."
+            size="medium"
+            className="h-48 sm:h-64 bg-card text-muted-foreground"
+          />
         </div>
       ) : !rules.length ? (
         <div className="text-center py-6 sm:py-8 bg-card">

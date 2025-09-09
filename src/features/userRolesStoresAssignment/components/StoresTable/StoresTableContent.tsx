@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
 import { StoresTableRow } from '@/features/userRolesStoresAssignment/components/StoresTable/StoresTableRow';
+import { EnhancedLoadingComponent } from '@/components/EnhancedLoadingComponent';
 
 interface Store {
   id: string;
@@ -34,11 +34,12 @@ export const StoresTableContent: React.FC<StoresTableContentProps> = ({
 }) => {
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-48 sm:h-64 bg-card text-muted-foreground">
-        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-        <span className="ml-2 text-sm sm:text-base text-foreground">
-          Loading stores...
-        </span>
+      <div className="flex items-center justify-center h-48 sm:h-64 bg-card">
+        <EnhancedLoadingComponent 
+          message="Loading stores..."
+          size="medium"
+          className="h-48 sm:h-64 bg-card text-muted-foreground"
+        />
       </div>
     );
   }

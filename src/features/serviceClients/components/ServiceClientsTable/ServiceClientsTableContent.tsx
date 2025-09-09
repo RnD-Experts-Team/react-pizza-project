@@ -1,8 +1,8 @@
 import React from 'react';
 import { Table, TableBody,  TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Loader2 } from 'lucide-react';
 import type { ServiceClient } from '@/features/serviceClients/types';
 import { ClientRow } from '@/features/serviceClients/components/ServiceClientsTable/ClientRow';
+import { EnhancedLoadingComponent } from '@/components/EnhancedLoadingComponent';
 
 interface ServiceClientsTableContentProps {
   clients: ServiceClient[];
@@ -23,11 +23,12 @@ export const ServiceClientsTableContent: React.FC<ServiceClientsTableContentProp
 }) => {
   if (loading.fetching) {
     return (
-      <div className="flex items-center justify-center h-48 sm:h-64 bg-card text-muted-foreground">
-        <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-        <span className="ml-2 text-sm sm:text-base text-foreground">
-          Loading service clients...
-        </span>
+      <div className="flex items-center justify-center h-48 sm:h-64 bg-card">
+        <EnhancedLoadingComponent 
+          message="Loading service clients..."
+          size="medium"
+          className="h-48 sm:h-64 bg-card text-muted-foreground"
+        />
       </div>
     );
   }

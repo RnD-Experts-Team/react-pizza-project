@@ -1,7 +1,7 @@
 import React from 'react';
 import { CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
 import { StoresDataTable } from '@/features/stores/components/StoresTable/StoresDataTable';
+import { EnhancedLoadingComponent } from '@/components/EnhancedLoadingComponent';
 
 interface Store {
   id: string;
@@ -39,10 +39,11 @@ export const StoresTableContent: React.FC<StoresTableContentProps> = ({
     <CardContent className="p-0 bg-card">
       {loading ? (
         <div className="flex items-center justify-center h-48 sm:h-64 bg-card">
-          <Loader2 className="h-6 w-6 sm:h-8 sm:w-8 animate-spin text-primary" />
-          <span className="ml-2 text-sm sm:text-base text-foreground">
-            Loading stores...
-          </span>
+          <EnhancedLoadingComponent 
+            message="Loading stores..."
+            size="medium"
+            className="h-48 sm:h-64 bg-card text-muted-foreground"
+          />
         </div>
       ) : !stores.length ? (
         <div className="text-center py-6 sm:py-8 bg-card">
