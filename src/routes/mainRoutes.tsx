@@ -33,7 +33,7 @@ export const mainRoutes = [
   />,
   <Route
     key="terms"
-    path="/terms"
+    path="/settings/terms"
     element={
       <ProtectedRoute>
         <MainLayout>
@@ -44,7 +44,7 @@ export const mainRoutes = [
   />,
   <Route
     key="privacy"
-    path="/privacy"
+    path="/settings/privacy"
     element={
       <ProtectedRoute>
         <MainLayout>

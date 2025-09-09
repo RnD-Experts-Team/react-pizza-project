@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -23,28 +24,23 @@ import {
   User as UserIcon,
   Palette,
   CheckCircle,
+  LogOut,
+  FileText,
+  Shield,
 } from 'lucide-react';
 
-
 const Settings: React.FC = () => {
-  const { user,  getUserProfile } = useAuth();
+  const { user, getUserProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
 
   // User profile states
   const [userProfile, setUserProfile] = useState<User | null>(user);
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState('');
-
-
-
-
-
-
-
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   const [saveStatus] = useState<string | null>(null);
-  
-
 
   // Update local userProfile when Redux user changes
   useEffect(() => {
@@ -57,8 +53,6 @@ const Settings: React.FC = () => {
       fetchUserProfile();
     }
   }, []);
-
-
 
   const fetchUserProfile = async () => {
     setProfileLoading(true);
@@ -82,11 +76,26 @@ const Settings: React.FC = () => {
     }
   };
 
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      await logout();
+      // Navigate to login page or home page after logout
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
 
+  const handleNavigateToTerms = () => {
+    navigate('/settings/terms');
+  };
 
-
-
-
+  const handleNavigateToPrivacy = () => {
+    navigate('/settings/privacy');
+  };
 
   return (
     <div className="container mx-auto p-3 sm:p-4 md:p-6 lg:p-8 max-w-4xl">
@@ -133,7 +142,6 @@ const Settings: React.FC = () => {
 
         {/* Profile Settings */}
         <TabsContent value="profile" className="space-y-4 sm:space-y-6 mx-2 sm:mx-0">
-
           <Card className="border-border bg-card">
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-lg sm:text-xl text-card-foreground">Current Profile Information</CardTitle>
@@ -147,8 +155,6 @@ const Settings: React.FC = () => {
                   {profileError}
                 </div>
               )}
-              
-
 
               {profileLoading ? (
                 <div className="text-center py-6 sm:py-8">
@@ -211,14 +217,55 @@ const Settings: React.FC = () => {
               ) : (
                 <p className="text-muted-foreground text-sm sm:text-base">No profile data available</p>
               )}
-
-
             </CardContent>
           </Card>
 
+          {/* Account Actions */}
+          <Card className="border-border bg-card">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl text-card-foreground">Account Actions</CardTitle>
+              <CardDescription className="text-sm sm:text-base text-muted-foreground">
+                Manage your account and access important information
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3 sm:space-y-4">
+                {/* Legal Links */}
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleNavigateToTerms}
+                    className="flex items-center gap-2 justify-center sm:justify-start"
+                  >
+                    <FileText className="h-4 w-4" />
+                    Terms & Services
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleNavigateToPrivacy}
+                    className="flex items-center gap-2 justify-center sm:justify-start"
+                  >
+                    <Shield className="h-4 w-4" />
+                    Privacy Policy
+                  </Button>
+                </div>
+
+                {/* Logout Button */}
+                <div className="pt-2 border-t border-border">
+                  <Button
+                    variant="destructive"
+                    onClick={handleLogout}
+                    disabled={logoutLoading}
+                    className="flex items-center gap-2 w-full sm:w-auto"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    {logoutLoading ? 'Logging out...' : 'Logout'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
-
-
 
         {/* Appearance Settings */}
         <TabsContent value="appearance" className="space-y-4 sm:space-y-6 mx-2 sm:mx-0">
@@ -261,11 +308,7 @@ const Settings: React.FC = () => {
             </CardContent>
           </Card>
         </TabsContent>
-
-        {/* Account Management */}
       </Tabs>
-      
-
     </div>
   );
 };

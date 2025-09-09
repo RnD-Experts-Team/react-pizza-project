@@ -48,7 +48,7 @@
     --chart-4: #3b82f6;
     --chart-5: #a855f7;
 
-    --sidebar-background: #f4f4f5;
+    --sidebar-background: linear-gradient(to bottom, #ffffff, #e7e7e7);
     --sidebar-foreground: #71717a;
     --sidebar-primary: #ff6000;
     --sidebar-primary-foreground: #ffffff;
@@ -139,7 +139,7 @@
     --chart-4: #3b82f6;
     --chart-5: #a855f7;
 
-    --sidebar-background: #18181b;
+    --sidebar-background: linear-gradient(to bottom, #000000, #181818);
     --sidebar-foreground: #a1a1aa;
     --sidebar-primary: #ff6000;
     --sidebar-primary-foreground: #ffffff;
@@ -190,4 +190,8 @@
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+}
+
+.bg-sidebar-gradient {
+  background: var(--sidebar-background);
 }
