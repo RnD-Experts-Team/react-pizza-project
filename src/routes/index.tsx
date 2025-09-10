@@ -7,3 +7,4 @@ export { authRulesRoutes } from '@/routes/authRulesRoutes';
 export { storesRoutes } from '@/routes/storesRoutes';
 export { userRoleStoreAssignmentRoutes } from '@/routes/userRoleStoreAssignmentRoutes';
 export { storeHierarchyRoutes } from '@/routes/storeHierarchyRoutes';
+export { positionsRoutes } from '@/routes/positionsRoutes';

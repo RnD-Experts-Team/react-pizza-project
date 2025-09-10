@@ -45,6 +45,7 @@ import {
   Users,
   ShieldCheck,
   FileText,
+  Building,
 } from 'lucide-react';
 
 
@@ -119,6 +120,11 @@ function AppSidebar() {
       title: 'User Role Store Assignment',
       url: '/user-role-store-assignment',
       icon: Users,
+    },
+    {
+      title: 'Positions',
+      url: '/positions',
+      icon: Building,
     },
   ];
 
@@ -219,7 +225,7 @@ function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={isMenuItemActive(location.pathname, item.url)}
-                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent/50 data-[active=true]:bg-sidebar-accent/70"
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent hover:underline data-[active=true]:bg-sidebar-accent/70"
                     tooltip={item.title}
                   >
                     <Link
@@ -295,6 +301,7 @@ function generateBreadcrumbs(pathname: string) {
     '/stores-hierarchy/create/:storeId',
     '/stores-hierarchy/delete/:storeId',
     '/stores-hierarchy/validate/:storeId',
+    '/positions',
   ];
 
 

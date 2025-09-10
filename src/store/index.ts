@@ -8,6 +8,7 @@ import serviceClientsReducer from '../features/serviceClients/store/serviceClien
 import storesReducer from '../features/stores/store/storesSlice'; // Add this import
 import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignment/store/userRolesStoresAssignmentSlice'; // Add this import
 import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchySlice'; // Add this import
+import positionsReducer from '../features/positions/store/positionsSlice'; // Add this import
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     users: usersReducer, // Add this line
     authRules: authRulesReducer, // Add this line
     serviceClients: serviceClientsReducer, // Add this line
+    positions: positionsReducer, // Add this line
     stores: storesReducer, // Add this line
     userRolesStoresAssignment: userRolesStoresAssignmentReducer, // Add this line
     roleHierarchy: roleHierarchyReducer, // Add this line
