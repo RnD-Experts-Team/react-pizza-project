@@ -20,6 +20,7 @@ import {
   userRoleStoreAssignmentRoutes,
   storeHierarchyRoutes,
   positionsRoutes,
+  skillsRoutes,
 } from '@/routes';
 
 
@@ -57,6 +58,9 @@ function App() {
 
               {/* Positions Management Routes */}
               {positionsRoutes}
+
+              {/* Skills Management Routes */}
+              {skillsRoutes}
 
               {/* Default and catch-all routes */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

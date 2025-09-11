@@ -4,7 +4,7 @@
  * Management Page Component
  * 
  * A tabbed interface for managing different aspects of the organization.
- * Currently includes Positions and Statuses tabs with room for expansion to other management areas.
+ * Currently includes Positions, Skills, and Statuses tabs with room for expansion to other management areas.
  */
 
 import React, { useState } from 'react';
@@ -15,14 +15,15 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs';
 import { 
-//   Users, 
-//   Settings,
   Building,
   CircleDot,
-//   Shield
+  // Users,
+  // Settings,
+  // Shield
 } from 'lucide-react';
 
 import PositionsPage from '@/features/positions/components/PositionsPage';
+import SkillsPage from '@/features/skills/components/SkillsPage';
 import StatusesPage from '@/features/statuses/components/StatusesPage';
 
 /**
@@ -48,14 +49,21 @@ const ManagementPage: React.FC = () => {
       label: 'Positions',
       icon: <Building className="h-4 w-4" />,
       component: <PositionsPage />,
-      description: 'Manage organizational positions and roles'
+      description: 'Manage organizational positions and roles',
+    },
+    {
+      id: 'skills',
+      label: 'Skills',
+      icon: <CircleDot className="h-4 w-4" />,
+      component: <SkillsPage />,
+      description: 'Manage organizational skills and related employee info',
     },
     {
       id: 'statuses',
       label: 'Statuses',
       icon: <CircleDot className="h-4 w-4" />,
       component: <StatusesPage />,
-      description: 'Manage organizational statuses and their descriptions'
+      description: 'Manage organizational statuses and their descriptions',
     },
     // Future tabs can be added here:
     // {

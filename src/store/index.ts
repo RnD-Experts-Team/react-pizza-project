@@ -10,6 +10,7 @@ import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignm
 import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchySlice'; // Add this import
 import positionsReducer from '../features/positions/store/positionsSlice'; // Add this import
 import statusesReducer from '../features/statuses/store/statusesSlice';
+import skillsReducer from '../features/skills/store/skillSlice';
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     userRolesStoresAssignment: userRolesStoresAssignmentReducer, // Add this line
     roleHierarchy: roleHierarchyReducer, // Add this line
     statuses: statusesReducer,
+    skills: skillsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
