@@ -25,6 +25,7 @@ import {
 import PositionsPage from '@/features/positions/components/PositionsPage';
 import SkillsPage from '@/features/skills/components/SkillsPage';
 import StatusesPage from '@/features/statuses/components/StatusesPage';
+import PreferencesPage from '@/features/preference/components/PreferencesPage';
 
 /**
  * Tab configuration interface
@@ -64,6 +65,13 @@ const ManagementPage: React.FC = () => {
       icon: <CircleDot className="h-4 w-4" />,
       component: <StatusesPage />,
       description: 'Manage organizational statuses and their descriptions',
+    },
+    {
+      id: 'preferences',
+      label: 'Preferences',
+      icon: <CircleDot className="h-4 w-4" />,
+      component: <PreferencesPage />,
+      description: 'Manage organizational preferences',
     },
     // Future tabs can be added here:
     // {

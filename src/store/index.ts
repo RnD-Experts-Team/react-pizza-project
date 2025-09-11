@@ -11,6 +11,7 @@ import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchy
 import positionsReducer from '../features/positions/store/positionsSlice'; // Add this import
 import statusesReducer from '../features/statuses/store/statusesSlice';
 import skillsReducer from '../features/skills/store/skillSlice';
+import preferencesReducer from '../features/preference/store/preferencesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -26,6 +27,7 @@ export const store = configureStore({
     roleHierarchy: roleHierarchyReducer, // Add this line
     statuses: statusesReducer,
     skills: skillsReducer,
+    preferences: preferencesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

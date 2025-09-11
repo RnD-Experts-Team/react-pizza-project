@@ -9,3 +9,4 @@ export { userRoleStoreAssignmentRoutes } from '@/routes/userRoleStoreAssignmentR
 export { storeHierarchyRoutes } from '@/routes/storeHierarchyRoutes';
 export { positionsRoutes } from '@/routes/positionsRoutes';
 export { skillsRoutes } from '@/routes/skillsRoutes';
+export { preferencesRoutes } from '@/routes/preferencesRoutes';
