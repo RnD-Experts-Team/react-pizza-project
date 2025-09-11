@@ -9,6 +9,7 @@ import storesReducer from '../features/stores/store/storesSlice'; // Add this im
 import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignment/store/userRolesStoresAssignmentSlice'; // Add this import
 import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchySlice'; // Add this import
 import positionsReducer from '../features/positions/store/positionsSlice'; // Add this import
+import statusesReducer from '../features/statuses/store/statusesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     stores: storesReducer, // Add this line
     userRolesStoresAssignment: userRolesStoresAssignmentReducer, // Add this line
     roleHierarchy: roleHierarchyReducer, // Add this line
+    statuses: statusesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

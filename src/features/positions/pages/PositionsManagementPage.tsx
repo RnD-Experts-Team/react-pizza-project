@@ -1,8 +1,10 @@
+// src/pages/ManagementPage.tsx
+
 /**
  * Management Page Component
  * 
  * A tabbed interface for managing different aspects of the organization.
- * Currently includes Positions tab with room for expansion to other management areas.
+ * Currently includes Positions and Statuses tabs with room for expansion to other management areas.
  */
 
 import React, { useState } from 'react';
@@ -16,10 +18,12 @@ import {
 //   Users, 
 //   Settings,
   Building,
+  CircleDot,
 //   Shield
 } from 'lucide-react';
 
 import PositionsPage from '@/features/positions/components/PositionsPage';
+import StatusesPage from '@/features/statuses/components/StatusesPage';
 
 /**
  * Tab configuration interface
@@ -46,6 +50,13 @@ const ManagementPage: React.FC = () => {
       component: <PositionsPage />,
       description: 'Manage organizational positions and roles'
     },
+    {
+      id: 'statuses',
+      label: 'Statuses',
+      icon: <CircleDot className="h-4 w-4" />,
+      component: <StatusesPage />,
+      description: 'Manage organizational statuses and their descriptions'
+    },
     // Future tabs can be added here:
     // {
     //   id: 'users',
@@ -70,7 +81,7 @@ const ManagementPage: React.FC = () => {
     // }
   ];
 
-  // Default active tab
+  // Default active tab - start with positions
   const [activeTab, setActiveTab] = useState<string>('positions');
 
   // Get current tab configuration
@@ -101,7 +112,7 @@ const ManagementPage: React.FC = () => {
         >
           {/* Tab Navigation */}
           <div className="bg-white rounded-lg shadow-sm border p-1">
-            <TabsList className="grid w-full grid-cols-1 lg:grid-cols-4 gap-1 bg-transparent">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 gap-1 bg-transparent">
               {tabs.map((tab) => (
                 <TabsTrigger
                   key={tab.id}
