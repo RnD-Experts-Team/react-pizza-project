@@ -46,6 +46,7 @@ import {
   ShieldCheck,
   FileText,
   Building,
+  UserCheck,
 } from 'lucide-react';
 
 
@@ -100,6 +101,11 @@ function AppSidebar() {
       title: 'User Management',
       url: '/user-management',
       icon: Users,
+    },
+    {
+      title: 'Employees',
+      url: '/employees',
+      icon: UserCheck,
     },
     {
       title: 'Service Client Management',
@@ -284,6 +290,10 @@ function generateBreadcrumbs(pathname: string) {
     '/user-management/create/role',
     '/user-management/roles/assign-permissions',
     '/user-management/create/permission',
+    '/employees',
+    '/employees/create',
+    '/employees/edit/:id',
+    '/employees/view/:id',
     '/service-client-management',
     '/auth-rules',
     '/auth-rules/create',
@@ -330,6 +340,7 @@ function generateBreadcrumbs(pathname: string) {
       'stores-hierarchy': 'Stores',
       'auth-rules': 'Authorization Rules',
       'blank-page': 'Blank Page',
+      employees: 'Employees',
       create: 'Create',
       edit: 'Edit',
       view: 'View',

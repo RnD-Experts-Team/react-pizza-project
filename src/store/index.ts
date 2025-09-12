@@ -12,6 +12,7 @@ import positionsReducer from '../features/positions/store/positionsSlice'; // Ad
 import statusesReducer from '../features/statuses/store/statusesSlice';
 import skillsReducer from '../features/skills/store/skillSlice';
 import preferencesReducer from '../features/preference/store/preferencesSlice';
+import employeesReducer from '../features/employees/store/employeesSlice';
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     statuses: statusesReducer,
     skills: skillsReducer,
     preferences: preferencesReducer,
+    employees: employeesReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

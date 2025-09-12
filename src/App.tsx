@@ -22,6 +22,7 @@ import {
   positionsRoutes,
   skillsRoutes,
   preferencesRoutes,
+  employeesRoutes,
 } from '@/routes';
 
 
@@ -65,6 +66,9 @@ function App() {
 
               {/* Preferences Management Routes */}
               {preferencesRoutes}
+
+              {/* Employees Management Routes */}
+              {employeesRoutes}
 
               {/* Default and catch-all routes */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
