@@ -11,3 +11,4 @@ export { positionsRoutes } from '@/routes/positionsRoutes';
 export { skillsRoutes } from '@/routes/skillsRoutes';
 export { preferencesRoutes } from '@/routes/preferencesRoutes';
 export { employeesRoutes } from '@/routes/employeesRoutes';
+export { schedulePreferencesRoutes } from '@/routes/SchedulePreferencesRoutes';
