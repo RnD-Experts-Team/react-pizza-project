@@ -80,23 +80,17 @@ import { useStores } from '@/features/stores/hooks/useStores';
 import { useEmployees } from '@/features/employees/hooks/useEmployees';
 import { usePreferences } from '@/features/preference/hooks/usePreferences';
 
-// Import Redux hooks directly
+// Import Redux hooks directly - using typed versions
 import { useDispatch, useSelector } from 'react-redux';
-import { unwrapResult } from '@reduxjs/toolkit';
+import type { AppDispatch, RootState } from '@/store'; // Adjust path to your store types
 
 // Import Redux actions and selectors directly
 import {
   fetchAllSchedulePreferences,
-  fetchSchedulePreferenceById,
   createSchedulePreference,
   updateSchedulePreference,
   deleteSchedulePreference,
-  clearErrors,
-  clearError,
-  setCurrentSchedulePreference,
-  clearCurrentSchedulePreference,
   selectAllSchedulePreferences,
-  selectCurrentSchedulePreference,
   selectSchedulePreferencesTotalCount,
   selectSchedulePreferencesLoadingStates,
   selectSchedulePreferencesErrors,
@@ -153,15 +147,14 @@ const SchedulePreferencesPage: React.FC = () => {
   // HOOKS AND STATE
   // ==========================================================================
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   // Redux selectors
-  const schedulePreferences = useSelector(selectAllSchedulePreferences);
-  const currentSchedulePreference = useSelector(selectCurrentSchedulePreference);
-  const totalCount = useSelector(selectSchedulePreferencesTotalCount);
-  const loadingStates = useSelector(selectSchedulePreferencesLoadingStates);
-  const errorStates = useSelector(selectSchedulePreferencesErrors);
-  const isAnyLoading = useSelector(selectIsAnySchedulePreferenceLoading);
+  const schedulePreferences = useSelector((state: RootState) => selectAllSchedulePreferences(state));
+  const totalCount = useSelector((state: RootState) => selectSchedulePreferencesTotalCount(state));
+  const loadingStates = useSelector((state: RootState) => selectSchedulePreferencesLoadingStates(state));
+  const errorStates = useSelector((state: RootState) => selectSchedulePreferencesErrors(state));
+  const isAnyLoading = useSelector((state: RootState) => selectIsAnySchedulePreferenceLoading(state));
 
   // Other hooks
   const storesHook = useStores(true, { per_page: 100 });
@@ -201,28 +194,41 @@ const SchedulePreferencesPage: React.FC = () => {
   // Loading and submitting states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedStoreForEmployees, setSelectedStoreForEmployees] = useState<string>('');
+  const [hasInitiallyFetched, setHasInitiallyFetched] = useState(false);
 
   // ==========================================================================
   // EFFECTS
   // ==========================================================================
 
-  // Fetch all data on mount
+  // Fetch all data on mount (only once)
   useEffect(() => {
     const fetchInitialData = async () => {
+      if (hasInitiallyFetched) return;
+      
       try {
+        setHasInitiallyFetched(true);
         await dispatch(fetchAllSchedulePreferences()).unwrap();
       } catch (error) {
         console.error('Failed to fetch schedule preferences:', error);
+        setHasInitiallyFetched(false); // Reset on error so it can retry
       }
     };
 
     fetchInitialData();
-  }, [dispatch]);
+  }, [dispatch, hasInitiallyFetched]);
 
-  // Fetch preferences on mount
+  // Fetch preferences on mount (only once)
+  const fetchPreferencesOnce = useCallback(async () => {
+    try {
+      await preferencesHook.fetchPreferences();
+    } catch (error) {
+      console.error('Failed to fetch preferences:', error);
+    }
+  }, [preferencesHook.fetchPreferences]);
+
   useEffect(() => {
-    preferencesHook.fetchPreferences().catch(console.error);
-  }, []);
+    fetchPreferencesOnce();
+  }, []); // Empty dependency array to run only once
 
   // Fetch employees when store is selected in create/edit dialog
   useEffect(() => {
@@ -230,7 +236,7 @@ const SchedulePreferencesPage: React.FC = () => {
       employeesHook.actions.fetchEmployeesByStore(selectedStoreForEmployees, { per_page: 100 })
         .catch(console.error);
     }
-  }, [selectedStoreForEmployees]);
+  }, [selectedStoreForEmployees]); // Removed employeesHook.actions from dependencies
 
   // Update selected store for employees when create dialog store changes
   useEffect(() => {
@@ -262,9 +268,15 @@ const SchedulePreferencesPage: React.FC = () => {
   // Any operation loading
   const isAnyOperationLoading = isAnyLoading || storesHook.loading || preferencesHook.isAnyLoading;
 
-  // Check if there are any errors
-  const hasAnyError = Object.values(errorStates).some(error => error !== null);
-  const firstError = hasAnyError ? Object.values(errorStates).find(error => error !== null) : null;
+  // Check if there are any errors - memoized for performance
+  const hasAnyError = useMemo(() => 
+    Object.values(errorStates).some(error => error !== null), 
+    [errorStates]
+  );
+  const firstError = useMemo(() => 
+    hasAnyError ? Object.values(errorStates).find(error => error !== null) : null, 
+    [hasAnyError, errorStates]
+  );
 
   // Get employment type filtered data
   const fullTimePreferences = useMemo(() => 
@@ -388,16 +400,20 @@ const SchedulePreferencesPage: React.FC = () => {
         description: 'Please wait while we save your changes.',
       });
 
-      await dispatch(createSchedulePreference(requestData)).unwrap();
+      const result = await dispatch(createSchedulePreference(requestData));
       
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-      
-      toast.success('Schedule preference created successfully', {
-        description: 'The new schedule preference has been added to the system.',
-      });
-      
-      handleCloseCreateDialog();
+      if (createSchedulePreference.fulfilled.match(result)) {
+        // Dismiss loading toast
+        toast.dismiss(loadingToastId);
+        
+        toast.success('Schedule preference created successfully', {
+          description: 'The new schedule preference has been added to the system.',
+        });
+        
+        handleCloseCreateDialog();
+      } else {
+        throw new Error(result.payload as string || 'Failed to create schedule preference');
+      }
     } catch (error) {
       console.error('Failed to create schedule preference:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -439,16 +455,20 @@ const SchedulePreferencesPage: React.FC = () => {
         description: 'Please wait while we save your changes.',
       });
 
-      await dispatch(updateSchedulePreference({ id: editDialog.schedulePreference.id, data: requestData })).unwrap();
+      const result = await dispatch(updateSchedulePreference({ id: editDialog.schedulePreference.id, data: requestData }));
       
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-      
-      toast.success('Schedule preference updated successfully', {
-        description: 'The schedule preference changes have been saved.',
-      });
-      
-      handleCloseEditDialog();
+      if (updateSchedulePreference.fulfilled.match(result)) {
+        // Dismiss loading toast
+        toast.dismiss(loadingToastId);
+        
+        toast.success('Schedule preference updated successfully', {
+          description: 'The schedule preference changes have been saved.',
+        });
+        
+        handleCloseEditDialog();
+      } else {
+        throw new Error(result.payload as string || 'Failed to update schedule preference');
+      }
     } catch (error) {
       console.error('Failed to update schedule preference:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -472,16 +492,20 @@ const SchedulePreferencesPage: React.FC = () => {
         description: 'Please wait while we remove the preference.',
       });
 
-      await dispatch(deleteSchedulePreference({ id: deleteDialog.schedulePreference.id })).unwrap();
+      const result = await dispatch(deleteSchedulePreference({ id: deleteDialog.schedulePreference.id }));
       
-      // Dismiss loading toast
-      toast.dismiss(loadingToastId);
-      
-      toast.success('Schedule preference deleted successfully', {
-        description: 'The schedule preference has been removed from the system.',
-      });
-      
-      handleCloseDeleteDialog();
+      if (deleteSchedulePreference.fulfilled.match(result)) {
+        // Dismiss loading toast
+        toast.dismiss(loadingToastId);
+        
+        toast.success('Schedule preference deleted successfully', {
+          description: 'The schedule preference has been removed from the system.',
+        });
+        
+        handleCloseDeleteDialog();
+      } else {
+        throw new Error(result.payload as string || 'Failed to delete schedule preference');
+      }
     } catch (error) {
       console.error('Failed to delete schedule preference:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -499,10 +523,16 @@ const SchedulePreferencesPage: React.FC = () => {
       toast.info('Refreshing data...', {
         description: 'Fetching the latest schedule preferences.',
       });
-      await dispatch(fetchAllSchedulePreferences()).unwrap();
-      toast.success('Data refreshed successfully', {
-        description: 'Schedule preferences have been updated.',
-      });
+      
+      const result = await dispatch(fetchAllSchedulePreferences());
+      
+      if (fetchAllSchedulePreferences.fulfilled.match(result)) {
+        toast.success('Data refreshed successfully', {
+          description: 'Schedule preferences have been updated.',
+        });
+      } else {
+        throw new Error(result.payload as string || 'Failed to refresh data');
+      }
     } catch (error) {
       console.error('Failed to refresh schedule preferences:', error);
       toast.error('Failed to refresh data', {
@@ -663,9 +693,9 @@ const SchedulePreferencesPage: React.FC = () => {
   };
 
   /**
-   * Renders store selection dropdown
+   * Renders store selection dropdown - memoized for performance
    */
-  const renderStoreSelect = (value: string, onValueChange: (value: string) => void, placeholder: string = "Select store...") => (
+  const renderStoreSelect = useCallback((value: string, onValueChange: (value: string) => void, placeholder: string = "Select store...") => (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger>
         <SelectValue placeholder={placeholder} />
@@ -681,12 +711,12 @@ const SchedulePreferencesPage: React.FC = () => {
         ))}
       </SelectContent>
     </Select>
-  );
+  ), [storesHook.stores]);
 
   /**
-   * Renders employee selection dropdown
+   * Renders employee selection dropdown - memoized for performance
    */
-  const renderEmployeeSelect = (value: string, onValueChange: (value: string) => void, disabled: boolean = false) => (
+  const renderEmployeeSelect = useCallback((value: string, onValueChange: (value: string) => void, disabled: boolean = false) => (
     <Select value={value} onValueChange={onValueChange} disabled={disabled}>
       <SelectTrigger>
         <SelectValue placeholder={disabled ? "Select store first..." : "Select employee..."} />
@@ -705,12 +735,12 @@ const SchedulePreferencesPage: React.FC = () => {
         ))}
       </SelectContent>
     </Select>
-  );
+  ), [availableEmployees]);
 
   /**
-   * Renders preference selection dropdown
+   * Renders preference selection dropdown - memoized for performance
    */
-  const renderPreferenceSelect = (value: string, onValueChange: (value: string) => void) => (
+  const renderPreferenceSelect = useCallback((value: string, onValueChange: (value: string) => void) => (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger>
         <SelectValue placeholder="Select preference..." />
@@ -726,12 +756,12 @@ const SchedulePreferencesPage: React.FC = () => {
         ))}
       </SelectContent>
     </Select>
-  );
+  ), [preferencesHook.preferences]);
 
   /**
-   * Renders employment type selection dropdown
+   * Renders employment type selection dropdown - memoized for performance
    */
-  const renderEmploymentTypeSelect = (value: string, onValueChange: (value: string) => void) => (
+  const renderEmploymentTypeSelect = useCallback((value: string, onValueChange: (value: string) => void) => (
     <Select value={value} onValueChange={onValueChange}>
       <SelectTrigger>
         <SelectValue placeholder="Select employment type..." />
@@ -745,7 +775,7 @@ const SchedulePreferencesPage: React.FC = () => {
         </SelectItem>
       </SelectContent>
     </Select>
-  );
+  ), []);
 
   // ==========================================================================
   // MAIN RENDER
@@ -842,7 +872,11 @@ const SchedulePreferencesPage: React.FC = () => {
       {renderDataTable()}
 
       {/* Create Dialog */}
-      <Dialog open={createDialog.open} onOpenChange={handleCloseCreateDialog}>
+      <Dialog open={createDialog.open} onOpenChange={(open) => {
+        if (!open) {
+          handleCloseCreateDialog();
+        }
+      }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Create Schedule Preference</DialogTitle>
@@ -906,7 +940,11 @@ const SchedulePreferencesPage: React.FC = () => {
       </Dialog>
 
       {/* Edit Dialog */}
-      <Dialog open={editDialog.open} onOpenChange={handleCloseEditDialog}>
+      <Dialog open={editDialog.open} onOpenChange={(open) => {
+        if (!open) {
+          handleCloseEditDialog();
+        }
+      }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>Edit Schedule Preference</DialogTitle>
@@ -969,7 +1007,11 @@ const SchedulePreferencesPage: React.FC = () => {
       </Dialog>
 
       {/* View Dialog */}
-      <Dialog open={viewDialog.open} onOpenChange={handleCloseViewDialog}>
+      <Dialog open={viewDialog.open} onOpenChange={(open) => {
+        if (!open) {
+          handleCloseViewDialog();
+        }
+      }}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>Schedule Preference Details</DialogTitle>
