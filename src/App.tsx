@@ -23,6 +23,7 @@ import {
   skillsRoutes,
   preferencesRoutes,
   employeesRoutes,
+  employmentInformationRoutes,
   schedulePreferencesRoutes
 } from '@/routes';
 
@@ -70,6 +71,9 @@ function App() {
 
               {/* Employees Management Routes */}
               {employeesRoutes}
+
+              {/* Employment Information Management Routes */}
+              {employmentInformationRoutes}
 
               {/* Schedule Preferences Management Routes */}
               {schedulePreferencesRoutes}

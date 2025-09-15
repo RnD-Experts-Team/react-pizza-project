@@ -14,6 +14,7 @@ import skillsReducer from '../features/skills/store/skillSlice';
 import preferencesReducer from '../features/preference/store/preferencesSlice';
 import employeesReducer from '../features/employees/store/employeesSlice';
 import schedulePreferencesReducer from '../features/schedulePreferences/store/schedulePreferencesSlice';
+import employmentInformationReducer from '../features/employmentInformation/store/employmentInformationSlice';
 
 export const store = configureStore({
   reducer: {
@@ -32,6 +33,7 @@ export const store = configureStore({
     preferences: preferencesReducer,
     employees: employeesReducer,
     schedulePreferences: schedulePreferencesReducer,
+    employmentInformation: employmentInformationReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

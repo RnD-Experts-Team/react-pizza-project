@@ -47,6 +47,8 @@ import {
   FileText,
   Building,
   UserCheck,
+  Calendar,
+  CreditCard,
 } from 'lucide-react';
 
 
@@ -108,6 +110,11 @@ function AppSidebar() {
       icon: UserCheck,
     },
     {
+      title: 'Employment Information',
+      url: '/employment-information',
+      icon: CreditCard,
+    },
+    {
       title: 'Service Client Management',
       url: '/service-client-management',
       icon: ShieldCheck,
@@ -131,6 +138,11 @@ function AppSidebar() {
       title: 'Positions',
       url: '/positions',
       icon: Building,
+    },
+    {
+      title: 'Schedule Preferences',
+      url: '/schedule-preferences',
+      icon: Calendar,
     },
   ];
 
@@ -294,6 +306,7 @@ function generateBreadcrumbs(pathname: string) {
     '/employees/create',
     '/employees/edit/:id',
     '/employees/view/:id',
+    '/employment-information',
     '/service-client-management',
     '/auth-rules',
     '/auth-rules/create',
@@ -312,6 +325,7 @@ function generateBreadcrumbs(pathname: string) {
     '/stores-hierarchy/delete/:storeId',
     '/stores-hierarchy/validate/:storeId',
     '/positions',
+    '/schedule-preferences',
   ];
 
 
@@ -340,7 +354,9 @@ function generateBreadcrumbs(pathname: string) {
       'stores-hierarchy': 'Stores',
       'auth-rules': 'Authorization Rules',
       'blank-page': 'Blank Page',
+      'schedule-preferences': 'Schedule Preferences',
       employees: 'Employees',
+      'employment-information': 'Employment Information',
       create: 'Create',
       edit: 'Edit',
       view: 'View',

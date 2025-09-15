@@ -97,7 +97,7 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // Log successful requests in development
-    if (process.env.NODE_ENV === 'development' && response.config.metadata) {
+    if (process.env.NODE_ENV === 'development' && response.config.metadata?.startTime) {
       const duration = Date.now() - response.config.metadata.startTime;
       console.log(`API Request completed in ${duration}ms:`, {
         url: response.config.url,
