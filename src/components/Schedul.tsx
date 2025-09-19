@@ -1,5 +1,22 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { DayPilot, DayPilotScheduler } from '@daypilot/daypilot-lite-react';
+import { 
+  Drawer, 
+  DrawerContent, 
+  DrawerFooter 
+} from './ui/drawer';
+import { Button } from './ui/button';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 // ================================================================================
 // TYPE DEFINITIONS AND INTERFACES
@@ -26,10 +43,54 @@ interface ExtendedEventData extends DayPilot.EventData {
  * Interface for user resource data
  * Represents each row/resource in the scheduler
  */
-interface UserResource {
-  name: string;   // Display name for the resource
-  id: string;     // Unique identifier
-  color: string;  // Color theme for the resource
+// interface UserResource {
+//   name: string;   // Display name for the resource
+//   id: string;     // Unique identifier
+//   color: string;  // Color theme for the resource
+// }
+
+/**
+ * Interface for status data
+ * Represents a status with id and name for the status dropdown
+ */
+interface Status {
+  id: string;
+  name: string;
+}
+
+/**
+ * Interface for employee event data
+ * Represents the data structure for creating employee events
+ */
+interface EmployeeEventData {
+  emp_info_id: number;
+  scheduled_start_time: string;
+  scheduled_end_time: string;
+  actual_start_time: string | null;
+  actual_end_time: string | null;
+  vci: boolean;
+  status_id: number;
+  agree_on_exception: boolean;
+  exception_notes: string | null;
+}
+
+/**
+ * Interface for store data
+ * Represents a store with id and name
+ */
+interface Store {
+  id: string;
+  name: string;
+}
+/**
+ * Interface for employee data
+ * Represents an employee with id, name, and store association
+ */
+interface Employee {
+  id: string;
+  name: string;
+  storeId: string;
+  color: string;  // Color theme for the employee
 }
 
 /**
@@ -90,23 +151,107 @@ const ReactScheduler: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewType>('week');
   
   // Current date being displayed - center point of the view
-  const [currentDate, setCurrentDate] = useState<DayPilot.Date>(new DayPilot.Date('2025-09-20'));
+  const [currentDate, setCurrentDate] = useState<DayPilot.Date>(DayPilot.Date.today());
+
+  // Selected store for filtering employees
+  const [selectedStoreId, setSelectedStoreId] = useState<string>('');
+
+  // Drawer state for event creation
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [newEventData, setNewEventData] = useState<{
+    start: DayPilot.Date;
+    end: DayPilot.Date;
+    resource: string;
+  } | null>(null);
+  const [eventTitle, setEventTitle] = useState('');
+
+  // Enhanced employee event form state
+  const [employeeEventForm, setEmployeeEventForm] = useState<EmployeeEventData>({
+    emp_info_id: 0,
+    scheduled_start_time: '',
+    scheduled_end_time: '',
+    actual_start_time: null,
+    actual_end_time: null,
+    vci: false,
+    status_id: 1,
+    agree_on_exception: false,
+    exception_notes: null,
+  });
+
+  // Drawer state for event editing
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<ExtendedEventData | null>(null);
+  const [editEventTitle, setEditEventTitle] = useState('');
+
+  // Enhanced employee event form state for editing
+  const [editEmployeeEventForm, setEditEmployeeEventForm] = useState<EmployeeEventData>({
+    emp_info_id: 0,
+    scheduled_start_time: '',
+    scheduled_end_time: '',
+    actual_start_time: null,
+    actual_end_time: null,
+    vci: false,
+    status_id: 1,
+    agree_on_exception: false,
+    exception_notes: null,
+  });
 
   // ================================================================================
   // STATIC DATA DEFINITIONS
   // ================================================================================
 
   /**
+   * Static status data for the status dropdown
+   */
+  const statusesData: Status[] = [
+    { id: '1', name: 'Scheduled' },
+    { id: '2', name: 'In Progress' },
+    { id: '3', name: 'Completed' },
+    { id: '4', name: 'Cancelled' },
+    { id: '5', name: 'No Show' },
+    { id: '6', name: 'Late' },
+    { id: '7', name: 'Early Departure' }
+  ];
+
+  /**
+   * Static stores data
+   */
+  const storesData: Store[] = [
+    { id: '1', name: 'Downtown Store' },
+    { id: '2', name: 'Mall Location' },
+    { id: '3', name: 'Airport Branch' },
+    { id: '4', name: 'Suburban Plaza' },
+    { id: '5', name: 'City Center' }
+  ];
+
+  /**
+   * Static employees data with store associations
+   */
+  const employeesData: Employee[] = [
+    { id: '1', name: 'John Doe', storeId: '1', color: '#1aaa55' },
+    { id: '2', name: 'Jane Smith', storeId: '1', color: '#357cd2' },
+    { id: '3', name: 'Mike Johnson', storeId: '2', color: '#7fa900' },
+    { id: '4', name: 'Sarah Wilson', storeId: '2', color: '#ea7a57' },
+    { id: '5', name: 'David Brown', storeId: '3', color: '#00bdae' },
+    { id: '6', name: 'Emily Davis', storeId: '3', color: '#ff6b6b' },
+    { id: '7', name: 'Robert Miller', storeId: '4', color: '#4ecdc4' },
+    { id: '8', name: 'Lisa Anderson', storeId: '4', color: '#45b7d1' },
+    { id: '9', name: 'Tom Wilson', storeId: '5', color: '#96ceb4' },
+    { id: '10', name: 'Anna Garcia', storeId: '5', color: '#feca57' }
+  ];
+
+  /**
    * Static user data that defines the resources (people) in our scheduler
    * Each user becomes a row in the scheduler display
+   * @deprecated - This will be replaced by filtered employees based on selected store
    */
-  const userData: UserResource[] = [
-    { name: 'John Doe', id: '1', color: '#1aaa55' },      // Green theme
-    { name: 'Jane Smith', id: '2', color: '#357cd2' },    // Blue theme
-    { name: 'Mike Johnson', id: '3', color: '#7fa900' },  // Olive theme
-    { name: 'Sarah Wilson', id: '4', color: '#ea7a57' },  // Orange theme
-    { name: 'David Brown', id: '5', color: '#00bdae' }    // Teal theme
-  ];
+  // const userData: UserResource[] = [
+  //   { name: 'John Doe', id: '1', color: '#1aaa55' },      // Green theme
+  //   { name: 'Jane Smith', id: '2', color: '#357cd2' },    // Blue theme
+  //   { name: 'Mike Johnson', id: '3', color: '#7fa900' },  // Olive theme
+  //   { name: 'Sarah Wilson', id: '4', color: '#ea7a57' },  // Orange theme
+  //   { name: 'David Brown', id: '5', color: '#00bdae' }    // Teal theme
+  // ];
 
   /**
    * Sample event data with extended properties
@@ -314,6 +459,22 @@ const ReactScheduler: React.FC = () => {
     setCurrentDate(DayPilot.Date.today());
   };
 
+  /**
+   * Handles store selection change
+   * Updates the selected store and filters employees accordingly
+   */
+  const handleStoreChange = (storeId: string) => {
+    setSelectedStoreId(storeId === 'all' ? '' : storeId);
+  };
+
+  // Filter employees based on selected store
+  const getFilteredEmployees = () => {
+    if (!selectedStoreId) {
+      return employeesData;
+    }
+    return employeesData.filter(employee => employee.storeId === selectedStoreId);
+  };
+
   // ================================================================================
   // DISPLAY FORMATTING HELPERS
   // ================================================================================
@@ -362,7 +523,7 @@ const ReactScheduler: React.FC = () => {
       newResource: args.newResource   // New resource (row) ID
     });
     //TODO:
-    // Here you would typically update your backend/database
+    // do something here 
   };
   
   /**
@@ -371,13 +532,13 @@ const ReactScheduler: React.FC = () => {
    * 
    * @param args - Contains the clicked event information
    */
-  const onEventRightClick = (args: DayPilot.SchedulerEventRightClickArgs) => {
-    console.log('Event right-clicked:', {
-      eventId: args.e.data.id,
-      resource: args.e.data.resource,
-    });
-    // Here you could show a context menu
-  };
+  // const onEventRightClick = (args: DayPilot.SchedulerEventRightClickArgs) => {
+  //   console.log('Event right-clicked:', {
+  //     eventId: args.e.data.id,
+  //     resource: args.e.data.resource,
+  //   });
+  //   // Here you could show a context menu
+  // };
 
   /**
    * Handles event resizing (dragging the edges to change duration)
@@ -391,7 +552,8 @@ const ReactScheduler: React.FC = () => {
       newStart: args.newStart,        // New start time
       newEnd: args.newEnd             // New end time
     });
-    // Here you would typically update your backend/database
+    //TODO:
+    // do something here
   };
 
   /**
@@ -403,80 +565,261 @@ const ReactScheduler: React.FC = () => {
   const onTimeRangeSelected = async (args: DayPilot.SchedulerTimeRangeSelectedArgs) => {
     const dp = schedulerRef.current!.control;
     
-    // Show a modal prompt to get the event title
-    const modal = await DayPilot.Modal.prompt('New event:', 'Event Title');
-    
     // Clear the visual selection
     dp.clearSelection();
     
-    // If user cancelled the modal, don't create the event
-    if (modal.canceled) {
+    // Store the selection data and open the drawer
+    setNewEventData({
+      start: args.start,
+      end: args.end,
+      resource: args.resource.toString()
+    });
+    setEventTitle('');
+    setIsDrawerOpen(true);
+  };
+
+  // Validation function for employee event form
+  const validateEmployeeEventForm = (): boolean => {
+    if (!eventTitle.trim()) {
+      console.warn('Event title is required');
+      return false;
+    }
+    
+    if (!newEventData) {
+      console.warn('Event data is missing');
+      return false;
+    }
+
+    // Validate actual times if provided
+    if (employeeEventForm.actual_start_time && employeeEventForm.actual_end_time) {
+      const startTime = new Date(`2000-01-01T${employeeEventForm.actual_start_time}`);
+      const endTime = new Date(`2000-01-01T${employeeEventForm.actual_end_time}`);
+      
+      if (startTime >= endTime) {
+        console.warn('Actual start time must be before actual end time');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Handle event creation from drawer
+  const handleCreateEvent = () => {
+    if (!validateEmployeeEventForm() || !newEventData) {
       return;
     }
 
-    // Create a new event object
+    // Get the selected employee info
+    const selectedEmployee = getFilteredEmployees().find(emp => emp.id === newEventData.resource);
+    
+    // Create the employee event data
+    const employeeEvent: EmployeeEventData = {
+      emp_info_id: parseInt(newEventData.resource), // Use resource ID as emp_info_id
+      scheduled_start_time: newEventData.start.toString('HH:mm:ss'),
+      scheduled_end_time: newEventData.end.toString('HH:mm:ss'),
+      actual_start_time: employeeEventForm.actual_start_time,
+      actual_end_time: employeeEventForm.actual_end_time,
+      vci: employeeEventForm.vci,
+      status_id: employeeEventForm.status_id,
+      agree_on_exception: employeeEventForm.agree_on_exception,
+      exception_notes: employeeEventForm.exception_notes,
+    };
+
+    // Create a new event object for the scheduler
     const newEvent: ExtendedEventData = {
       id: DayPilot.guid(),            // Generate unique ID
-      text: modal.result!,            // Use the entered title
-      start: args.start,              // Selected start time
-      end: args.end,                  // Selected end time
-      resource: args.resource,        // Selected resource (row)
-      barColor: '#93c47d',           // Default color for new events
+      text: eventTitle.trim(),        // Use the entered title
+      start: newEventData.start,      // Selected start time
+      end: newEventData.end,          // Selected end time
+      resource: newEventData.resource, // Selected resource (row)
+      barColor: selectedEmployee?.color || '#93c47d', // Use employee color or default
     };
 
     // Add the new event to our state
     const updatedEvents = [...events, newEvent];
     setEvents(updatedEvents);
     
-    console.log('New event created:', newEvent);
-    // Here you would typically save to your backend/database
+    console.log('New employee event created:', employeeEvent);
+    console.log('New scheduler event created:', newEvent);
+    
+    // Close drawer and reset form
+    setIsDrawerOpen(false);
+    setNewEventData(null);
+    setEventTitle('');
+    resetEmployeeEventForm();
+    
+    // Here you would typically send employeeEvent to your backend
+  };
+
+  // Reset employee event form to default values
+  const resetEmployeeEventForm = () => {
+    setEmployeeEventForm({
+      emp_info_id: 0,
+      scheduled_start_time: '',
+      scheduled_end_time: '',
+      actual_start_time: null,
+      actual_end_time: null,
+      vci: false,
+      status_id: 1,
+      agree_on_exception: false,
+      exception_notes: null,
+    });
+  };
+
+  // Initialize employee event form when drawer opens
+  useEffect(() => {
+    if (isDrawerOpen && newEventData) {
+      // Set default values when creating a new event
+      setEmployeeEventForm({
+        emp_info_id: parseInt(newEventData.resource),
+        scheduled_start_time: newEventData.start.toString('HH:mm:ss'),
+        scheduled_end_time: newEventData.end.toString('HH:mm:ss'),
+        actual_start_time: null,
+        actual_end_time: null,
+        vci: false,
+        status_id: 1, // Default to 'Scheduled'
+        agree_on_exception: false,
+        exception_notes: null,
+      });
+    }
+  }, [isDrawerOpen, newEventData]);
+
+  // Initialize edit employee event form when edit drawer opens
+  useEffect(() => {
+    if (isEditDrawerOpen && editingEvent) {
+      // Set values from existing event for editing
+      setEditEmployeeEventForm({
+        emp_info_id: typeof editingEvent.resource === 'number' ? editingEvent.resource : parseInt(editingEvent.resource?.toString() || '0'),
+        scheduled_start_time: editingEvent.start?.toString('HH:mm:ss') || '',
+        scheduled_end_time: editingEvent.end?.toString('HH:mm:ss') || '',
+        actual_start_time: null, // These would come from backend data
+        actual_end_time: null,
+        vci: false, // These would come from backend data
+        status_id: 1, // Default to 'Scheduled'
+        agree_on_exception: false,
+        exception_notes: null,
+      });
+      setEditEventTitle(editingEvent.text || '');
+    }
+  }, [isEditDrawerOpen, editingEvent]);
+
+  // Handle drawer close
+  const handleDrawerClose = () => {
+    setIsDrawerOpen(false);
+    setNewEventData(null);
+    setEventTitle('');
+    resetEmployeeEventForm();
+  };
+
+  // Update employee event form field
+  const updateEmployeeEventForm = (field: keyof EmployeeEventData, value: any) => {
+    setEmployeeEventForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Reset edit employee event form to default values
+  const resetEditEmployeeEventForm = () => {
+    setEditEmployeeEventForm({
+      emp_info_id: 0,
+      scheduled_start_time: '',
+      scheduled_end_time: '',
+      actual_start_time: null,
+      actual_end_time: null,
+      vci: false,
+      status_id: 1,
+      agree_on_exception: false,
+      exception_notes: null,
+    });
+  };
+
+  // Update edit employee event form field
+  const updateEditEmployeeEventForm = (field: keyof EmployeeEventData, value: any) => {
+    setEditEmployeeEventForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle event editing from drawer
+  const handleEditEvent = () => {
+    if (!editingEvent || !editEventTitle.trim()) {
+      return;
+    }
+
+    // Update the event in our state
+    const updatedEvents = events.map(event => 
+      event.id === editingEvent.id 
+        ? { ...event, text: editEventTitle.trim() }
+        : event
+    );
+    setEvents(updatedEvents);
+    
+    console.log('Event updated:', editingEvent);
+    console.log('Employee event form data:', editEmployeeEventForm);
+    
+    // Here you would typically update your backend/database with both event and employee data
+    // Example API call structure:
+    // await updateEmployeeEvent(editingEvent.id, {
+    //   title: editEventTitle.trim(),
+    //   ...editEmployeeEventForm
+    // });
+    
+    // Close drawer and reset form
+    setIsEditDrawerOpen(false);
+    setEditingEvent(null);
+    setEditEventTitle('');
+    resetEditEmployeeEventForm();
+  };
+
+  // Handle edit drawer close
+  // const handleEditDrawerClose = () => {
+  //   setIsEditDrawerOpen(false);
+  //   setEditingEvent(null);
+  //   setEditEventTitle('');
+  //   resetEditEmployeeEventForm();
+  // };
+
+  // Handle event deletion from drawer
+  const handleDeleteEvent = () => {
+    if (!editingEvent) {
+      return;
+    }
+
+    // Remove the event from our state
+    const updatedEvents = events.filter(event => event.id !== editingEvent.id);
+    setEvents(updatedEvents);
+    
+    console.log('Event deleted:', editingEvent.id);
+    
+    // Close drawer and reset form
+    setIsEditDrawerOpen(false);
+    setEditingEvent(null);
+    setEditEventTitle('');
+    
+    // Here you would typically delete from your backend/database
   };
 
   /**
    * Handles single clicks on events
-   * Allows users to edit existing events
+   * Allows users to edit existing events using a drawer interface
    * 
    * @param args - Contains the clicked event information
    */
   const onEventClicked = async (args: DayPilot.SchedulerEventClickedArgs) => {
     const dp = schedulerRef.current!.control;
     
-    // Show a modal prompt with current event title
-    const modal = await DayPilot.Modal.prompt('Edit event:', args.e.data.text);
-    
     // Clear any selection
     dp.clearSelection();
     
-    // If user cancelled, don't update
-    if (modal.canceled) {
-      return;
-    }
-
-    // Update the event in our state
-    const updatedEvents = events.map(event => 
-      event.id === args.e.data.id 
-        ? { ...event, text: modal.result! }
-        : event
-    );
-    setEvents(updatedEvents);
+    // Set up the editing state
+    setEditingEvent(args.e.data as ExtendedEventData);
+    setEditEventTitle(args.e.data.text || '');
+    setIsEditDrawerOpen(true);
     
-    console.log('Event updated:', args.e.data);
-    // Here you would typically update your backend/database
-  };
-
-  /**
-   * Handles event deletion (typically via Delete key or context menu)
-   * Removes the event from the scheduler
-   * 
-   * @param args - Contains the deleted event information
-   */
-  const onEventDeleted = (args: DayPilot.SchedulerEventDeletedArgs) => {
-    // Remove the event from our state
-    const updatedEvents = events.filter(event => event.id !== args.e.data.id);
-    setEvents(updatedEvents);
-    
-    console.log('Event deleted:', args.e.data.id);
-    // Here you would typically delete from your backend/database
+    console.log('Event clicked for editing:', args.e.data);
   };
 
   // ================================================================================
@@ -499,21 +842,57 @@ const ReactScheduler: React.FC = () => {
       args.data.fontColor = 'white';                // Text color
     }
     
+    // Add rounded corners styling
+    args.data.cssClass = 'rounded-event';
+    
     // Adjust display based on current view - less detail in month view
     const showDetails = currentView !== 'month';
     const fontSize = currentView === 'month' ? '10px' : '12px';
     
-    // Generate custom HTML content if we have additional properties
+    // Generate custom HTML content with centered text and rounded styling
     if (eventData.description || eventData.status || eventData.priority || eventData.position) {
       args.data.html = `
-        <div style="padding: 3px; font-size: ${fontSize}; line-height: 1.2;">
+        <div style="
+          padding: 3px; 
+          font-size: ${fontSize}; 
+          line-height: 1.2;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          border-radius: 8px;
+          overflow: hidden;
+        ">
           <div style="font-weight: bold;">${args.data.text}</div>
           ${showDetails && eventData.description ? `<div style="font-size: 10px; opacity: 0.9;">${eventData.description}</div>` : ''}
           ${showDetails && eventData.status ? `<div style="font-size: 9px;">Status: ${eventData.status}</div>` : ''}
           ${showDetails && eventData.position ? `<div style="font-size: 9px;">Position: ${eventData.position}</div>` : ''}
         </div>
       `;
+    } else {
+      // For events without additional details, still apply centered styling
+      args.data.html = `
+        <div style="
+          padding: 3px; 
+          font-size: ${fontSize}; 
+          line-height: 1.2;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          border-radius: 8px;
+          overflow: hidden;
+        ">
+          <div style="font-weight: bold;">${args.data.text}</div>
+        </div>
+      `;
     }
+    
+    // Apply border radius directly to the event element
+    args.data.cssClass = "rounded-event";
   };
 
   /**
@@ -523,17 +902,19 @@ const ReactScheduler: React.FC = () => {
    * @param args - Contains row data and rendering options
    */
   const onBeforeRowHeaderRender = (args: DayPilot.SchedulerBeforeRowHeaderRenderArgs) => {
-    // Find the user data for this row
-    const user = userData.find(u => u.id === args.row.id);
-    if (user) {
-      // Add a colored circle next to the user name
+    // Find the corresponding employee data
+    const filteredEmployees = getFilteredEmployees();
+    const employee = filteredEmployees.find(emp => emp.id === args.row.id);
+    
+    if (employee) {
+      // Add a colored circle indicator next to the name
       args.row.areas = [
         {
           left: 5,                        // Position from left edge
           top: 10,                        // Position from top edge
           width: 12,                      // Circle width
           height: 12,                     // Circle height
-          backColor: user.color,          // Use user's theme color
+          backColor: employee.color,      // Use employee's theme color
           style: 'border-radius: 50%;'    // Make it circular
         }
       ];
@@ -546,31 +927,36 @@ const ReactScheduler: React.FC = () => {
 
   /**
    * Initialize the component with resource and event data
-   * Runs once when component mounts
+   * Runs once when component mounts and when store selection changes
    */
   useEffect(() => {
-    // Convert user data to DayPilot resource format
-    const dayPilotResources = userData.map(user => ({
-      name: user.name,
-      id: user.id
+    // Get filtered employees based on selected store
+    const filteredEmployees = getFilteredEmployees();
+    
+    // Convert employee data to DayPilot resource format
+    const dayPilotResources = filteredEmployees.map(employee => ({
+      name: employee.name,
+      id: employee.id
     }));
 
-    // Set initial data
+    // Set resources and events
     setResources(dayPilotResources);
-    setEvents(originalData);
-  }, []);
+    setEvents(originalData.filter(event => 
+      filteredEmployees.some(emp => emp.id === event.resource)
+    ));
+  }, [selectedStoreId]); // Re-run when store selection changes
 
-  /**
-   * Handle view changes - scroll to appropriate time when view or date changes
-   * This improves user experience by showing relevant time periods
-   */
+  // Handle view changes - scroll to appropriate time when view or date changes
+  // This improves user experience by showing relevant time periods
   useEffect(() => {
     if (schedulerRef.current) {
       // Small delay to ensure the scheduler has finished rendering
       setTimeout(() => {
         // For day and week views, scroll to 8 AM to show business hours
         if (currentView === 'day' || currentView === 'week') {
-          schedulerRef.current?.control.scrollTo(currentDate.toString() + 'T08:00:00');
+          // Create a proper date with 8 AM time
+          const scrollDate = new DayPilot.Date(currentDate).addHours(8);
+          schedulerRef.current?.control.scrollTo(scrollDate);
         }
       }, 100);
     }
@@ -581,151 +967,122 @@ const ReactScheduler: React.FC = () => {
   // ================================================================================
 
   return (
-    <div className="scheduler-container" style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
+    <div className="p-5 font-sans">
       {/* Main Title */}
-      <h2 style={{ marginBottom: '20px', color: '#333' }}>
+      <h2 className="mb-5 text-2xl font-bold text-foreground">
         React Scheduler with Multiple Views (DayPilot)
       </h2>
       
       {/* ============================================================================ */}
       {/* NAVIGATION AND VIEW SELECTION TOOLBAR */}
       {/* ============================================================================ */}
-      <div style={{ 
-        marginBottom: '20px', 
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px',
-        backgroundColor: '#f8f9fa',
-        borderRadius: '8px',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-      }}>
+      <div className="mb-5 flex items-center justify-between rounded-lg bg-muted p-4 shadow-sm">
         {/* Navigation Controls - Left side of toolbar */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div className="flex items-center gap-2.5">
           {/* Previous Period Button */}
-          <button 
+          <Button 
             onClick={handlePrevious}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              backgroundColor: 'white',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
+            variant="outline"
+            size="sm"
+            className="text-sm"
           >
             ← Previous
-          </button>
+          </Button>
           
           {/* Today Button - Highlighted to show it's important */}
-          <button 
+          <Button 
             onClick={handleToday}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #007bff',
-              backgroundColor: '#007bff',
-              color: 'white',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: 'bold'
-            }}
+            variant="default"
+            size="sm"
+            className="font-bold"
           >
             Today
-          </button>
+          </Button>
           
           {/* Next Period Button */}
-          <button 
+          <Button 
             onClick={handleNext}
-            style={{
-              padding: '8px 12px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              backgroundColor: 'white',
-              cursor: 'pointer',
-              fontSize: '14px'
-            }}
+            variant="outline"
+            size="sm"
+            className="text-sm"
           >
             Next →
-          </button>
+          </Button>
           
           {/* Current Date Range Display */}
-          <div style={{ 
-            marginLeft: '20px', 
-            fontSize: '16px', 
-            fontWeight: 'bold',
-            color: '#333'
-          }}>
+          <div className="ml-5 text-base font-bold text-foreground">
             {getDateRangeText()}
           </div>
         </div>
 
         {/* View Selection Buttons - Right side of toolbar */}
-        <div style={{ display: 'flex', gap: '5px' }}>
+        <div className="flex gap-1">
           {/* Day View Button */}
-          <button 
+          <Button 
             onClick={() => handleViewChange('day')} 
-            style={{
-              padding: '8px 16px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              backgroundColor: currentView === 'day' ? '#007bff' : 'white',
-              color: currentView === 'day' ? 'white' : '#333',
-              cursor: 'pointer',
-              fontWeight: currentView === 'day' ? 'bold' : 'normal',
-              fontSize: '14px'
-            }}
+            variant={currentView === 'day' ? 'default' : 'outline'}
+            size="sm"
+            className="px-4"
           >
             Day
-          </button>
+          </Button>
           
           {/* Week View Button */}
-          <button 
+          <Button 
             onClick={() => handleViewChange('week')} 
-            style={{
-              padding: '8px 16px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              backgroundColor: currentView === 'week' ? '#007bff' : 'white',
-              color: currentView === 'week' ? 'white' : '#333',
-              cursor: 'pointer',
-              fontWeight: currentView === 'week' ? 'bold' : 'normal',
-              fontSize: '14px'
-            }}
+            variant={currentView === 'week' ? 'default' : 'outline'}
+            size="sm"
+            className="px-4"
           >
             Week
-          </button>
+          </Button>
           
           {/* Month View Button */}
-          <button 
+          <Button 
             onClick={() => handleViewChange('month')} 
-            style={{
-              padding: '8px 16px',
-              borderRadius: '4px',
-              border: '1px solid #ddd',
-              backgroundColor: currentView === 'month' ? '#007bff' : 'white',
-              color: currentView === 'month' ? 'white' : '#333',
-              cursor: 'pointer',
-              fontWeight: currentView === 'month' ? 'bold' : 'normal',
-              fontSize: '14px'
-            }}
+            variant={currentView === 'month' ? 'default' : 'outline'}
+            size="sm"
+            className="px-4"
           >
             Month
-          </button>
+          </Button>
         </div>
+      </div>
+
+      {/* ============================================================================ */}
+      {/* STORE SELECTION */}
+      {/* ============================================================================ */}
+      <div className="mb-4 flex items-center gap-4 rounded-lg bg-card border border-border p-4 shadow-sm">
+        <Label htmlFor="storeSelect" className="text-sm font-medium text-card-foreground whitespace-nowrap">
+          Select Store:
+        </Label>
+        <Select
+          value={selectedStoreId || 'all'}
+          onValueChange={handleStoreChange}
+        >
+          <SelectTrigger className="w-[200px]">
+            <SelectValue placeholder="All Stores" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Stores</SelectItem>
+            {storesData.map(store => (
+              <SelectItem key={store.id} value={store.id}>
+                {store.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selectedStoreId && (
+          <span className="text-sm text-muted-foreground">
+            Showing employees from: <span className="font-medium text-primary">{storesData.find(s => s.id === selectedStoreId)?.name}</span>
+          </span>
+        )}
       </div>
 
       {/* ============================================================================ */}
       {/* INFORMATION BAR */}
       {/* ============================================================================ */}
-      <div style={{ 
-        marginBottom: '15px', 
-        padding: '10px',
-        backgroundColor: '#e7f3ff',
-        borderRadius: '4px',
-        fontSize: '14px',
-        color: '#0066cc'
-      }}>
+      <div className="mb-4 rounded bg-primary-50 p-2.5 text-sm text-primary-700">
         <strong>Current View:</strong> {currentView.charAt(0).toUpperCase() + currentView.slice(1)} 
         {/* Show business hours info for day/week views */}
         {(currentView === 'day' || currentView === 'week') && 
@@ -769,10 +1126,9 @@ const ReactScheduler: React.FC = () => {
         // {/* ================================================================ */}
         onEventMoved={onEventMoved}               // When event is drag-dropped
         onEventResized={onEventResized}           // When event is resized
-        onEventRightClick={onEventRightClick}     // When event is right-clicked
+        // onEventRightClick={onEventRightClick}     // When event is right-clicked
         onTimeRangeSelected={onTimeRangeSelected} // When empty time is selected
         onEventClicked={onEventClicked}           // When event is clicked
-        onEventDeleted={onEventDeleted}           // When event is deleted
         onBeforeEventRender={onBeforeEventRender} // Custom event rendering
         onBeforeRowHeaderRender={onBeforeRowHeaderRender} // Custom row header rendering
         
@@ -782,7 +1138,7 @@ const ReactScheduler: React.FC = () => {
         eventMoveHandling="Update"                // Enable drag-drop moving
         eventResizeHandling="Update"              // Enable resizing
         timeRangeSelectedHandling="Enabled"       // Enable time range selection
-        eventDeleteHandling="Update"              // Enable deletion (Delete key)
+        eventDeleteHandling="Disabled"            // Disable default deletion (no 'x' button)
         
         // {/* ================================================================ */}
         /* VISUAL STYLING AND LAYOUT */
@@ -794,8 +1150,313 @@ const ReactScheduler: React.FC = () => {
         headerHeight={30}                         // Time header height
         rowHeaderWidth={120}                      // Resource name column width
       />
+
+      {/* Employee Event Creation Drawer */}
+      <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+        <DrawerContent title="Create New Employee Event">
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+            {/* Event Title */}
+            <div>
+              <Label htmlFor="eventTitle" className="text-sm font-medium">
+                Event Title
+              </Label>
+              <Input
+                id="eventTitle"
+                type="text"
+                value={eventTitle}
+                onChange={(e) => setEventTitle(e.target.value)}
+                placeholder="Enter event title..."
+                className="mt-1"
+                autoFocus
+              />
+            </div>
+
+            {/* Event Info Display */}
+            {newEventData && (
+              <div className="bg-muted/50 p-3 rounded-md space-y-2">
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p><strong className="text-foreground">Employee:</strong> {getFilteredEmployees().find(emp => emp.id === newEventData.resource)?.name || newEventData.resource}</p>
+                  <p><strong className="text-foreground">Scheduled Start:</strong> {newEventData.start.toString()}</p>
+                  <p><strong className="text-foreground">Scheduled End:</strong> {newEventData.end.toString()}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Actual Times Section */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Actual Times</h3>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="actualStartTime" className="text-sm">
+                    Actual Start Time
+                  </Label>
+                  <Input
+                    id="actualStartTime"
+                    type="time"
+                    value={employeeEventForm.actual_start_time || ''}
+                    onChange={(e) => updateEmployeeEventForm('actual_start_time', e.target.value || null)}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="actualEndTime" className="text-sm">
+                    Actual End Time
+                  </Label>
+                  <Input
+                    id="actualEndTime"
+                    type="time"
+                    value={employeeEventForm.actual_end_time || ''}
+                    onChange={(e) => updateEmployeeEventForm('actual_end_time', e.target.value || null)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Status Selection */}
+            <div>
+              <Label htmlFor="statusSelect" className="text-sm font-medium">
+                Status
+              </Label>
+              <Select
+                value={employeeEventForm.status_id.toString()}
+                onValueChange={(value) => updateEmployeeEventForm('status_id', parseInt(value))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusesData.map(status => (
+                    <SelectItem key={status.id} value={status.id}>
+                      {status.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Boolean Options */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Options</h3>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="vciSwitch" className="text-sm">
+                  VCI (Video Call Interview)
+                </Label>
+                <Switch
+                  id="vciSwitch"
+                  checked={employeeEventForm.vci}
+                  onCheckedChange={(checked) => updateEmployeeEventForm('vci', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="agreeExceptionSwitch" className="text-sm">
+                  Agree on Exception
+                </Label>
+                <Switch
+                  id="agreeExceptionSwitch"
+                  checked={employeeEventForm.agree_on_exception}
+                  onCheckedChange={(checked) => updateEmployeeEventForm('agree_on_exception', checked)}
+                />
+              </div>
+            </div>
+
+            {/* Exception Notes */}
+            <div>
+              <Label htmlFor="exceptionNotes" className="text-sm font-medium">
+                Exception Notes
+              </Label>
+              <Textarea
+                id="exceptionNotes"
+                value={employeeEventForm.exception_notes || ''}
+                onChange={(e) => updateEmployeeEventForm('exception_notes', e.target.value || null)}
+                placeholder="Enter any exception notes..."
+                className="mt-1 min-h-[80px]"
+              />
+            </div>
+          </div>
+          
+          <DrawerFooter>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                onClick={handleDrawerClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateEvent}
+                disabled={!eventTitle.trim()}
+              >
+                Create Event
+              </Button>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Event Editing Drawer */}
+      <Drawer open={isEditDrawerOpen} onOpenChange={setIsEditDrawerOpen}>
+        <DrawerContent title="Edit Employee Event">
+          <div className="max-h-[70vh] overflow-y-auto px-6 py-4 space-y-6">
+            {/* Event Title */}
+            <div>
+              <Label htmlFor="editEventTitle" className="text-sm font-medium">
+                Event Title
+              </Label>
+              <Input
+                id="editEventTitle"
+                type="text"
+                value={editEventTitle}
+                onChange={(e) => setEditEventTitle(e.target.value)}
+                placeholder="Enter event title..."
+                className="mt-1"
+                autoFocus
+              />
+            </div>
+
+            {/* Employee Info Display */}
+            <div>
+              <Label className="text-sm font-medium">Employee Information</Label>
+              <div className="mt-1 p-3 bg-muted rounded-md">
+                <p className="text-sm">
+                  <strong>Employee:</strong> {getFilteredEmployees().find(emp => emp.id === editingEvent?.resource)?.name || editingEvent?.resource}
+                </p>
+                <p className="text-sm">
+                  <strong>Scheduled Start:</strong> {editingEvent?.start?.toString()}
+                </p>
+                <p className="text-sm">
+                  <strong>Scheduled End:</strong> {editingEvent?.end?.toString()}
+                </p>
+              </div>
+            </div>
+
+            {/* Actual Times */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">Actual Times</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="editActualStartTime" className="text-sm">
+                    Actual Start Time
+                  </Label>
+                  <Input
+                    id="editActualStartTime"
+                    type="time"
+                    value={editEmployeeEventForm.actual_start_time || ''}
+                    onChange={(e) => updateEditEmployeeEventForm('actual_start_time', e.target.value || null)}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="editActualEndTime" className="text-sm">
+                    Actual End Time
+                  </Label>
+                  <Input
+                    id="editActualEndTime"
+                    type="time"
+                    value={editEmployeeEventForm.actual_end_time || ''}
+                    onChange={(e) => updateEditEmployeeEventForm('actual_end_time', e.target.value || null)}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Status Selection */}
+            <div>
+              <Label htmlFor="editStatusSelect" className="text-sm font-medium">
+                Status
+              </Label>
+              <Select
+                value={editEmployeeEventForm.status_id.toString()}
+                onValueChange={(value) => updateEditEmployeeEventForm('status_id', parseInt(value))}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusesData.map(status => (
+                    <SelectItem key={status.id} value={status.id}>
+                      {status.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Boolean Options */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-semibold text-foreground">Options</h3>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="editVciSwitch" className="text-sm">
+                  VCI (Video Call Interview)
+                </Label>
+                <Switch
+                  id="editVciSwitch"
+                  checked={editEmployeeEventForm.vci}
+                  onCheckedChange={(checked) => updateEditEmployeeEventForm('vci', checked)}
+                />
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <Label htmlFor="editAgreeExceptionSwitch" className="text-sm">
+                  Agree on Exception
+                </Label>
+                <Switch
+                  id="editAgreeExceptionSwitch"
+                  checked={editEmployeeEventForm.agree_on_exception}
+                  onCheckedChange={(checked) => updateEditEmployeeEventForm('agree_on_exception', checked)}
+                />
+              </div>
+            </div>
+
+            {/* Exception Notes */}
+            <div>
+              <Label htmlFor="editExceptionNotes" className="text-sm font-medium">
+                Exception Notes
+              </Label>
+              <Textarea
+                id="editExceptionNotes"
+                value={editEmployeeEventForm.exception_notes || ''}
+                onChange={(e) => updateEditEmployeeEventForm('exception_notes', e.target.value || null)}
+                placeholder="Enter any exception notes..."
+                className="mt-1 min-h-[80px]"
+              />
+            </div>
+          </div>
+          
+          <DrawerFooter>
+            <div className="flex gap-2 justify-between">
+              <Button
+                variant="destructive"
+                onClick={handleDeleteEvent}
+              >
+                Delete Event
+              </Button>
+              <div className="flex gap-2">
+                <Button
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleEditEvent}
+                  disabled={!editEventTitle.trim()}
+                >
+                  Update Event
+                </Button>
+              </div>
+            </div>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
     </div>
   );
 };
 
 export default ReactScheduler;
+      

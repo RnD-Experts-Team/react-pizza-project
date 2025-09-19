@@ -6,7 +6,6 @@ import { CustomerServiceOverview } from '@/components/CustomerServiceOverview';
 import { InfoCards } from '../components/InfoCards';
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
 import { DSQRDashboard } from '../components/DSQRDashboard';
-import { DrawerExample } from '../components/DrawerExample';
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,8 +16,6 @@ const Dashboard: React.FC = () => {
       navigate('/login');
     }
   }, [isAuthenticated, isLoading, navigate]);
-
-
 
   if (isLoading) {
     return (
@@ -37,7 +34,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-6 p-2 md:p-4 max-w-7xl">
-      <DrawerExample></DrawerExample>
       <InfoCards></InfoCards>
       <InfoSection></InfoSection>
       <CustomerServiceOverview></CustomerServiceOverview>
