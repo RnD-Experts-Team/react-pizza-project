@@ -24,7 +24,8 @@ import {
   preferencesRoutes,
   employeesRoutes,
   employmentInformationRoutes,
-  schedulePreferencesRoutes
+  schedulePreferencesRoutes,
+  dailySchedulesRoutes,
 } from '@/routes';
 
 
@@ -77,6 +78,9 @@ function App() {
 
               {/* Schedule Preferences Management Routes */}
               {schedulePreferencesRoutes}
+
+              {/* Daily Schedules Management Routes */}
+              {dailySchedulesRoutes}
 
               {/* Default and catch-all routes */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />

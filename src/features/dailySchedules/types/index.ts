@@ -166,9 +166,11 @@ export const EmployeeDataSchema = z.object({
 });
 
 // Extended schema for weekly requests that includes employee data
-export const DailyScheduleCreateItemWithEmployeeSchema = DailyScheduleCreateItemSchema.extend({
-  employee: EmployeeDataSchema.optional(),
-});
+export const DailyScheduleCreateItemWithEmployeeSchema = DailyScheduleCreateItemSchema.merge(
+  z.object({
+    employee: EmployeeDataSchema.optional(),
+  })
+);
 
 // Legacy single create schema for POST /api/daily-schedules (single shape)
 export const SingleCreateBodySchema = z.object({
@@ -305,11 +307,13 @@ export const WeeklyScheduleFormSchema = z.object({
     z.object({
       date_of_day: DateOnlySchema,
       schedules: z.array(
-        DailyScheduleCreateItemSchema.extend({
-          // Additional client-side validation
-          employee_id: z.number(), // For form selection
-          employee_skills: z.array(z.number()).optional(), // For skill coverage validation
-        })
+        DailyScheduleCreateItemSchema.merge(
+          z.object({
+            // Additional client-side validation
+            employee_id: z.number(), // For form selection
+            employee_skills: z.array(z.number()).optional(), // For skill coverage validation
+          })
+        )
       ).superRefine((schedules, ctx) => {
         // Client-side validation: no overlapping shifts per employee
         const employeeSchedules = new Map<number, Array<{ start: string; end: string }>>();
