@@ -1,0 +1,38 @@
+/* CSS styles for gradient event rendering in DayPilot Scheduler */
+
+.phased-gradient {
+  background: var(--gradient-background, linear-gradient(to right, #ccc 0%, #ccc 100%)) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+.phased-gradient .scheduler_default_event_inner {
+  background: transparent !important;
+}
+
+.phased-gradient .scheduler_default_event_bar {
+  background: transparent !important;
+}
+
+/* Ensure text remains visible on gradient backgrounds */
+.phased-gradient .scheduler_default_event_text {
+  color: #333 !important;
+  font-weight: 500;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
+  z-index: 10;
+  position: relative;
+}
+
+/* Handle hover states */
+.phased-gradient:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+/* Selected state */
+.phased-gradient.scheduler_default_event_selected {
+  border: 2px solid #007acc !important;
+  box-shadow: 0 0 5px rgba(0, 122, 204, 0.3);
+}

@@ -1,8 +1,8 @@
-import  ReactScheduler  from '@/components/Schedul'
+import SchedulerOrchestrator from '@/features/dailySchedules/components/SchedulerOrchestrator';
 
 const DailySchedulesPage: React.FC = () => {
   return (
-    <ReactScheduler />
+    <SchedulerOrchestrator />
   );
 };
 
