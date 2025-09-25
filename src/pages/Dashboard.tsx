@@ -6,7 +6,7 @@ import { CustomerServiceOverview } from '@/components/CustomerServiceOverview';
 import { InfoCards } from '../components/InfoCards';
 import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
 import { DSQRDashboard } from '../components/DSQRDashboard';
-import { StoreItemsSelector } from '../features/storeItems/components/StoreItemsSelector';
+import { StoreItemsFilter } from '../features/storeItems/components/StoreItemsFilter';
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -35,7 +35,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-6 p-2 md:p-4 max-w-7xl">
-      <StoreItemsSelector className="mb-6" />
+      <StoreItemsFilter className="mb-6" />
       <InfoCards></InfoCards>
       <InfoSection></InfoSection>
       <CustomerServiceOverview></CustomerServiceOverview>
