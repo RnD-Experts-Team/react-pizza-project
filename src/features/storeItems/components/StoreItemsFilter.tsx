@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Calendar, Filter } from 'lucide-react';
+import { Calendar, Filter, ChevronDown, ChevronUp } from 'lucide-react';
 import { useCurrentStore } from '@/components/layouts/mainLayout/CurrentStoreContext';
 import { usePizzaStoreItems } from '../hooks/useStoreItems';
 
@@ -15,9 +15,21 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   onFilterChange 
 }) => {
   const { currentStore } = useCurrentStore();
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayDate());
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Internal state for pending filters (before apply is clicked)
+  const [pendingDate, setPendingDate] = useState<string>(getTodayDate());
+  const [pendingItems, setPendingItems] = useState<Set<string>>(new Set());
+  const [pendingSearchTerm, setPendingSearchTerm] = useState('');
 
   const {
     items,
@@ -32,65 +44,119 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   useEffect(() => {
     if (currentStore?.id) {
       fetchItems(currentStore.id);
+      
+      // Log store change with current filter state
+      console.log('Store Changed - Filter State:', {
+        newStore: {
+          id: currentStore.id,
+          name: currentStore.name
+        },
+        currentFilters: {
+          selectedDate: selectedDate,
+          selectedItems: Array.from(selectedItems),
+          searchTerm: searchTerm
+        },
+        pendingFilters: {
+          pendingDate: pendingDate,
+          pendingItems: Array.from(pendingItems),
+          pendingSearchTerm: pendingSearchTerm
+        }
+      });
     }
-  }, [currentStore?.id, fetchItems]);
+  }, [currentStore?.id, fetchItems, selectedDate, selectedItems, searchTerm, pendingDate, pendingItems, pendingSearchTerm]);
 
-  // Filter items based on search term
+  // Set first item as selected by default when items are loaded
+  useEffect(() => {
+    if (items.length > 0 && pendingItems.size === 0) {
+      const firstItemId = items[0].item_id;
+      setPendingItems(new Set([firstItemId]));
+    }
+  }, [items, pendingItems.size]);
+
+  // Auto-apply filters when defaults are set (first load)
+  useEffect(() => {
+    if (items.length > 0 && pendingItems.size > 0 && selectedItems.size === 0) {
+      // Auto-apply the default filters
+      setSelectedDate(pendingDate);
+      setSelectedItems(pendingItems);
+      setSearchTerm(pendingSearchTerm);
+      
+      // Log current filters
+      const selectedItemsArray = Array.from(pendingItems);
+      const selectedItemsData = items.filter(item => selectedItemsArray.includes(item.item_id));
+      
+      console.log('Auto-applied Filter State:', {
+        selectedDate: pendingDate,
+        selectedItems: selectedItemsData,
+        selectedItemIds: selectedItemsArray
+      });
+
+      // Call optional callback if provided
+      if (onFilterChange) {
+        onFilterChange({
+          date: pendingDate,
+          selectedItems: selectedItemsArray
+        });
+      }
+    }
+  }, [items, pendingItems, pendingDate, pendingSearchTerm, selectedItems.size, onFilterChange]);
+
+  // Filter items based on search term (use pending search term for display)
   const filteredItems = React.useMemo(() => {
-    if (!searchTerm) return items;
-    return filterItems({ searchTerm });
-  }, [items, searchTerm, filterItems]);
+    if (!pendingSearchTerm) return items;
+    return filterItems({ searchTerm: pendingSearchTerm });
+  }, [items, pendingSearchTerm, filterItems]);
 
-  // Handle date change
+  // Handle date change (update pending state)
   const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newDate = event.target.value;
-    setSelectedDate(newDate);
-    logCurrentFilters(newDate, selectedItems);
+    setPendingDate(newDate);
   };
 
-  // Handle item selection
+  // Handle item selection (update pending state)
   const handleItemToggle = useCallback((itemId: string) => {
-    setSelectedItems(prev => {
+    setPendingItems(prev => {
       const newSelection = new Set(prev);
       if (newSelection.has(itemId)) {
         newSelection.delete(itemId);
       } else {
         newSelection.add(itemId);
       }
-      
-      logCurrentFilters(selectedDate, newSelection);
       return newSelection;
     });
-  }, [selectedDate]);
+  }, []);
 
-  // Handle select all
+  // Handle select all (update pending state)
   const handleSelectAll = useCallback(() => {
     let newSelection: Set<string>;
-    if (selectedItems.size === filteredItems.length) {
+    if (pendingItems.size === filteredItems.length) {
       // Deselect all
       newSelection = new Set();
     } else {
       // Select all filtered items
       newSelection = new Set(filteredItems.map(item => item.item_id));
     }
-    setSelectedItems(newSelection);
-    logCurrentFilters(selectedDate, newSelection);
-  }, [selectedItems.size, filteredItems, selectedDate]);
+    setPendingItems(newSelection);
+  }, [pendingItems.size, filteredItems]);
 
-  // Clear selection
+  // Clear selection (update pending state)
   const handleClearSelection = useCallback(() => {
     const newSelection = new Set<string>();
-    setSelectedItems(newSelection);
-    logCurrentFilters(selectedDate, newSelection);
-  }, [selectedDate]);
+    setPendingItems(newSelection);
+  }, []);
 
-  // Log current filters
-  const logCurrentFilters = (date: string, itemsSet: Set<string>) => {
-    const selectedItemsArray = Array.from(itemsSet);
+  // Apply filters - this is when we actually update the applied state and trigger logging
+  const handleApplyFilters = useCallback(() => {
+    setSelectedDate(pendingDate);
+    setSelectedItems(pendingItems);
+    setSearchTerm(pendingSearchTerm);
+    
+    // Log current filters
+    const selectedItemsArray = Array.from(pendingItems);
     const selectedItemsData = items.filter(item => selectedItemsArray.includes(item.item_id));
     
     console.log('Filter State:', {
-      selectedDate: date,
+      selectedDate: pendingDate,
       selectedItems: selectedItemsData,
       selectedItemIds: selectedItemsArray
     });
@@ -98,10 +164,25 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
     // Call optional callback if provided
     if (onFilterChange) {
       onFilterChange({
-        date,
+        date: pendingDate,
         selectedItems: selectedItemsArray
       });
     }
+  }, [pendingDate, pendingItems, pendingSearchTerm, items, onFilterChange]);
+
+  // Reset filters
+  const handleResetFilters = useCallback(() => {
+    setPendingDate('');
+    setPendingItems(new Set());
+    setPendingSearchTerm('');
+    setSelectedDate('');
+    setSelectedItems(new Set());
+    setSearchTerm('');
+  }, []);
+
+  // Toggle collapse state
+  const toggleCollapse = () => {
+    setIsCollapsed(!isCollapsed);
   };
 
   if (!currentStore) {
@@ -134,17 +215,36 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
 
   return (
     <Card className={`bg-card border-border shadow-sm ${className}`}>
-      <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
-        <CardTitle className="flex items-center gap-2 text-base sm:text-lg text-card-foreground">
-          <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-          Store Items Filter - {currentStore.name}
+      <CardHeader 
+        className="px-3 py-3 sm:px-4 md:px-6 sm:py-4 md:py-6 cursor-pointer hover:bg-accent/50 transition-colors"
+        onClick={toggleCollapse}
+      >
+        <CardTitle className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between text-sm sm:text-base md:text-lg text-card-foreground">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Filter className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
+            <span className="truncate">Store Items Filter - {currentStore.name}</span>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {(selectedDate || selectedItems.size > 0) && (
+              <span className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded-full whitespace-nowrap">
+                Active
+              </span>
+            )}
+            {isCollapsed ? (
+              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+            ) : (
+              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6 space-y-6">
+      
+      {!isCollapsed && (
+        <CardContent className="px-3 py-3 sm:px-4 md:px-6 sm:pb-4 md:pb-6 space-y-4 sm:space-y-6">
         {/* Date Selection Section */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
+            <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
             <label 
               htmlFor="date-input" 
               className="text-sm font-medium text-foreground"
@@ -155,14 +255,14 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
           <Input
             id="date-input"
             type="date"
-            value={selectedDate}
+            value={pendingDate}
             onChange={handleDateChange}
-            className="w-full bg-background border-border text-foreground focus:ring-ring focus:border-ring"
+            className="w-full bg-background border-border text-foreground focus:ring-ring focus:border-ring text-sm sm:text-base"
             placeholder="Select a date"
           />
-          {selectedDate && (
-            <p className="text-sm text-muted-foreground">
-              Selected: {new Date(selectedDate).toLocaleDateString('en-US', {
+          {pendingDate && (
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              Selected: {new Date(pendingDate).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric'
@@ -172,75 +272,77 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
         </div>
 
         {/* Items Selection Section */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-3 sm:space-y-4">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
             <h4 className="text-sm font-medium text-foreground">Store Items</h4>
-            <span className="text-sm text-muted-foreground">
-              {selectedItems.size} of {filteredItems.length} selected
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              {pendingItems.size} of {filteredItems.length} selected
             </span>
           </div>
 
           {/* Search and Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
             <div className="flex-1">
               <Input
                 type="text"
                 placeholder="Search items..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                value={pendingSearchTerm}
+                onChange={(e) => setPendingSearchTerm(e.target.value)}
+                className="w-full text-sm sm:text-base"
               />
             </div>
-            <button
-              onClick={handleSelectAll}
-              className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring"
-            >
-              {selectedItems.size === filteredItems.length ? 'Deselect All' : 'Select All'}
-            </button>
-            {selectedItems.size > 0 && (
+            <div className="flex gap-2 sm:gap-3">
               <button
-                onClick={handleClearSelection}
-                className="px-4 py-2 text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring"
+                onClick={handleSelectAll}
+                className="flex-1 sm:flex-none px-3 py-2 text-xs sm:text-sm bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring whitespace-nowrap"
               >
-                Clear
+                {pendingItems.size === filteredItems.length ? 'Deselect All' : 'Select All'}
               </button>
-            )}
+              {pendingItems.size > 0 && (
+                <button
+                  onClick={handleClearSelection}
+                  className="flex-1 sm:flex-none px-3 py-2 text-xs sm:text-sm bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Items List */}
           <div className="border border-border rounded-lg">
             {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-2 text-muted-foreground">Loading items...</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center py-6 sm:py-8 gap-2">
+                <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-primary"></div>
+                <span className="text-xs sm:text-sm text-muted-foreground text-center">Loading items...</span>
               </div>
             ) : filteredItems.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-6 sm:py-8 text-xs sm:text-sm text-muted-foreground px-4">
                 {searchTerm ? 'No items match your search.' : 'No items available for this store.'}
               </div>
             ) : (
-              <div className="space-y-1 max-h-64 overflow-y-auto p-2">
+              <div className="space-y-1 max-h-48 sm:max-h-64 overflow-y-auto p-2">
                 {filteredItems.map((item) => (
                   <div
                     key={item.item_id}
-                    className="flex items-center p-3 border border-border rounded-lg hover:bg-accent transition-colors"
+                    className="flex items-center p-2 sm:p-3 border border-border rounded-lg hover:bg-accent transition-colors"
                   >
                     <input
                       type="checkbox"
                       id={`item-${item.item_id}`}
-                      checked={selectedItems.has(item.item_id)}
+                      checked={pendingItems.has(item.item_id)}
                       onChange={() => handleItemToggle(item.item_id)}
-                      className="h-4 w-4 text-primary focus:ring-ring border-border rounded"
+                      className="h-4 w-4 text-primary focus:ring-ring border-border rounded flex-shrink-0"
                     />
                     <label
                       htmlFor={`item-${item.item_id}`}
-                      className="ml-3 flex-1 cursor-pointer"
+                      className="ml-2 sm:ml-3 flex-1 cursor-pointer min-w-0"
                     >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <span className="text-xs sm:text-sm font-medium text-foreground truncate">
                           {item.menu_item_name}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground flex-shrink-0">
                           ID: {item.item_id}
                         </span>
                       </div>
@@ -250,15 +352,31 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
               </div>
             )}
           </div>
+
+          {/* Apply and Reset Buttons */}
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 pt-3 sm:pt-4 border-t border-border">
+            <button
+              onClick={handleApplyFilters}
+              className="w-full sm:flex-1 px-4 py-2 sm:py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring font-medium text-sm sm:text-base"
+            >
+              Apply Filters
+            </button>
+            <button
+              onClick={handleResetFilters}
+              className="w-full sm:w-auto px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-ring text-sm sm:text-base"
+            >
+              Reset
+            </button>
+          </div>
         </div>
 
         {/* Summary Section */}
         {(selectedDate || selectedItems.size > 0) && (
-          <div className="p-4 border border-border rounded-lg bg-accent/50">
-            <h5 className="text-sm font-medium text-foreground mb-2">Current Filters:</h5>
-            <div className="space-y-1 text-sm text-muted-foreground">
+          <div className="p-3 sm:p-4 border border-border rounded-lg bg-accent/50">
+            <h5 className="text-sm font-medium text-foreground mb-2">Applied Filters:</h5>
+            <div className="space-y-1 text-xs sm:text-sm text-muted-foreground">
               {selectedDate && (
-                <p>Date: {new Date(selectedDate).toLocaleDateString('en-US', {
+                <p className="break-words">Date: {new Date(selectedDate).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric'
@@ -270,7 +388,8 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
             </div>
           </div>
         )}
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 };
