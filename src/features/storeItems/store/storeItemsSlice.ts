@@ -184,40 +184,40 @@ export const {
 } = pizzaStoreItemsSlice.actions;
 
 // Export selectors
-export const selectPizzaStoreItems = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  state.pizzaStoreItems;
+export const selectPizzaStoreItems = (state: { storeItems: PizzaStoreItemsState }) =>
+  state.storeItems;
 
 export const selectItemsByStore = (storeId: string) =>
-  (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-    state.pizzaStoreItems.itemsByStore[storeId] || [];
+  (state: { storeItems: PizzaStoreItemsState }) =>
+    state.storeItems.itemsByStore[storeId] || [];
 
-export const selectCurrentItems = (state: { pizzaStoreItems: PizzaStoreItemsState }) => {
-  const { currentStoreId, itemsByStore } = state.pizzaStoreItems;
+export const selectCurrentItems = (state: { storeItems: PizzaStoreItemsState }) => {
+  const { currentStoreId, itemsByStore } = state.storeItems;
   return currentStoreId ? itemsByStore[currentStoreId] || [] : [];
 };
 
-export const selectLoadingState = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  state.pizzaStoreItems.loadingState;
+export const selectLoadingState = (state: { storeItems: PizzaStoreItemsState }) =>
+  state.storeItems.loadingState;
 
-export const selectIsLoading = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  state.pizzaStoreItems.loadingState === LOADING_STATES.PENDING;
+export const selectIsLoading = (state: { storeItems: PizzaStoreItemsState }) =>
+  state.storeItems.loadingState === LOADING_STATES.PENDING;
 
-export const selectError = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  state.pizzaStoreItems.error;
+export const selectError = (state: { storeItems: PizzaStoreItemsState }) =>
+  state.storeItems.error;
 
-export const selectCurrentStoreId = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  state.pizzaStoreItems.currentStoreId;
+export const selectCurrentStoreId = (state: { storeItems: PizzaStoreItemsState }) =>
+  state.storeItems.currentStoreId;
 
 export const selectStoreMetadata = (storeId: string) =>
-  (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-    state.pizzaStoreItems.storeMetadata[storeId];
+  (state: { storeItems: PizzaStoreItemsState }) =>
+    state.storeItems.storeMetadata[storeId];
 
 export const selectHasDataForStore = (storeId: string) =>
-  (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-    Boolean(state.pizzaStoreItems.itemsByStore[storeId]?.length);
+  (state: { storeItems: PizzaStoreItemsState }) =>
+    Boolean(state.storeItems.itemsByStore[storeId]?.length);
 
-export const selectAllStoreIds = (state: { pizzaStoreItems: PizzaStoreItemsState }) =>
-  Object.keys(state.pizzaStoreItems.itemsByStore);
+export const selectAllStoreIds = (state: { storeItems: PizzaStoreItemsState }) =>
+  Object.keys(state.storeItems.itemsByStore);
 
 // Export reducer as default
 export default pizzaStoreItemsSlice.reducer;
