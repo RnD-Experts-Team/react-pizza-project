@@ -17,6 +17,7 @@ import schedulePreferencesReducer from '../features/schedulePreferences/store/sc
 import employmentInformationReducer from '../features/employmentInformation/store/employmentInformationSlice';
 import dailySchedulesReducer from '../features/dailySchedules/store/slices/dailySchedulesSlice';
 import weeklySchedulesReducer from '../features/dailySchedules/store/slices/weeklySchedulesSlice';
+import storeItemsReducer from '../features/storeItems/store/storeItemsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -38,6 +39,7 @@ export const store = configureStore({
     employmentInformation: employmentInformationReducer,
     dailySchedules: dailySchedulesReducer,
     weeklySchedules: weeklySchedulesReducer,
+    storeItems: storeItemsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
