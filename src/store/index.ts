@@ -1,14 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../features/auth/store/authSlice';
 import permissionsReducer from '../features/permissions/store/permissionsSlice';
-import rolesReducer from '../features/roles/store/rolesSlice'; // Add this import
-import usersReducer from '../features/users/store/usersSlice'; // Add this import
-import authRulesReducer from '../features/authorizationRules/store/authRulesSlice'; // Add this import
-import serviceClientsReducer from '../features/serviceClients/store/serviceClientsSlice'; // Add this import
-import storesReducer from '../features/stores/store/storesSlice'; // Add this import
-import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignment/store/userRolesStoresAssignmentSlice'; // Add this import
-import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchySlice'; // Add this import
-import positionsReducer from '../features/positions/store/positionsSlice'; // Add this import
+import rolesReducer from '../features/roles/store/rolesSlice';
+import usersReducer from '../features/users/store/usersSlice';
+import authRulesReducer from '../features/authorizationRules/store/authRulesSlice';
+import serviceClientsReducer from '../features/serviceClients/store/serviceClientsSlice';
+import storesReducer from '../features/stores/store/storesSlice';
+import userRolesStoresAssignmentReducer from '../features/userRolesStoresAssignment/store/userRolesStoresAssignmentSlice';
+import roleHierarchyReducer from '../features/storeHierarchy/store/roleHierarchySlice';
+import positionsReducer from '../features/positions/store/positionsSlice';
 import statusesReducer from '../features/statuses/store/statusesSlice';
 import skillsReducer from '../features/skills/store/skillSlice';
 import preferencesReducer from '../features/preference/store/preferencesSlice';
@@ -19,18 +19,24 @@ import dailySchedulesReducer from '../features/dailySchedules/store/slices/daily
 import weeklySchedulesReducer from '../features/dailySchedules/store/slices/weeklySchedulesSlice';
 import storeItemsReducer from '../features/storeItems/store/storeItemsSlice';
 
+// Import the new DSPR slices
+import dsprApiReducer from '../features/DSPR/store/coordinatorSlice';
+import hourlySalesReducer from '../features/DSPR/store/hourlySalesSlice';
+import dsqrReducer from '../features/DSPR/store/dSQRSlice';
+import dsprMetricsReducer from '../features/DSPR/store/dSPRSlice';
+
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     permissions: permissionsReducer,
-    roles: rolesReducer, // Add this line
-    users: usersReducer, // Add this line
-    authRules: authRulesReducer, // Add this line
-    serviceClients: serviceClientsReducer, // Add this line
-    positions: positionsReducer, // Add this line
-    stores: storesReducer, // Add this line
-    userRolesStoresAssignment: userRolesStoresAssignmentReducer, // Add this line
-    roleHierarchy: roleHierarchyReducer, // Add this line
+    roles: rolesReducer,
+    users: usersReducer,
+    authRules: authRulesReducer,
+    serviceClients: serviceClientsReducer,
+    positions: positionsReducer,
+    stores: storesReducer,
+    userRolesStoresAssignment: userRolesStoresAssignmentReducer,
+    roleHierarchy: roleHierarchyReducer,
     statuses: statusesReducer,
     skills: skillsReducer,
     preferences: preferencesReducer,
@@ -40,6 +46,12 @@ export const store = configureStore({
     dailySchedules: dailySchedulesReducer,
     weeklySchedules: weeklySchedulesReducer,
     storeItems: storeItemsReducer,
+    
+    // Add the new DSPR-related slices
+    dsprApi: dsprApiReducer,           // Main API coordinator slice
+    hourlySales: hourlySalesReducer,   // Hourly sales domain slice
+    dsqr: dsqrReducer,                 // DSQR domain slice
+    dsprMetrics: dsprMetricsReducer,   // DSPR metrics domain slice
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
