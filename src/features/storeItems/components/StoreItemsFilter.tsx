@@ -19,7 +19,7 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
 
   // Initialize DSPR API hook
-  const { fetchData: fetchDsprData, isLoading: isDsprLoading, error: dsprError } = useDsprApi({
+  const { fetchData: fetchDsprData, } = useDsprApi({
     enableLogging: true,
     autoClearErrors: true
   });
@@ -43,7 +43,7 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
 
   const [selectedDate, setSelectedDate] = useState<string>(getTwoDaysAgoDate());
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState('');
+  const [, setSearchTerm] = useState('');
 
   // Internal state for pending filters (before apply is clicked)
   const [pendingDate, setPendingDate] = useState<string>(getTwoDaysAgoDate());

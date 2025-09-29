@@ -4,8 +4,8 @@ import { useAuth } from '../features/auth/hooks/useAuth';
 import { InfoSection } from '@/components/InfoSection';
 import { CustomerServiceOverview } from '@/components/CustomerServiceOverview';
 import { InfoCards } from '../components/InfoCards';
-import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
-import { DSQRDashboard } from '../components/DSQRDashboard';
+// import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
+// import { DSQRDashboard } from '../components/DSQRDashboard';
 import { StoreItemsFilter } from '../features/storeItems/components/StoreItemsFilter';
 
 const Dashboard: React.FC = () => {
@@ -39,8 +39,8 @@ const Dashboard: React.FC = () => {
       <InfoCards></InfoCards>
       <InfoSection></InfoSection>
       <CustomerServiceOverview></CustomerServiceOverview>
-      <ChannelSalesDashboard></ChannelSalesDashboard>
-      <DSQRDashboard></DSQRDashboard>
+      {/* <ChannelSalesDashboard></ChannelSalesDashboard> */}
+      {/* <DSQRDashboard></DSQRDashboard> */}
     </div>
   );
 };

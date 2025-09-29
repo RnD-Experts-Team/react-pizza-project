@@ -34,25 +34,18 @@ import {
   selectAttentionRequired
 } from '../store/dSQRSlice';
 import {
-  DSQRFilter,
-  DSQRAnalysisConfig,
-  PerformanceAlert,
-  PlatformMetrics,
+  type DSQRFilter,
+  type DSQRAnalysisConfig,
+  type PerformanceAlert,
+  type PlatformMetrics,
   DeliveryPlatform,
-  TrackingStatus,
   AlertSeverity,
-  AlertPriority,
   PerformanceLevel,
   PerformanceGrade,
-  OptimizationScore,
-  MetricUnit,
-  defaultDSQRConfig,
   isValidDeliveryPlatform,
-  isValidTrackingStatus,
   isOnTrack,
-  isValidRating
 } from '../types/DSQR';
-import { useDsprApi } from '../hooks/useCoordinator';
+import { useDsprApi } from './useCoordinator';
 
 // =============================================================================
 // HOOK INTERFACE
@@ -365,7 +358,6 @@ export interface DSQRExportResult {
  */
 export const useDSQR = (options: UseDSQROptions = {}): UseDSQRReturn => {
   const {
-    autoProcessAlerts = true,
     defaultFilter,
     enableLogging = process.env.NODE_ENV === 'development',
     configOverrides,
@@ -375,7 +367,7 @@ export const useDSQR = (options: UseDSQROptions = {}): UseDSQRReturn => {
   const dispatch = useDispatch<AppDispatch>();
 
   // Get DSPR API state for coordination
-  const { data: dsprData, isLoading: dsprLoading } = useDsprApi();
+  const {  isLoading: dsprLoading } = useDsprApi();
 
   // Selectors
   const dsqrState = useSelector((state: RootState) => selectDSQRState(state));
@@ -739,7 +731,7 @@ export const useDSQR = (options: UseDSQROptions = {}): UseDSQRReturn => {
     };
 
     const gaps = Object.entries(industry).map(([metric, benchmark]) => {
-      const currentValue = current[metric] || 0;
+      const currentValue = (current as Record<string, number>)[metric] || 0;
       const gap = currentValue - benchmark;
       
       return {
