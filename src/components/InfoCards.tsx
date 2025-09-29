@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGrid } from '@/components/performance/PerformanceGrid';
+import { PerformanceGridFive } from '@/components/performance/PerformanceGridFive';
 import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { CardDataProps } from '@/types/infoCards';
@@ -92,6 +92,14 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
         weekly: formatCurrency(weeklyRawData?.Refunded_order_Qty || 0),
         icon: 'trending',
         id: 'refunded-1',
+      },
+      {
+        title: 'Average Ticket',
+        bgColor: 'bg-green-200',
+        daily: formatCurrency(dailyRawData.Avrage_ticket || 0),
+        weekly: formatCurrency(weeklyRawData?.Avrage_ticket || 0),
+        icon: 'trending',
+        id: 'avrage-ticket-1',
       },
     ];
   }, [externalData, dailyRawData, weeklyRawData, hasValidData]);
@@ -185,7 +193,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
           <>
             {/* Top - Cards */}
             <div className="w-full">
-              <PerformanceGrid
+              <PerformanceGridFive
                 data={transformedData}
                 isLoading={isLoading}
               />

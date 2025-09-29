@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGrid } from '@/components/performance/PerformanceGrid';
+import { PerformanceGridFive } from '@/components/performance/PerformanceGridFive';
 import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { PerformanceItemProps } from '@/types/performance';
@@ -63,12 +63,14 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
     const dailyWasteGateway = dailyRawData?.waste_gateway ?? 0;
     const dailyOverShort = dailyRawData?.over_short ?? 0;
     const dailyModifiedOrders = dailyRawData?.Modified_Order_Qty ?? 0;
+    const dailyCashVsDeposite = dailyRawData?.Cash_Sales_Vs_Deposite_Difference ?? 0;
 
     // Extract weekly values with fallbacks
     const weeklyWasteAlta = weeklyRawData?.Waste_Alta ?? 0;
     const weeklyWasteGateway = weeklyRawData?.waste_gateway ?? 0;
     const weeklyOverShort = weeklyRawData?.over_short ?? 0;
     const weeklyModifiedOrders = weeklyRawData?.Modified_Order_Qty ?? 0;
+    const weeklyCashVsDeposite = weeklyRawData?.Cash_Sales_Vs_Deposite_Difference ?? 0;
 
     return [
       {
@@ -98,6 +100,13 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
         icon: 'Fa6SolidPencil',
         daily: formatQuantity(dailyModifiedOrders),
         weekly: formatQuantity(weeklyModifiedOrders),
+      },
+      {
+        title: 'Cash vs Deposite',
+        bgColor: 'bg-green-200',
+        icon: 'Fa6SolidPencil',
+        daily: formatCurrency(dailyCashVsDeposite),
+        weekly: formatCurrency(weeklyCashVsDeposite), 
       },
     ];
   }, [dailyRawData, weeklyRawData]);
@@ -169,7 +178,7 @@ export const InfoSection: React.FC<InfoSectionProps> = ({
       ) : !hasData || !data || data.length === 0 ? (
         <NoDataState />
       ) : (
-        <PerformanceGrid data={data} isLoading={isLoading} />
+        <PerformanceGridFive data={data} isLoading={isLoading} />
       )}
     </section>
   );
