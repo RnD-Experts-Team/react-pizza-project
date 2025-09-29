@@ -122,48 +122,57 @@ export class DsprApiService {
   }
 
   /**
-   * Fetch DSPR report data from API
-   * Main method for retrieving DSPR data with comprehensive error handling
+   * Fetch DSPR report data from the API
+   * Handles both requests with and without body payload
    * 
-   * @param params - Store and date parameters
-   * @param requestBody - Request body with items array
-   * @returns Promise resolving to DSPR API response
-   * @throws ApiError on request failures
+   * @param params - API request parameters (store, date, etc.)
+   * @param requestBody - Optional request body containing items array
+   * @returns Promise resolving to validated API response
+   * @throws ApiError on validation or request failures
    */
-  public async fetchDsprReport(
+  async fetchDsprReport(
     params: DsprApiParams,
-    requestBody: DsprApiRequestBody
+    requestBody?: DsprApiRequestBody
   ): Promise<DsprApiResponse> {
     try {
-      // Validate input parameters
+      // Validate request parameters and body (if provided)
       this.validateRequest(params, requestBody);
 
-      // Construct the API URL with parameters
+      // Build API URL with query parameters
       const url = this.buildApiUrl(params);
 
-      // Make the API request with retry logic
+      // Make request with retry logic
       const response = await this.makeRequestWithRetry(url, requestBody);
 
-      // Validate and return response data
+      // Validate and transform response
       return this.validateAndTransformResponse(response);
 
     } catch (error) {
-      console.error('[DSPR API] Error fetching DSPR report:', error);
-      throw this.transformError(error);
+      // Transform error to standardized format
+      const apiError = this.transformError(error);
+      
+      console.error('[DSPR API] Request failed:', {
+        params,
+        requestBody,
+        error: apiError
+      });
+
+      throw apiError;
     }
   }
 
   /**
    * Validate request parameters and body
    * Ensures data integrity before making API calls
+   * Handles both requests with and without body
    * 
    * @param params - Request parameters to validate
-   * @param requestBody - Request body to validate
+   * @param requestBody - Optional request body to validate
    * @throws ApiError on validation failures
    */
   private validateRequest(
     params: DsprApiParams,
-    requestBody: DsprApiRequestBody
+    requestBody?: DsprApiRequestBody
   ): void {
     // Validate store ID format
     if (!isValidStoreId(params.store)) {
@@ -179,17 +188,19 @@ export class DsprApiService {
       );
     }
 
-    // Validate items array
-    if (!Array.isArray(requestBody.items) || requestBody.items.length === 0) {
-      throw new Error('Items array must contain at least one item ID');
-    }
-
-    // Validate each item ID
-    requestBody.items.forEach((item, index) => {
-      if (item === null || item === undefined || item === '') {
-        throw new Error(`Invalid item ID at index ${index}: ${item}`);
+    // Validate items array only if request body is provided
+    if (requestBody) {
+      if (!Array.isArray(requestBody.items) || requestBody.items.length === 0) {
+        throw new Error('Items array must contain at least one item ID when body is provided');
       }
-    });
+
+      // Validate each item ID
+      requestBody.items.forEach((item, index) => {
+        if (item === null || item === undefined || item === '') {
+          throw new Error(`Invalid item ID at index ${index}: ${item}`);
+        }
+      });
+    }
   }
 
   /**
@@ -204,21 +215,24 @@ export class DsprApiService {
   /**
    * Make API request with retry logic
    * Implements exponential backoff for transient failures
+   * Handles both GET (no body) and POST (with body) requests
    * 
    * @param url - API endpoint URL
-   * @param requestBody - Request payload
+   * @param requestBody - Optional request payload
    * @returns Promise resolving to axios response
    */
   private async makeRequestWithRetry(
     url: string,
-    requestBody: DsprApiRequestBody
+    requestBody?: DsprApiRequestBody
   ): Promise<AxiosResponse<DsprApiResponse>> {
     let lastError: Error | null = null;
 
     for (let attempt = 1; attempt <= this.retryConfig.maxAttempts; attempt++) {
       try {
-        // Make the POST request
-        const response = await this.axiosInstance.post<DsprApiResponse>(url, requestBody);
+        // Make the request - currently uses POST with body or GET without body
+        const response = requestBody 
+          ? await this.axiosInstance.post<DsprApiResponse>(url, requestBody)
+          : await this.axiosInstance.post<DsprApiResponse>(url);
         
         // Request successful, return response
         return response;
@@ -513,6 +527,42 @@ export const createDsprApiService = (retryConfig?: Partial<RetryConfig>): DsprAp
 // =============================================================================
 
 /**
+ * Convenience function to fetch DSPR report
+ * Handles both requests with and without body payload
+ * 
+ * @param params - API request parameters
+ * @param requestBody - Optional request body
+ * @returns Promise resolving to DSPR API response
+ */
+export const fetchDsprReport = (
+  params: DsprApiParams,
+  requestBody?: DsprApiRequestBody
+): Promise<DsprApiResponse> => {
+  return dsprApiService.fetchDsprReport(params, requestBody);
+};
+
+/**
+ * Convenience function to fetch DSPR report with custom retry configuration
+ * Handles both requests with and without body payload
+ * 
+ * @param params - API request parameters
+ * @param requestBody - Optional request body
+ * @param retryConfig - Custom retry configuration
+ * @returns Promise resolving to DSPR API response
+ */
+export const fetchDsprReportWithRetry = (
+  params: DsprApiParams,
+  requestBody?: DsprApiRequestBody,
+  retryConfig?: Partial<RetryConfig>
+): Promise<DsprApiResponse> => {
+  const service = retryConfig 
+    ? createDsprApiService(retryConfig)
+    : dsprApiService;
+  
+  return service.fetchDsprReport(params, requestBody);
+};
+
+/**
  * Fetch DSPR report with default service instance
  * Convenience function for simple use cases
  * 
@@ -521,7 +571,7 @@ export const createDsprApiService = (retryConfig?: Partial<RetryConfig>): DsprAp
  * @param items - Array of item IDs
  * @returns Promise resolving to DSPR API response
  */
-export const fetchDsprReport = async (
+export const fetchDsprReportSimple = async (
   store: string,
   date: string,
   items: (string | number)[]
@@ -541,7 +591,7 @@ export const fetchDsprReport = async (
  * @param retryConfig - Custom retry configuration
  * @returns Promise resolving to DSPR API response
  */
-export const fetchDsprReportWithRetry = async (
+export const fetchDsprReportSimpleWithRetry = async (
   store: string,
   date: string,
   items: (string | number)[],

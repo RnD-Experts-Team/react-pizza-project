@@ -44,19 +44,19 @@ export interface DsprApiParams {
 
 /**
  * Request body for the DSPR API call
- * Must contain at least one item ID
+ * Optional - can be omitted for requests without body
  */
 export interface DsprApiRequestBody {
-  /** Array of item IDs - must contain at least one item */
-  items: ItemId[];
+  /** Array of item IDs - optional for requests without body */
+  items?: ItemId[];
 }
 
 /**
- * Complete request structure combining path params and body
+ * Complete request structure combining path params and optional body
  */
 export interface DsprApiRequest {
   params: DsprApiParams;
-  body: DsprApiRequestBody;
+  body?: DsprApiRequestBody;
 }
 
 // =============================================================================

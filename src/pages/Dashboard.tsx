@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../features/auth/hooks/useAuth';
 import { InfoSection } from '@/components/InfoSection';
@@ -11,12 +11,17 @@ import { StoreItemsFilter } from '../features/storeItems/components/StoreItemsFi
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+  const [storeItemsError, setStoreItemsError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated && !isLoading) {
       navigate('/login');
     }
   }, [isAuthenticated, isLoading, navigate]);
+
+  const handleStoreItemsError = useCallback((error: string | null) => {
+    setStoreItemsError(error);
+  }, []);
 
   if (isLoading) {
     return (
@@ -35,10 +40,26 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto space-y-4 md:space-y-6 p-2 md:p-4 max-w-7xl">
-      <StoreItemsFilter className="mb-6" />
-      <InfoCards></InfoCards>
-      <InfoSection></InfoSection>
-      <CustomerServiceOverview></CustomerServiceOverview>
+      <StoreItemsFilter className="mb-6" onError={handleStoreItemsError} />
+      {storeItemsError ? (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="text-red-600 font-semibold text-lg mb-2">
+            Store Items Filter Error
+          </div>
+          <div className="text-red-700 mb-4">
+            {storeItemsError}
+          </div>
+          <div className="text-red-600 text-sm">
+            Dashboard components are unavailable due to filter processing failure.
+          </div>
+        </div>
+      ) : (
+        <>
+          <InfoCards></InfoCards>
+          <InfoSection></InfoSection>
+          <CustomerServiceOverview></CustomerServiceOverview>
+        </>
+      )}
       {/* <ChannelSalesDashboard></ChannelSalesDashboard> */}
       {/* <DSQRDashboard></DSQRDashboard> */}
     </div>

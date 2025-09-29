@@ -132,7 +132,8 @@ export const fetchDsprData = createAsyncThunk<
       console.log('[DSPR API Slice] Starting API request', {
         store: request.params.store,
         date: request.params.date,
-        itemCount: request.body.items.length,
+        itemCount: request.body?.items?.length || 0,
+        hasBody: !!request.body,
         requestId: generateRequestId(request)
       });
 
@@ -180,7 +181,8 @@ export const refreshDsprData = createAsyncThunk<
     try {
       console.log('[DSPR API Slice] Refreshing data (cache bypass)', {
         store: request.params.store,
-        date: request.params.date
+        date: request.params.date,
+        hasBody: !!request.body
       });
 
       // Clear current cache before refreshing
@@ -509,9 +511,13 @@ function validateDsprRequest(request: DsprApiRequest): void {
     throw new Error('Store and date parameters are required');
   }
   
-  if (!Array.isArray(request.body.items) || request.body.items.length === 0) {
-    throw new Error('Items array must contain at least one item');
+  // Only validate items if body is provided
+  if (request.body) {
+    if (!Array.isArray(request.body.items) || request.body.items.length === 0) {
+      throw new Error('Items array must contain at least one item when body is provided');
+    }
   }
+  // Note: No validation error if body is not provided - this is now valid
 }
 
 /**
@@ -521,7 +527,7 @@ function validateDsprRequest(request: DsprApiRequest): void {
  */
 function generateRequestId(request: DsprApiRequest): string {
   const { store, date } = request.params;
-  const itemsHash = request.body.items.join('-');
+  const itemsHash = request.body?.items?.join('-') || 'no-items';
   const timestamp = Date.now();
   return `${store}_${date}_${itemsHash}_${timestamp}`;
 }
