@@ -1,100 +1,160 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { PerformanceGrid } from '@/components/performance/PerformanceGrid';
-import { useIsMobile } from '@/hooks/use-mobile';
 import type { PerformanceItemProps } from '@/types/performance';
+import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
+import { useIsMobile } from '@/hooks/use-mobile';
 
-import { Button } from '@/components/ui/button';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 interface CustomerServiceOverviewProps {
   title?: string;
   subtitle?: string;
   className?: string;
-  showRefresh?: boolean;
 }
 
 export const CustomerServiceOverview: React.FC<CustomerServiceOverviewProps> = ({
   title = 'Customer Services Overview',
   subtitle,
   className,
-  showRefresh = true,
 }) => {
   const isMobile = useIsMobile();
-  const [isLoading, setIsLoading] = React.useState(false);
 
-  const refreshData = () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
+  // Use DSPR hook to get dynamic data
+  const {
+    dailyRawData,
+    weeklyRawData,
+    isLoading,
+    error,
+  } = useDSPRMetrics();
+
+  // Helper function to format percentage values
+  const formatPercentage = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return '0%';
+    return `${(value * 100).toFixed(1)}%`;
   };
 
-  // First row of metrics
-  const firstRowData: PerformanceItemProps[] = [
-    {
-      title: 'Customer Count',
-      bgColor: 'bg-performance-bg-1',
-      icon: 'users',
-      daily: '199',
-      weekly: '658',
-    },
-    {
-      title: 'Customer Count %',
-      bgColor: 'bg-performance-bg-2',
-      icon: 'trending',
-      daily: '75%',
-      weekly: '85%',
-    },
-    {
-      title: 'Upselling %',
-      bgColor: 'bg-performance-bg-3',
-      icon: 'arrowUp',
-      daily: '0%',
-      weekly: '100%',
-    },
-    {
-      title: 'Digital Sales %',
-      bgColor: 'bg-performance-bg-4',
-      icon: 'computer',
-      daily: '33%',
-      weekly: '35.33%',
-    },
-  ];
+  // Helper function to format number values
+  const formatNumber = (value: number | null | undefined): string => {
+    if (value === null || value === undefined) return '0';
+    return value.toString();
+  };
 
-  // Second row of metrics
-  const secondRowData: PerformanceItemProps[] = [
-    {
-      title: 'Customer Service %',
-      bgColor: 'bg-performance-bg-5',
-      icon: 'microphone',
-      daily: '91%',
-      weekly: '93.89%',
-    },
-    {
-      title: 'Put Into Portal %',
-      bgColor: 'bg-performance-bg-6',
-      icon: 'arrowUp',
-      daily: '100%',
-      weekly: '99.33%',
-    },
-    {
-      title: 'In Portal On Time %',
-      bgColor: 'bg-performance-bg-7',
-      icon: 'clock',
-      daily: '98%',
-      weekly: '97.33%',
-    },
-    {
-      title: 'Portal Eligible Transactions',
-      bgColor: 'bg-performance-bg-8',
-      icon: 'document',
-      daily: '47',
-      weekly: '152',
-    },
-  ];
+  // Transform DSPR data into performance metrics format
+  const transformedData = useMemo((): PerformanceItemProps[] => {
+    // First row of metrics - using dynamic data
+    const firstRowData: PerformanceItemProps[] = [
+      {
+        title: 'Customer Count',
+        bgColor: 'bg-performance-bg-1',
+        icon: 'users',
+        daily: formatNumber(dailyRawData?.Customer_count),
+        weekly: formatNumber(weeklyRawData?.Customer_count),
+      },
+      {
+        title: 'Customer Count %',
+        bgColor: 'bg-performance-bg-2',
+        icon: 'trending',
+        daily: formatPercentage(dailyRawData?.Customer_count_percent),
+        weekly: formatPercentage(weeklyRawData?.Customer_count_percent),
+      },
+      {
+        title: 'Upselling %',
+        bgColor: 'bg-performance-bg-3',
+        icon: 'arrowUp',
+        daily: formatPercentage(dailyRawData?.Upselling),
+        weekly: formatPercentage(weeklyRawData?.Upselling),
+      },
+      {
+        title: 'Digital Sales %',
+        bgColor: 'bg-performance-bg-4',
+        icon: 'computer',
+        daily: formatPercentage(dailyRawData?.Digital_Sales_Percent),
+        weekly: formatPercentage(weeklyRawData?.Digital_Sales_Percent),
+      },
+    ];
+
+    // Second row of metrics - using dynamic data
+    const secondRowData: PerformanceItemProps[] = [
+      {
+        title: 'Customer Service %',
+        bgColor: 'bg-performance-bg-5',
+        icon: 'microphone',
+        daily: formatPercentage(dailyRawData?.Customer_Service),
+        weekly: formatPercentage(weeklyRawData?.Customer_Service),
+      },
+      {
+        title: 'Put Into Portal %',
+        bgColor: 'bg-performance-bg-6',
+        icon: 'arrowUp',
+        daily: formatPercentage(dailyRawData?.Put_into_Portal_Percent),
+        weekly: formatPercentage(weeklyRawData?.Put_into_Portal_Percent),
+      },
+      {
+        title: 'In Portal On Time %',
+        bgColor: 'bg-performance-bg-7',
+        icon: 'clock',
+        daily: formatPercentage(dailyRawData?.In_Portal_on_Time_Percent),
+        weekly: formatPercentage(weeklyRawData?.In_Portal_on_Time_Percent),
+      },
+      {
+        title: 'Portal Eligible Transactions',
+        bgColor: 'bg-performance-bg-8',
+        icon: 'document',
+        daily: formatNumber(dailyRawData?.Total_Portal_Eligible_Transactions),
+        weekly: formatNumber(weeklyRawData?.Total_Portal_Eligible_Transactions),
+      },
+    ];
+
+    return [...firstRowData, ...secondRowData];
+  }, [dailyRawData, weeklyRawData]);
+
+  const hasData = !!(dailyRawData || weeklyRawData);
+
+  // Error state component
+  const ErrorState = () => (
+    <div className={cn(
+      'w-full bg-card rounded-lg border border-destructive/20 p-6 shadow-realistic',
+      'flex flex-col items-center justify-center text-center space-y-4',
+      isMobile ? 'min-h-48' : 'min-h-64'
+    )}>
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-destructive/10">
+        <ExclamationTriangleIcon className="w-6 h-6 text-destructive" />
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-card-foreground">
+          Unable to Load Data
+        </h3>
+        <p className="text-sm text-muted-foreground max-w-md">
+          We're experiencing difficulties loading your customer service metrics. This could be due to a temporary connection issue or data processing error.
+          <p className='font-bold mt-1'>Try changing the Date filter.</p>
+        </p>
+      </div>
+    </div>
+  );
+
+  // No data state component
+  const NoDataState = () => (
+    <div className={cn(
+      'w-full bg-card rounded-lg border border-border p-6 shadow-realistic',
+      'flex flex-col items-center justify-center text-center space-y-4',
+      isMobile ? 'min-h-48' : 'min-h-64'
+    )}>
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-muted">
+        <ExclamationTriangleIcon className="w-6 h-6 text-muted-foreground" />
+      </div>
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold text-card-foreground">
+          No Data Available
+        </h3>
+        <p className="text-sm text-muted-foreground max-w-md">
+          There's currently no customer service data available to display. Please check back later or contact support if this issue persists.
+          <p className='font-bold mt-1'>Try changing the Date filter.</p>
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <section
@@ -108,32 +168,25 @@ export const CustomerServiceOverview: React.FC<CustomerServiceOverviewProps> = (
       <SectionHeader
         title={title}
         subtitle={subtitle}
-        actions={
-          showRefresh ? (
-            <Button
-              variant="outline"
-              size={isMobile ? 'sm' : 'sm'}
-              onClick={refreshData}
-              disabled={isLoading}
-              className={cn('gap-2', isMobile && 'text-xs px-2 py-1')}
-            >
-              <ArrowPathIcon
-                className={cn(
-                  isMobile ? 'h-3 w-3' : 'h-4 w-4',
-                  isLoading && 'animate-spin',
-                )}
-              />
-              {isMobile ? 'Refresh' : 'Refresh'}
-            </Button>
-          ) : null
-        }
       />
 
-      {/* First Performance Grid */}
-      <PerformanceGrid className='pb-2' data={firstRowData} isLoading={isLoading} />
-      
-      {/* Second Performance Grid */}
-      <PerformanceGrid data={secondRowData} isLoading={isLoading} />
+      {/* Handle error states */}
+      {error ? (
+        <ErrorState />
+      ) : !hasData || !transformedData || transformedData.length === 0 ? (
+        <NoDataState />
+      ) : (
+        <div className="space-y-6">
+          <PerformanceGrid
+            data={transformedData.slice(0, 4)}
+            isLoading={isLoading}
+          />
+          <PerformanceGrid
+            data={transformedData.slice(4, 8)}
+            isLoading={isLoading}
+          />
+        </div>
+      )}
     </section>
   );
 };

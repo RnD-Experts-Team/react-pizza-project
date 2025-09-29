@@ -6,18 +6,17 @@ import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
 import type { CardDataProps } from '@/types/infoCards';
 import type { PerformanceItemProps } from '@/types/performance';
-import { Button } from '@/components/ui/button';
-import { ArrowPathIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from 'recharts';
+import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer,
+// } from 'recharts';
 
 interface InfoCardsProps {
   title?: string;
@@ -32,14 +31,12 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
   subtitle,
   data: externalData,
   className,
-  showRefresh = true,
 }) => {
   const { 
     dailyRawData, 
     weeklyRawData, 
     isLoading, 
     error,
-    reprocessData,
     hasValidData 
   } = useDSPRMetrics();
   const isMobile = useIsMobile();
@@ -99,12 +96,6 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
     ];
   }, [externalData, dailyRawData, weeklyRawData, hasValidData]);
 
-  const handleRefresh = () => {
-    if (reprocessData) {
-      reprocessData();
-    }
-  };
-
   // Error state component
   const ErrorState = () => (
     <div className={cn(
@@ -124,21 +115,6 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
           <p className='font-bold mt-1'>Try changing the Date filter.</p>
         </p>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRefresh}
-        disabled={isLoading}
-        className="gap-2"
-      >
-        <ArrowPathIcon
-          className={cn(
-            'h-4 w-4',
-            isLoading && 'animate-spin'
-          )}
-        />
-        Try Again
-      </Button>
     </div>
   );
 
@@ -158,23 +134,9 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
         </h3>
         <p className="text-sm text-muted-foreground max-w-md">
           There's currently no business data available to display. Please check back later or contact support if this issue persists.
+          <p className='font-bold mt-1'>Try changing the Date filter.</p>
         </p>
       </div>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleRefresh}
-        disabled={isLoading}
-        className="gap-2"
-      >
-        <ArrowPathIcon
-          className={cn(
-            'h-4 w-4',
-            isLoading && 'animate-spin'
-          )}
-        />
-        Refresh
-      </Button>
     </div>
   );
 
@@ -188,15 +150,15 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
   }));
 
   // Random data for the bar chart
-  const chartData = [
-    { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
-    { name: 'Page B', uv: 3000, pv: 1398, amt: 2210 },
-    { name: 'Page C', uv: 2000, pv: 9800, amt: 2290 },
-    { name: 'Page D', uv: 2780, pv: 3908, amt: 2000 },
-    { name: 'Page E', uv: 1890, pv: 4800, amt: 2181 },
-    { name: 'Page F', uv: 2390, pv: 3800, amt: 2500 },
-    { name: 'Page G', uv: 3490, pv: 4300, amt: 2100 },
-  ];
+  // const chartData = [
+  //   { name: 'Page A', uv: 4000, pv: 2400, amt: 2400 },
+  //   { name: 'Page B', uv: 3000, pv: 1398, amt: 2210 },
+  //   { name: 'Page C', uv: 2000, pv: 9800, amt: 2290 },
+  //   { name: 'Page D', uv: 2780, pv: 3908, amt: 2000 },
+  //   { name: 'Page E', uv: 1890, pv: 4800, amt: 2181 },
+  //   { name: 'Page F', uv: 2390, pv: 3800, amt: 2500 },
+  //   { name: 'Page G', uv: 3490, pv: 4300, amt: 2100 },
+  // ];
 
   return (
     <section
@@ -210,25 +172,6 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
       <SectionHeader
         title={title}
         subtitle={subtitle}
-        actions={
-          showRefresh ? (
-            <Button
-              variant="outline"
-              size={isMobile ? 'sm' : 'sm'}
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className={cn('gap-2', isMobile && 'text-xs px-2 py-1')}
-            >
-              <ArrowPathIcon
-                className={cn(
-                  isMobile ? 'h-3 w-3' : 'h-4 w-4',
-                  isLoading && 'animate-spin',
-                )}
-              />
-              Refresh
-            </Button>
-          ) : null
-        }
       />
 
       {/* Main content area with cards on top and chart below */}
@@ -249,7 +192,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
             </div>
 
             {/* Bottom - Bar Chart */}
-            <div
+            {/* <div
               className={cn(
                 'w-full bg-card rounded-lg border border-border p-4 shadow-realistic overflow-hidden',
                 isMobile ? 'h-48' : 'h-72',
@@ -284,7 +227,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
                   <Bar dataKey="uv" fill="var(--chart-2)" />
                 </BarChart>
               </ResponsiveContainer>
-            </div>
+            </div> */}
           </>
         )}
       </div>
