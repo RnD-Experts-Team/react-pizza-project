@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // User Role Store Assignment Pages
 import UserRoleStoreAssignmentPage from '@/features/userRolesStoresAssignment/pages/UserRoleStoreAssignmentPage';
@@ -15,9 +16,11 @@ export const userRoleStoreAssignmentRoutes = [
     path="/user-role-store-assignment"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <UserRoleStoreAssignmentPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <UserRoleStoreAssignmentPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -26,9 +29,11 @@ export const userRoleStoreAssignmentRoutes = [
     path="/user-role-store-assignment/bulk"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <AssignPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <AssignPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -37,9 +42,11 @@ export const userRoleStoreAssignmentRoutes = [
     path="/user-role-store-assignment/assign"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <SingleAssignPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <SingleAssignPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -48,9 +55,11 @@ export const userRoleStoreAssignmentRoutes = [
     path="/user-role-store-assignment/view/user/:userId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <UserAssignmentsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <UserAssignmentsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -59,9 +68,11 @@ export const userRoleStoreAssignmentRoutes = [
     path="/user-role-store-assignment/view/store/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <StoreAssignmentsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <StoreAssignmentsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

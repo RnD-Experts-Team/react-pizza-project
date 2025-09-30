@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGridFive } from '@/components/performance/PerformanceGridFive';
+import { PerformanceGridFive } from '@/features/dashboard/components/performance/PerformanceGridFive';
 import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { CardDataProps } from '@/types/infoCards';
-import type { PerformanceItemProps } from '@/types/performance';
+import type { CardDataProps } from '@/features/dashboard/types/infoCards';
+import type { PerformanceItemProps } from '@/features/dashboard/types/performance';
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 // import {
 //   BarChart,
@@ -66,7 +66,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
         bgColor: 'bg-blue-500',
         daily: formatCurrency(dailyRawData.Total_Sales || 0),
         weekly: formatCurrency(weeklyRawData?.Total_Sales || 0),
-        icon: 'chart',
+        icon: 'currency',
         id: 'sales-1',
       },
       {
@@ -82,7 +82,7 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
         bgColor: 'bg-blue-300',
         daily: formatPercentage(dailyRawData.labor || 0),
         weekly: formatPercentage(weeklyRawData?.labor || 0),
-        icon: 'trophy',
+        icon: 'users',
         id: 'labor-1',
       },
       {
@@ -149,13 +149,48 @@ export const InfoCards: React.FC<InfoCardsProps> = ({
   );
 
   // Transform CardDataProps to PerformanceItemProps
-  const transformedData: PerformanceItemProps[] = data.map((card) => ({
-    title: card.title,
-    daily: card.daily,
-    weekly: card.weekly,
-    bgColor: card.bgColor || '#f3f4f6',
-    icon: 'FlowbiteChartLineDownOutline' as const, // Default icon
-  }));
+  const transformedData: PerformanceItemProps[] = data.map((card) => {
+    // Map card icons to performance iconMap keys
+    let performanceIcon: keyof typeof import('@/features/dashboard/types/performance').iconMap;
+    
+    switch (card.icon) {
+      case 'chart':
+        performanceIcon = 'FlowbiteChartLineDownOutline';
+        break;
+      case 'currency':
+        performanceIcon = 'currency';
+        break;
+      case 'trophy':
+        performanceIcon = 'trophy';
+        break;
+      case 'trending':
+        performanceIcon = 'trending';
+        break;
+      default:
+        // Map based on card title for better semantic matching
+        if (card.title.toLowerCase().includes('sales')) {
+          performanceIcon = 'FlowbiteChartLineDownOutline';
+        } else if (card.title.toLowerCase().includes('tips')) {
+          performanceIcon = 'currency';
+        } else if (card.title.toLowerCase().includes('labor')) {
+          performanceIcon = 'users';
+        } else if (card.title.toLowerCase().includes('refunded')) {
+          performanceIcon = 'IconParkOutlineRecycling';
+        } else if (card.title.toLowerCase().includes('average') || card.title.toLowerCase().includes('ticket')) {
+          performanceIcon = 'trending';
+        } else {
+          performanceIcon = 'FlowbiteChartLineDownOutline';
+        }
+    }
+
+    return {
+      title: card.title,
+      daily: card.daily,
+      weekly: card.weekly,
+      bgColor: card.bgColor || '#f3f4f6',
+      icon: performanceIcon,
+    };
+  });
 
   // Random data for the bar chart
   // const chartData = [

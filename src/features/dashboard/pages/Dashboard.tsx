@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/hooks/useAuth';
-import { InfoSection } from '@/components/InfoSection';
-import { CustomerServiceOverview } from '@/components/CustomerServiceOverview';
-import { InfoCards } from '../components/InfoCards';
-// import { ChannelSalesDashboard } from '../components/ChannelSalesDashboard';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { InfoSection } from '@/features/dashboard/components/onPage/InfoSectionOnPage';
+import { CustomerServiceOverview } from '@/features/dashboard/components/onPage/CustomerServiceOverviewOnPage';
+import { InfoCards } from '@/features/dashboard/components/onPage/InfoCardsOnPage';
+import { ChannelSalesDashboard } from '@/features/dashboard/components/onPage/ChannelSalesDashboardOnPage';
 // import { DSQRDashboard } from '../components/DSQRDashboard';
-import { StoreItemsFilter } from '../features/storeItems/components/StoreItemsFilter';
+import { StoreItemsFilter } from '@/features/storeItems/components/StoreItemsFilter';
 
 const Dashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -58,9 +58,9 @@ const Dashboard: React.FC = () => {
           <InfoCards></InfoCards>
           <InfoSection></InfoSection>
           <CustomerServiceOverview></CustomerServiceOverview>
+          <ChannelSalesDashboard></ChannelSalesDashboard>
         </>
       )}
-      {/* <ChannelSalesDashboard></ChannelSalesDashboard> */}
       {/* <DSQRDashboard></DSQRDashboard> */}
     </div>
   );

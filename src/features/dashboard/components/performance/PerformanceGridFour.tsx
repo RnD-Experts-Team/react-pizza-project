@@ -1,6 +1,6 @@
 import React from 'react';
-import { PerformanceCard } from './PerformanceCard';
-import type { PerformanceItemProps } from '@/types/performance';
+import { PerformanceCard } from '@/features/dashboard/components/performance/PerformanceCard';
+import type { PerformanceItemProps } from '@/features/dashboard/types/performance';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTheme } from '@/hooks/useTheme';
 import { cn } from '@/lib/utils';

@@ -168,7 +168,7 @@ export const hasAllRoles = (rolesList: string[]): boolean => {
 };
 
 /**
- * Check if user is super admin (convenience function)
+ * Check if user is super-admin (convenience function)
  */
 export const isSuperAdmin = (): boolean => {
   return hasRole('super-admin');

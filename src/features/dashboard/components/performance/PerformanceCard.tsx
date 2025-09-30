@@ -1,8 +1,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type { PerformanceItemProps } from '@/types/performance'; // Make sure iconMap is imported
-import { iconMap } from '@/types/performance';
+import type { PerformanceItemProps } from '@/features/dashboard/types/performance'; // Make sure iconMap is imported
+import { iconMap } from '@/features/dashboard/types/performance';
 
 // import { useIsMobile } from '@/hooks/use-mobile';
 

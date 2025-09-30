@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Stores Management Pages
 import StoresListPage from '@/features/stores/pages/StoresListPage';
@@ -14,9 +15,11 @@ export const storesRoutes = [
     path="/stores"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <StoresListPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <StoresListPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -25,9 +28,11 @@ export const storesRoutes = [
     path="/stores/create"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateStorePage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateStorePage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -36,9 +41,11 @@ export const storesRoutes = [
     path="/stores/edit/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <EditStorePage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <EditStorePage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -47,9 +54,11 @@ export const storesRoutes = [
     path="/stores/view/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <StoreDetailsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <StoreDetailsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

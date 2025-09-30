@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGrid } from '@/components/performance/PerformanceGridFour';
-import type { PerformanceItemProps } from '@/types/performance';
+import { PerformanceGrid } from '@/features/dashboard/components/performance/PerformanceGridFour';
+import type { PerformanceItemProps } from '@/features/dashboard/types/performance';
 import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
 

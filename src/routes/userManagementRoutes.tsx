@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // User Management Pages
 import UserManagement from '@/features/users/pages/UserManagement';
@@ -17,9 +18,11 @@ export const userManagementRoutes = [
     path="/user-management"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <UserManagement />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <UserManagement />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -28,9 +31,11 @@ export const userManagementRoutes = [
     path="/user-management/create/user"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateUser />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateUser />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -39,9 +44,11 @@ export const userManagementRoutes = [
     path="/user-management/edit/user/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <EditUser />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <EditUser />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -50,9 +57,11 @@ export const userManagementRoutes = [
     path="/user-management/view/user/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <UserDetail />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <UserDetail />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -61,9 +70,11 @@ export const userManagementRoutes = [
     path="/user-management/create/role"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateRole />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateRole />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -72,9 +83,11 @@ export const userManagementRoutes = [
     path="/user-management/roles/assign-permissions"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <AssignPermissionsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <AssignPermissionsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -83,9 +96,11 @@ export const userManagementRoutes = [
     path="/user-management/create/permission"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreatePermission />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreatePermission />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

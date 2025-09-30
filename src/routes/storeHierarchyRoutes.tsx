@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Store Hierarchy Management Pages
 import StoreHierarchyDetailPage from '@/features/storeHierarchy/pages/StoreHierarchyDetailPage';
@@ -15,9 +16,11 @@ export const storeHierarchyRoutes = [
     path="/stores-hierarchy/view/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <StoreHierarchyDetailPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <StoreHierarchyDetailPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -26,9 +29,11 @@ export const storeHierarchyRoutes = [
     path="/stores-hierarchy/create/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateHierarchyPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateHierarchyPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -37,9 +42,11 @@ export const storeHierarchyRoutes = [
     path="/stores-hierarchy/delete/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <DeleteHierarchyConfirmationPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <DeleteHierarchyConfirmationPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -48,9 +55,11 @@ export const storeHierarchyRoutes = [
     path="/stores-hierarchy/validate/:storeId"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <ValidateHierarchyPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <ValidateHierarchyPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

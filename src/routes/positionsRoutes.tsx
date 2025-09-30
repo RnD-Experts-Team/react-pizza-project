@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Positions Management Pages
 import PositionsManagementPage from '@/features/positions/pages/PositionsManagementPage';
@@ -11,9 +12,11 @@ export const positionsRoutes = [
     path="/positions"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <PositionsManagementPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <PositionsManagementPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

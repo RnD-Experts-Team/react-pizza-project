@@ -8,6 +8,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '../../ui/sidebar';
+import RoleGuard from '../../guards/RoleGuard';
 import type { NavigationMenuProps } from './types';
 
 // Helper function to check if a menu item should be active
@@ -32,24 +33,55 @@ const NavigationMenu: React.FC<NavigationMenuProps> = ({ menuItems }) => {
       </SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
-          {menuItems.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                asChild
-                isActive={isMenuItemActive(location.pathname, item.url)}
-                className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent hover:underline data-[active=true]:bg-sidebar-accent/70"
-                tooltip={item.title}
+          {menuItems.map((item) => {
+            // Dashboard should be accessible without role restrictions
+            if (item.url === '/dashboard' || item.url === '/settings') {
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isMenuItemActive(location.pathname, item.url)}
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent hover:underline data-[active=true]:bg-sidebar-accent/70"
+                    tooltip={item.title}
+                  >
+                    <Link
+                      to={item.url}
+                      className="flex items-center space-x-2 sm:space-x-3"
+                    >
+                      <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            }
+
+            // All other navigation items require super-admin role
+            return (
+              <RoleGuard 
+                key={item.title}
+                role="super-admin"
+                fallback={null}
               >
-                <Link
-                  to={item.url}
-                  className="flex items-center space-x-2 sm:space-x-3"
-                >
-                  <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="truncate">{item.title}</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isMenuItemActive(location.pathname, item.url)}
+                    className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent hover:underline data-[active=true]:bg-sidebar-accent/70"
+                    tooltip={item.title}
+                  >
+                    <Link
+                      to={item.url}
+                      className="flex items-center space-x-2 sm:space-x-3"
+                    >
+                      <item.icon className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </RoleGuard>
+            );
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>

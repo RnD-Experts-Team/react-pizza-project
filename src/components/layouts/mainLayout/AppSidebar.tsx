@@ -99,13 +99,29 @@ const AppSidebar: React.FC = () => {
     { title: 'Blank Page', url: '/blank-page', icon: FileText },
     { title: 'User Management', url: '/user-management', icon: Users },
     { title: 'Employees', url: '/employees', icon: UserCheck },
-    { title: 'Employment Information', url: '/employment-information', icon: CreditCard },
-    { title: 'Service Client Management', url: '/service-client-management', icon: ShieldCheck },
+    {
+      title: 'Employment Information',
+      url: '/employment-information',
+      icon: CreditCard,
+    },
+    {
+      title: 'Service Client Management',
+      url: '/service-client-management',
+      icon: ShieldCheck,
+    },
     { title: 'Auth Rules', url: '/auth-rules', icon: ShieldCheck },
     { title: 'Stores', url: '/stores', icon: Store },
-    { title: 'User Role Store Assignment', url: '/user-role-store-assignment', icon: Users },
+    {
+      title: 'User Role Store Assignment',
+      url: '/user-role-store-assignment',
+      icon: Users,
+    },
     { title: 'Positions', url: '/positions', icon: Building },
-    { title: 'Schedule Preferences', url: '/schedule-preferences', icon: Calendar },
+    {
+      title: 'Schedule Preferences',
+      url: '/schedule-preferences',
+      icon: Calendar,
+    },
   ];
 
   return (
@@ -134,7 +150,10 @@ const AppSidebar: React.FC = () => {
               className="px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm hover:bg-sidebar-accent/50 data-[active=true]:bg-sidebar-accent/70"
               tooltip="Settings"
             >
-              <Link to="/settings" className="flex items-center space-x-2 sm:space-x-3">
+              <Link
+                to="/settings"
+                className="flex items-center space-x-2 sm:space-x-3"
+              >
                 <Settings className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                 <span className="truncate">Settings</span>
               </Link>

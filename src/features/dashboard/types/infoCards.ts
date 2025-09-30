@@ -3,6 +3,7 @@ import {
   ChartBarIcon,
   TrophyIcon,
   ArrowTrendingUpIcon,
+  UsersIcon,
 } from '@heroicons/react/24/outline';
 
 export interface CardDataProps {
@@ -26,4 +27,5 @@ export const iconMap = {
   chart: ChartBarIcon,
   trophy: TrophyIcon,
   trending: ArrowTrendingUpIcon,
+  users: UsersIcon,
 } as const;

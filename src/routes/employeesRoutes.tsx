@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Employees Management Pages
 import EmployeesPage from '@/features/employees/pages/EmployeesPage';
@@ -14,9 +15,11 @@ export const employeesRoutes = [
     path="/employees"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <EmployeesPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <EmployeesPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -25,9 +28,11 @@ export const employeesRoutes = [
     path="/employees/create"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateEmployeePage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateEmployeePage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -36,9 +41,11 @@ export const employeesRoutes = [
     path="/employees/edit/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <EditEmployeePage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <EditEmployeePage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -47,9 +54,11 @@ export const employeesRoutes = [
     path="/employees/view/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <ViewEmployeePage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <ViewEmployeePage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

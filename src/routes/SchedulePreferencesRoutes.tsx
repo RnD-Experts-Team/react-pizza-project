@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Schedule Preferences Management Pages
 import SchedulePreferencesPage from '@/features/schedulePreferences/pages/SchedulePreferencesPage';
@@ -11,9 +12,11 @@ export const schedulePreferencesRoutes = [
     path="/schedule-preferences"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <SchedulePreferencesPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <SchedulePreferencesPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

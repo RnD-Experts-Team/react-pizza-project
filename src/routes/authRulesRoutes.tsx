@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Auth Rules Management Pages
 import AuthRulesManagement from '@/features/authorizationRules/pages/AuthRulesManagement';
@@ -12,9 +13,11 @@ export const authRulesRoutes = [
     path="/auth-rules"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <AuthRulesManagement />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <AuthRulesManagement />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -23,9 +26,11 @@ export const authRulesRoutes = [
     path="/auth-rules/create"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <CreateAuthRule />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <CreateAuthRule />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

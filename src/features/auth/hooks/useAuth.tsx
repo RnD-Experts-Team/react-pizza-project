@@ -157,7 +157,7 @@ export const useAuth = () => {
     [hasAnyPermission, hasAnyRole]
   );
 
-  // Check if user is super admin (helper for common use case)
+  // Check if user is super-admin (helper for common use case)
   const isSuperAdmin = useCallback(
     (): boolean => hasRole('super-admin'),
     [hasRole]

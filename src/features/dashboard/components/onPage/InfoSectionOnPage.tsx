@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { PerformanceGridFive } from '@/components/performance/PerformanceGridFive';
+import { PerformanceGridFive } from '@/features/dashboard/components/performance/PerformanceGridFive';
 import { useDSPRMetrics } from '@/features/DSPR/hooks/useDSPRDailyWeekly';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { PerformanceItemProps } from '@/types/performance';
+import type { PerformanceItemProps } from '@/features/dashboard/types/performance';
 
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 

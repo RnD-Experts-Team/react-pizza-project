@@ -3,7 +3,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
 
 // Main Pages
-import Dashboard from '@/pages/Dashboard';
+import Dashboard from '@/features/dashboard/pages/Dashboard';
 import BlankPage from '@/pages/BlankPage';
 import TermsOfService from '@/pages/settings-and-abouts/TermsOfService';
 import PrivacyPolicy from '@/pages/settings-and-abouts/PrivacyPolicy';

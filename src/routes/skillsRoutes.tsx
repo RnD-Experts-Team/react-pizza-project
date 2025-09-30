@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Skills Management Pages
 import SkillsPage from '@/features/skills/components/SkillsPage';
@@ -12,9 +13,11 @@ export const skillsRoutes = [
     path="/skills"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <SkillsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <SkillsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,
@@ -23,9 +26,11 @@ export const skillsRoutes = [
     path="/skills/:id"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <SkillDetailsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <SkillDetailsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

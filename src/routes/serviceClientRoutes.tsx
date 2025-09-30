@@ -1,6 +1,7 @@
 import { Route } from 'react-router-dom';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import MainLayout from '@/components/layouts/MainLayout';
+import RoleGuard from '@/components/guards/RoleGuard';
 
 // Service Client Management Pages
 import ServiceClientsPage from '@/features/serviceClients/pages/ServiceClientManagement';
@@ -11,9 +12,11 @@ export const serviceClientRoutes = [
     path="/service-client-management"
     element={
       <ProtectedRoute>
-        <MainLayout>
-          <ServiceClientsPage />
-        </MainLayout>
+        <RoleGuard role="super-admin">
+          <MainLayout>
+            <ServiceClientsPage />
+          </MainLayout>
+        </RoleGuard>
       </ProtectedRoute>
     }
   />,

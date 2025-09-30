@@ -1,4 +1,4 @@
-import Home from '@/pages/Dashboard';
+import Home from '@/features/dashboard/pages/Dashboard';
 import { Route, Routes } from 'react-router-dom';
 
 const AppRouter = () => {
