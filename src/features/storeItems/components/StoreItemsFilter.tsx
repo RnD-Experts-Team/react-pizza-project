@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Filter } from 'lucide-react';
 import { useCurrentStore } from '@/components/layouts/mainLayout/CurrentStoreContext';
 import { useDsprApi } from '../../DSPR/hooks/useCoordinator';
+import { SingleDatePicker } from '@/components/ui/singleDatePicker';
 
 interface StoreItemsFilterProps {
   className?: string;
@@ -78,25 +78,26 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   );
 
   const [selectedDate, setSelectedDate] =
-    useState<string>(getTwoDaysAgoLocal());
-  const [pendingDate, setPendingDate] = useState<string>(getTwoDaysAgoLocal());
+    useState<Date | undefined>(new Date(getTwoDaysAgoLocal()));
+  const [pendingDate, setPendingDate] = useState<Date | undefined>(new Date(getTwoDaysAgoLocal()));
 
   // Helper function to send data to DSPR API
   const sendToDsprApi = useCallback(
     async (
       storeId: string,
-      date: string,
+      date: Date,
       context: string = 'filter-update',
     ) => {
       try {
         if (storeId && date) {
+          const dateString = formatLocalYmd(date);
           await fetchDsprData(
-            { store: storeId, date },
+            { store: storeId, date: dateString },
             [], // Empty array since no items are selected
           );
           console.log(`[${context}] DSPR API call initiated:`, {
             store: storeId,
-            date,
+            date: dateString,
             itemCount: 0,
             items: [],
           });
@@ -118,14 +119,14 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
 
   // Auto-apply filters when defaults are set (first load)
   useEffect(() => {
-    if (currentStore?.id && selectedDate === '') {
+    if (currentStore?.id && !selectedDate) {
       // Validate the default date before applying
-      if (isValidDate(pendingDate)) {
+      if (pendingDate && isValidDate(formatLocalYmd(pendingDate))) {
         setSelectedDate(pendingDate);
 
         if (onFilterChange) {
           onFilterChange({
-            date: pendingDate,
+            date: formatLocalYmd(pendingDate),
             selectedItems: [],
           });
         }
@@ -154,15 +155,14 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   }, [currentStore, handleError]);
 
   // Handle date change (update pending state)
-  const handleDateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newDate = event.target.value;
-    setPendingDate(newDate);
+  const handleDateChange = (date: Date | undefined) => {
+    setPendingDate(date);
   };
 
   // Apply filters - update applied state
   const handleApplyFilters = useCallback(() => {
     // Check if date is invalid and handle it appropriately
-    if (pendingDate && !isValidDate(pendingDate)) {
+    if (pendingDate && !isValidDate(formatLocalYmd(pendingDate))) {
       const errorMessage =
         'Invalid date selected. Please select a date before today.';
       handleError(errorMessage);
@@ -174,9 +174,9 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
 
     setSelectedDate(pendingDate);
 
-    if (onFilterChange) {
+    if (onFilterChange && pendingDate) {
       onFilterChange({
-        date: pendingDate,
+        date: formatLocalYmd(pendingDate),
         selectedItems: [],
       });
     }
@@ -186,7 +186,7 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
   useEffect(() => {
     if (currentStore?.id && selectedDate) {
       // Additional validation before making API call
-      if (isValidDate(selectedDate)) {
+      if (isValidDate(formatLocalYmd(selectedDate))) {
         sendToDsprApiRef.current(
           currentStore.id,
           selectedDate,
@@ -223,17 +223,17 @@ export const StoreItemsFilter: React.FC<StoreItemsFilterProps> = ({
 
       <CardContent className="px-4 py-2">
         <div className="flex justify-between w-full items-center gap-3">
-          <Input
-            type="date"
+          <SingleDatePicker
             value={pendingDate}
             onChange={handleDateChange}
-            max={formatLocalYmd(yesterday)}
-            className="w-40 bg-background border-border text-foreground focus:ring-ring focus:border-ring text-sm [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert-[27%] [&::-webkit-calendar-picker-indicator]:sepia-[51%] [&::-webkit-calendar-picker-indicator]:saturate-[2878%] [&::-webkit-calendar-picker-indicator]:hue-rotate-[346deg] [&::-webkit-calendar-picker-indicator]:brightness-[104%] [&::-webkit-calendar-picker-indicator]:contrast-[97%] [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+            maxDate={yesterday}
+            placeholder="Select date"
+            className="w-40 bg-background border-border text-foreground focus:ring-ring focus:border-ring text-sm"
           />
           <button
             onClick={handleApplyFilters}
             className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-ring font-medium text-sm ${
-              pendingDate && !isValidDate(pendingDate)
+              pendingDate && !isValidDate(formatLocalYmd(pendingDate))
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 : 'bg-primary text-primary-foreground hover:bg-primary/90'
             }`}
